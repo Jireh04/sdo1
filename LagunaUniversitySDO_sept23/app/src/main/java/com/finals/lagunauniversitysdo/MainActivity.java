@@ -12,6 +12,8 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.os.Handler;
+
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -114,14 +116,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                             if (id == R.id.menu_user_name) {
                                                 return true;
                                             } else if (id == R.id.menu_logout) {
+                                                // Clear user session data
+                                                UserSession.clearSession();
+
                                                 Toast.makeText(MainActivity.this, "Logging out...", Toast.LENGTH_SHORT).show();
-                                                finish();
+
+                                                // Optionally, you can add a delay here for better UX
+                                                new Handler().postDelayed(() -> {
+                                                    // Finish the current activity and start the login activity
+                                                    Intent intent = new Intent(MainActivity.this, LoginActivity.class); // Change this to your actual login activity
+                                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Clear the back stack
+                                                    startActivity(intent);
+                                                    finish(); // Close MainActivity
+                                                }, 1000); // 1 second delay for user feedback
+
                                                 return true;
                                             } else {
                                                 return false;
                                             }
                                         }
                                     });
+
                                 } else {
                                     // User not found in Firestore
                                     Toast.makeText(MainActivity.this, "User not found in Firestore.", Toast.LENGTH_SHORT).show();

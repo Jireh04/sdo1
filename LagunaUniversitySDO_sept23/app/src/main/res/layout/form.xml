@@ -3,13 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".form">
+    tools:context=".form"
+    android:padding="16dp"
+    android:orientation="vertical"> <!-- Set orientation to vertical -->
 
     <ScrollView
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="16dp">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -96,13 +96,17 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="DATE OF FILING:" />
+                        android:text="DATE OF FILING:"
+                        android:textStyle="bold" />
 
                     <EditText
                         android:id="@+id/date_field"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="YYYY-MM-DD HH:MM:SS" />
+                        android:hint="YYYY-MM-DD HH:MM"
+                        android:focusable="false"
+                        android:clickable="false"
+                        android:enabled="false" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -115,7 +119,8 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TERM:" />
+                        android:text="TERM:"
+                        android:textStyle="bold" />
 
                     <Spinner
                         android:id="@+id/term_spinner"
@@ -150,13 +155,17 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="NAME:" />
+                        android:text="NAME:"
+                        android:textStyle="bold" />
 
                     <EditText
                         android:id="@+id/name_field"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Enter your name" />
+                        android:hint="Student Name"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:clickable="false" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -169,15 +178,19 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="MOBILE NO.:" />
+                        android:text="MOBILE NO.:"
+                        android:textStyle="bold" />
 
                     <EditText
-                        android:id="@+id/mobile_field"
+                        android:id="@+id/contact_field"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Enter your mobile number" />
+                        android:background="@android:color/transparent"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:hint="Enter your mobile number"
+                        android:inputType="phone" />
                 </LinearLayout>
-
             </LinearLayout>
 
             <!-- Department and Email -->
@@ -197,13 +210,17 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="DEPARTMENT:" />
+                        android:text="DEPARTMENT:"
+                        android:textStyle="bold" />
 
                     <EditText
                         android:id="@+id/department_field"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Enter department" />
+                        android:hint="Enter department"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:background="@android:color/transparent" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -216,15 +233,18 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="EMAIL ADDRESS:" />
+                        android:text="EMAIL ADDRESS:"
+                        android:textStyle="bold" />
 
                     <EditText
                         android:id="@+id/email_field"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Enter your email" />
+                        android:hint="Enter your email"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:background="@android:color/transparent" />
                 </LinearLayout>
-
             </LinearLayout>
 
             <!-- Details Section -->
@@ -236,6 +256,7 @@
                 android:textSize="14sp"
                 android:paddingTop="20dp" />
 
+            <!-- Violations Dropdown -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -259,16 +280,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Learning Difficulty" />
-
                 <!-- Add more CheckBoxes as needed -->
-
             </LinearLayout>
 
-            <!-- Violations Dropdown -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Violations" />
+                android:text="VIOLATIONS"
+                android:textStyle="bold"
+                android:paddingTop="10dp" />
 
             <Spinner
                 android:id="@+id/violation_spinner"
@@ -299,6 +319,71 @@
                 android:paddingTop="20dp"
                 android:paddingBottom="10dp" />
 
+            <!-- Scrollable Table Section -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_marginTop="100dp"
+                android:fillViewport="true">
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TableLayout
+                        android:id="@+id/details_table"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:stretchColumns="1"
+                        android:padding="16dp">
+
+                        <!-- Table Header -->
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@color/green3">
+
+                            <TextView
+                                android:layout_width="200dp"
+                                android:layout_height="wrap_content"
+                                android:text="NAME"
+                                android:padding="8dp"
+                                android:textColor="@android:color/white" />
+
+                            <TextView
+                                android:layout_width="100dp"
+                                android:layout_height="wrap_content"
+                                android:text="PROGRAM"
+                                android:padding="8dp"
+                                android:textColor="@android:color/white" />
+
+                            <TextView
+                                android:layout_width="150dp"
+                                android:layout_height="wrap_content"
+                                android:text="ID NUMBER"
+                                android:padding="8dp"
+                                android:textColor="@android:color/white" />
+
+                            <TextView
+                                android:layout_width="150dp"
+                                android:layout_height="wrap_content"
+                                android:text="CONTACTS"
+                                android:padding="8dp"
+                                android:textColor="@android:color/white" />
+
+                            <TextView
+                                android:layout_width="70dp"
+                                android:layout_height="wrap_content"
+                                android:text="    "
+                                android:padding="8dp"
+                                android:textColor="@android:color/white" />
+                        </TableRow>
+
+                        <!-- Add more rows as needed -->
+                    </TableLayout>
+                </ScrollView>
+            </HorizontalScrollView>
+
             <!-- Submit Button -->
             <Button
                 android:id="@+id/submit_button"
@@ -309,9 +394,5 @@
                 android:backgroundTint="@color/design_default_color_primary" />
 
         </LinearLayout>
-
     </ScrollView>
-
-
-
 </LinearLayout>

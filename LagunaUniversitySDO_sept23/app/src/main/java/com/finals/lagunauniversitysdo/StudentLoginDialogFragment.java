@@ -9,6 +9,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
+import android.util.Log;
+import android.text.TextUtils;
+
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -68,40 +71,68 @@ public class StudentLoginDialogFragment extends DialogFragment {
     }
 
     private void authenticate(String username, String password) {
-        // Query Firestore for the student document matching the username and password
+        // Clear previous session data
+        UserSession.clearSession();
+
+        Log.d("Auth", "Attempting to log in with username: " + username);
+
+        // Validate inputs
+        if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
+            Toast.makeText(getActivity(), "Username and password must not be empty.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Use Firebase Firestore to authenticate the user
         db.collection("students")
                 .whereEqualTo("username", username)
-                .whereEqualTo("password", password) // Plaintext password - should be hashed in a real app
+                .whereEqualTo("password", password) // Note: Use a secure way to handle passwords!
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<com.google.firebase.firestore.QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<com.google.firebase.firestore.QuerySnapshot> task) {
                         if (task.isSuccessful()) {
+                            Log.d("Auth", "Query successful");
+
                             com.google.firebase.firestore.QuerySnapshot querySnapshot = task.getResult();
                             if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                                // Authentication successful, get the user document
                                 DocumentSnapshot document = querySnapshot.getDocuments().get(0);
-                                String userId = document.getId(); // Get the document ID (user ID)
+                                String studId = document.getId();  // Get the document ID (student ID)
+                                String firstName = document.getString("firstname");
+                                String lastName = document.getString("lastname");
+                                String email = document.getString("email");
+                                Long contactNum = document.getLong("contacts");
+                                String program = document.getString("program");
 
-                                // Pass the user ID to MainActivity
+                                // Store user ID and student details in UserSession
+                                UserSession.setStudId(studId);
+                                UserSession.setStudentDetails(firstName + " " + lastName, email, contactNum, program);
+
+                                Log.d("Auth", "Login successful for user: " + firstName + " " + lastName);
                                 Toast.makeText(getActivity(), "Student logged in", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(getActivity(), MainActivity.class);
-                                intent.putExtra("USER_ID", userId);  // Pass the user ID to MainActivity
-                                startActivity(intent);
-                                dismiss(); // Close the login dialog
 
+                                // Proceed to the main activity
+                                Intent intent = new Intent(getActivity(), MainActivity.class);
+                                intent.putExtra("USER_ID", studId);
+                                startActivity(intent);
+                                dismiss();
                             } else {
-                                // Authentication failed (invalid credentials)
+                                Log.d("Auth", "Invalid credentials: No documents found.");
                                 Toast.makeText(getActivity(), "Invalid credentials", Toast.LENGTH_SHORT).show();
                             }
                         } else {
-                            // Error while fetching data
+                            Log.d("Auth", "Query failed: " + task.getException());
                             Toast.makeText(getActivity(), "Error fetching user: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         }
                     }
                 });
     }
+
+
 }
+
+
+
+
 
 
 
