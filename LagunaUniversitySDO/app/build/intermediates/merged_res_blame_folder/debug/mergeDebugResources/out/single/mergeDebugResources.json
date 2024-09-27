@@ -1,0 +1,278 @@
+[
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_activity_login.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\activity_login.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\anim_slide_out.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\anim\\slide_out.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_qr_scanner_overlay.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\qr_scanner_overlay.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_baseline_qr_code_scanner_24.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\baseline_qr_code_scanner_24.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-xxxhdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-xxhdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_menu_item_image.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\menu_item_image.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_fragment_refferal_form_student.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\fragment_refferal_form_student.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-xxxhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_fragment_my_refferal_student.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\fragment_my_refferal_student.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_ic_launcher_background.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\ic_launcher_background.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_baseline_logout_24.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\baseline_logout_24.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-xxxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-xxxhdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.finals.lagunauniversitysdo.app-debug-40:/layout_form.xml.flat",
+        "source": "com.finals.lagunauniversitysdo.app-main-42:/layout/form.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-anydpi-v26\\ic_launcher_round.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_square_border.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\square_border.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-mdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_baseline_delete_outline_24.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\baseline_delete_outline_24.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_fragment_personnel_login_dialog.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\fragment_personnel_login_dialog.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_baseline_home_24.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\baseline_home_24.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-xhdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-xhdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_fragment_student_login_dialog.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\fragment_student_login_dialog.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_baseline_close_24.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\baseline_close_24.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_nav_header.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\nav_header.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\menu_prefect_menu.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\menu\\prefect_menu.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_light_green_border.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\light_green_border.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\menu_personnel_menu.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\menu\\personnel_menu.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_login_bg.jpg.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\login_bg.jpg"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-xxhdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_fragment_refferals_prefect.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\fragment_refferals_prefect.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_baseline_lock_24.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\baseline_lock_24.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-hdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_light_blue_border.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\light_blue_border.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_activity_main.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_baseline_hardware_24.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\baseline_hardware_24.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_red_border.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\red_border.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-anydpi-v26\\ic_launcher.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_lu_logo.png.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\lu_logo.png"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_fragment_my_violations_student.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\fragment_my_violations_student.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_bg_lu.png.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\bg_lu.png"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\xml_backup_rules.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\xml\\backup_rules.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_fragment_student_dashboard.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\fragment_student_dashboard.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_fragment_dod_login_dialog.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\fragment_dod_login_dialog.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_form.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\form.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_fragment_guidance_refferal_prefect.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\fragment_guidance_refferal_prefect.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\xml_data_extraction_rules.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\xml\\data_extraction_rules.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-hdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-hdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-xhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_fragment_guidance_refferal_student.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\fragment_guidance_refferal_student.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_app.jpg.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\app.jpg"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\anim_slide_in.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\anim\\slide_in.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-xhdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_baseline_account_circle_24.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\baseline_account_circle_24.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-mdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-mdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_baseline_restart_alt_24.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\baseline_restart_alt_24.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_lu_img.png.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\lu_img.png"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_baseline_person_pin_24.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\baseline_person_pin_24.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable-v24_ic_launcher_foreground.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable-v24\\ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-xxhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_dialog_add_violation.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\dialog_add_violation.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_fragment_dashboard_prefect.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\fragment_dashboard_prefect.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_baseline_category_24.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\baseline_category_24.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_fragment_personnel_my_refferal_form.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\fragment_personnel_my_refferal_form.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\menu_nav_menu.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\menu\\nav_menu.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_fragment_personnel_refferal_form.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\fragment_personnel_refferal_form.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_fragment_reports_prefect.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\fragment_reports_prefect.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-hdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\menu_user_menu.xml.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\menu\\user_menu.xml"
+    },
+    {
+        "merged": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\admin\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\mipmap-mdpi\\ic_launcher_round.webp"
+    }
+]

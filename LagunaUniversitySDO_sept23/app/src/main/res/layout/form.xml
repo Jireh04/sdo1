@@ -310,20 +310,11 @@
                 android:inputType="textMultiLine"
                 android:minLines="4" />
 
-            <!-- Privacy Consent Checkbox -->
-            <CheckBox
-                android:id="@+id/privacy_consent"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="I hereby affirm that all information supplied herein is complete and accurate. Withholding or giving false information will make me ineligible for admission or subject to dismissal. I also agree to the data privacy policy of Laguna University."
-                android:paddingTop="20dp"
-                android:paddingBottom="10dp" />
-
             <!-- Scrollable Table Section -->
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
-                android:layout_marginTop="100dp"
+                android:layout_marginTop="10dp"
                 android:fillViewport="true">
 
                 <ScrollView
@@ -343,35 +334,39 @@
                             android:layout_height="wrap_content"
                             android:background="@color/green3">
 
-                            <TextView
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/violators_name"
                                 android:layout_width="200dp"
                                 android:layout_height="wrap_content"
                                 android:text="NAME"
                                 android:padding="8dp"
                                 android:textColor="@android:color/white" />
 
-                            <TextView
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/violators_program"
                                 android:layout_width="100dp"
                                 android:layout_height="wrap_content"
                                 android:text="PROGRAM"
                                 android:padding="8dp"
                                 android:textColor="@android:color/white" />
 
-                            <TextView
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/violators_studID"
                                 android:layout_width="150dp"
                                 android:layout_height="wrap_content"
-                                android:text="ID NUMBER"
+                                android:text="STUDENT NO"
                                 android:padding="8dp"
                                 android:textColor="@android:color/white" />
 
-                            <TextView
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/violators_contact"
                                 android:layout_width="150dp"
                                 android:layout_height="wrap_content"
                                 android:text="CONTACTS"
                                 android:padding="8dp"
                                 android:textColor="@android:color/white" />
 
-                            <TextView
+                            <com.google.android.material.textview.MaterialTextView
                                 android:layout_width="70dp"
                                 android:layout_height="wrap_content"
                                 android:text="    "
@@ -383,6 +378,15 @@
                     </TableLayout>
                 </ScrollView>
             </HorizontalScrollView>
+
+            <!-- Privacy Consent Checkbox -->
+            <CheckBox
+                android:id="@+id/privacy_consent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I hereby affirm that all information supplied herein is complete and accurate. Withholding or giving false information will make me ineligible for admission or subject to dismissal. I also agree to the data privacy policy of Laguna University."
+                android:paddingTop="20dp"
+                android:paddingBottom="10dp" />
 
             <!-- Submit Button -->
             <Button

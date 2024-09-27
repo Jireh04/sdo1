@@ -1,0 +1,28 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:padding="8dp">
+
+    <!-- ImageView with circular shadow -->
+    <ImageView
+        android:id="@+id/your_image_view"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/lu_img"
+        android:scaleType="centerCrop" />
+
+    <!-- TextView beside ImageView -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="SDOMS"
+        android:textColor="#FFFFFF"
+    android:textSize="30sp"
+    android:textStyle="bold"
+    android:gravity="center_vertical"/>
+</LinearLayout>

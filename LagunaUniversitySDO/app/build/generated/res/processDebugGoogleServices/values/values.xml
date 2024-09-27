@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">1015399945231</string>
+    <string name="google_api_key" translatable="false">AIzaSyDgyg34aABwZhfz0c1D3bkXYcF92791qJI</string>
+    <string name="google_app_id" translatable="false">1:1015399945231:android:31351e35dbcb998c0bbf7a</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDgyg34aABwZhfz0c1D3bkXYcF92791qJI</string>
+    <string name="google_storage_bucket" translatable="false">laguna-university-sdo.appspot.com</string>
+    <string name="project_id" translatable="false">laguna-university-sdo</string>
+</resources>

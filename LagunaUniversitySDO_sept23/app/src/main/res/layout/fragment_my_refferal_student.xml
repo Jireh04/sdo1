@@ -5,10 +5,76 @@
     android:layout_height="match_parent"
     tools:context=".MyRefferal_student">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <!-- Vertical ScrollView to allow vertical scrolling -->
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="My Refferal" />
+        android:layout_height="match_parent">
+
+        <!-- LinearLayout to contain the table -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="top|left"
+            android:padding="16dp">
+
+            <!-- Title of the table -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/green3"
+                android:text="REFERRALS"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:layout_gravity="start"
+                android:paddingBottom="8dp" />
+
+            <!-- HorizontalScrollView to allow horizontal scrolling -->
+            <HorizontalScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <!-- Table for Date Reported, Student No., Name, Status -->
+                <TableLayout
+                    android:id="@+id/tableLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:stretchColumns="1">
+
+                    <!-- Header Row -->
+                    <TableRow>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Date Reported"
+                            android:textStyle="bold"
+                            android:padding="8dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Student No."
+                            android:textStyle="bold"
+                            android:padding="8dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Name"
+                            android:textStyle="bold"
+                            android:padding="8dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Status"
+                            android:textStyle="bold"
+                            android:padding="8dp" />
+                    </TableRow>
+
+                </TableLayout>
+            </HorizontalScrollView>
+        </LinearLayout>
+    </ScrollView>
 
 </FrameLayout>

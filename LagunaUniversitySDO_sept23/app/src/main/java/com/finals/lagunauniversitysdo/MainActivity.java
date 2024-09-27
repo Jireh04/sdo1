@@ -155,26 +155,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         Fragment selectedFragment = null;
-        String title = "";
+
 
         int itemId = item.getItemId();
         if (itemId == R.id.refferalForm) {
             selectedFragment = new refferalForm_student();
-            title = "Refferal Form";
         } else if (itemId == R.id.myRefferal) {
             selectedFragment = new MyRefferal_student();
-            title = "My Refferal";
         } else if (itemId == R.id.myViolation) {
             selectedFragment = new myViolations_student();
-            title = "My Violations";
         } else if (itemId == R.id.guidanceRefferal) {
             selectedFragment = new guidanceRefferal_student();
-            title = "Guidance Refferal";
         }
 
         if (selectedFragment != null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
-            toolbarTitle.setText(title);
         }
 
         drawer_layout.closeDrawer(GravityCompat.START);
