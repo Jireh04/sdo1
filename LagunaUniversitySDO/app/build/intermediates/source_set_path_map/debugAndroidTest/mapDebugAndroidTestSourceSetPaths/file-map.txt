@@ -1,5 +1,5 @@
-com.finals.lagunauniversitysdo.test.app-core-1.6.1-0 C:\Users\ranielle anthony\.gradle\caches\transforms-4\b2f8f014ca22d0736efd444c31ea700f\transformed\core-1.6.1\res
-com.finals.lagunauniversitysdo.test.app-androidTest-1 C:\Users\ranielle anthony\AndroidStudioProjects\LagunaUniversitySDO\app\build\generated\res\resValues\androidTest\debug
-com.finals.lagunauniversitysdo.test.app-mergeDebugAndroidTestResources-2 C:\Users\ranielle anthony\AndroidStudioProjects\LagunaUniversitySDO\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
-com.finals.lagunauniversitysdo.test.app-mergeDebugAndroidTestResources-3 C:\Users\ranielle anthony\AndroidStudioProjects\LagunaUniversitySDO\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
-com.finals.lagunauniversitysdo.test.app-debugAndroidTest-4 C:\Users\ranielle anthony\AndroidStudioProjects\LagunaUniversitySDO\app\build\intermediates\merged_res\debugAndroidTest\mergeDebugAndroidTestResources
+com.finals.lagunauniversitysdo.test.app-core-1.6.1-0 C:\Users\admin\.gradle\caches\transforms-4\b2f8f014ca22d0736efd444c31ea700f\transformed\core-1.6.1\res
+com.finals.lagunauniversitysdo.test.app-androidTest-1 C:\Users\admin\AndroidStudioProjects\SDOnew\app\build\generated\res\resValues\androidTest\debug
+com.finals.lagunauniversitysdo.test.app-mergeDebugAndroidTestResources-2 C:\Users\admin\AndroidStudioProjects\SDOnew\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
+com.finals.lagunauniversitysdo.test.app-mergeDebugAndroidTestResources-3 C:\Users\admin\AndroidStudioProjects\SDOnew\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
+com.finals.lagunauniversitysdo.test.app-debugAndroidTest-4 C:\Users\admin\AndroidStudioProjects\SDOnew\app\build\intermediates\merged_res\debugAndroidTest\mergeDebugAndroidTestResources

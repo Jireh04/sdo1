@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:2:1-56:12
-INJECTED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:2:1-56:12
-INJECTED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:2:1-56:12
-INJECTED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:2:1-56:12
+ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:2:1-59:12
+INJECTED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:2:1-59:12
+INJECTED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:2:1-59:12
+INJECTED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:2:1-59:12
 MERGED from [com.google.firebase:firebase-auth:23.0.0] C:\Users\admin\.gradle\caches\transforms-4\68ce7fb03f398182879857f9abe2369d\transformed\firebase-auth-23.0.0\AndroidManifest.xml:17:1-75:12
 MERGED from [com.google.firebase:firebase-firestore:25.1.0] C:\Users\admin\.gradle\caches\transforms-4\36edd6dfcf3262023c2ac4fbf457f4df\transformed\firebase-firestore-25.1.0\AndroidManifest.xml:2:1-26:12
 MERGED from [com.google.firebase:firebase-database:21.0.0] C:\Users\admin\.gradle\caches\transforms-4\f1991c014fed6b41165ce6e2ab4c7a67\transformed\firebase-database-21.0.0\AndroidManifest.xml:15:1-38:12
@@ -71,17 +71,17 @@ MERGED from [com.google.android.libraries.identity.googleid:googleid:1.1.0] C:\U
 MERGED from [io.grpc:grpc-android:1.62.2] C:\Users\admin\.gradle\caches\transforms-4\e711fce231aa1011d4fc248a94915216\transformed\grpc-android-1.62.2\AndroidManifest.xml:2:1-9:12
 MERGED from [com.google.firebase:protolite-well-known-types:18.0.0] C:\Users\admin\.gradle\caches\transforms-4\9eb5cc97ed244f8e63eefe6cd33b9ead\transformed\protolite-well-known-types-18.0.0\AndroidManifest.xml:2:1-11:12
 	package
-		INJECTED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml
 	android:versionName
-		INJECTED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml
 	xmlns:tools
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:3:5-51
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:3:5-51
 	android:versionCode
-		INJECTED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml
 	xmlns:android
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:2:11-69
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:2:11-69
 uses-permission#android.permission.INTERNET
-ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:5:5-66
+ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:5:5-66
 MERGED from [com.google.firebase:firebase-auth:23.0.0] C:\Users\admin\.gradle\caches\transforms-4\68ce7fb03f398182879857f9abe2369d\transformed\firebase-auth-23.0.0\AndroidManifest.xml:25:5-67
 MERGED from [com.google.firebase:firebase-auth:23.0.0] C:\Users\admin\.gradle\caches\transforms-4\68ce7fb03f398182879857f9abe2369d\transformed\firebase-auth-23.0.0\AndroidManifest.xml:25:5-67
 MERGED from [com.google.firebase:firebase-firestore:25.1.0] C:\Users\admin\.gradle\caches\transforms-4\36edd6dfcf3262023c2ac4fbf457f4df\transformed\firebase-firestore-25.1.0\AndroidManifest.xml:11:5-67
@@ -91,24 +91,24 @@ MERGED from [com.google.firebase:firebase-database:21.0.0] C:\Users\admin\.gradl
 MERGED from [com.google.android.recaptcha:recaptcha:18.4.0] C:\Users\admin\.gradle\caches\transforms-4\18687b3b8602e4757c1f14c786cdad93\transformed\recaptcha-18.4.0\AndroidManifest.xml:7:5-67
 MERGED from [com.google.android.recaptcha:recaptcha:18.4.0] C:\Users\admin\.gradle\caches\transforms-4\18687b3b8602e4757c1f14c786cdad93\transformed\recaptcha-18.4.0\AndroidManifest.xml:7:5-67
 	android:name
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:5:22-64
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:5:22-64
 uses-permission#android.permission.CAMERA
-ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:6:5-65
+ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:6:5-65
 MERGED from [com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\admin\.gradle\caches\transforms-4\d795244dd84f2397a8356a7926641188\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:22:5-65
 MERGED from [com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\admin\.gradle\caches\transforms-4\d795244dd84f2397a8356a7926641188\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:22:5-65
 	android:name
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:6:22-62
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:6:22-62
 uses-feature#android.hardware.camera
-ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:7:5-84
+ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:7:5-84
 MERGED from [com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\admin\.gradle\caches\transforms-4\d795244dd84f2397a8356a7926641188\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:25:5-27:36
 MERGED from [com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\admin\.gradle\caches\transforms-4\d795244dd84f2397a8356a7926641188\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:25:5-27:36
 	android:required
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:7:58-81
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:7:58-81
 	android:name
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:7:19-57
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:7:19-57
 application
-ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:10:5-54:19
-INJECTED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:10:5-54:19
+ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:10:5-57:19
+INJECTED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:10:5-57:19
 MERGED from [com.google.firebase:firebase-auth:23.0.0] C:\Users\admin\.gradle\caches\transforms-4\68ce7fb03f398182879857f9abe2369d\transformed\firebase-auth-23.0.0\AndroidManifest.xml:28:5-73:19
 MERGED from [com.google.firebase:firebase-auth:23.0.0] C:\Users\admin\.gradle\caches\transforms-4\68ce7fb03f398182879857f9abe2369d\transformed\firebase-auth-23.0.0\AndroidManifest.xml:28:5-73:19
 MERGED from [com.google.firebase:firebase-firestore:25.1.0] C:\Users\admin\.gradle\caches\transforms-4\36edd6dfcf3262023c2ac4fbf457f4df\transformed\firebase-firestore-25.1.0\AndroidManifest.xml:13:5-24:19
@@ -156,79 +156,83 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\admin\.gradle\cach
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\admin\.gradle\caches\transforms-4\c33a78840f4331412d8381eec96add89\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:24:5-25:19
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\admin\.gradle\caches\transforms-4\c33a78840f4331412d8381eec96add89\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:24:5-25:19
 	android:extractNativeLibs
-		INJECTED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.13.0] C:\Users\admin\.gradle\caches\transforms-4\082a5359c999085d8d4a334dbd7e341f\transformed\core-1.13.0\AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:17:9-35
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:17:9-35
 	android:label
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:15:9-41
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:15:9-41
 	android:fullBackupContent
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:13:9-54
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:13:9-54
 	android:roundIcon
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:16:9-54
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:16:9-54
 	tools:targetApi
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:19:9-29
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:19:9-29
 	android:icon
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:14:9-43
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:14:9-43
 	android:allowBackup
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:11:9-35
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:11:9-35
 	android:theme
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:18:9-57
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:18:9-57
 	android:dataExtractionRules
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:12:9-65
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:12:9-65
 activity#com.finals.lagunauniversitysdo.MainActivity
-ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:22:9-25:20
+ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:22:9-25:20
 	android:exported
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:24:13-36
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:24:13-36
 	android:name
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:23:13-41
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:23:13-41
+activity#com.finals.lagunauniversitysdo.refferalForm_student
+ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:26:9-28:20
+	android:name
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:27:13-49
 activity#com.finals.lagunauniversitysdo.QRScannerActivity
-ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:26:9-28:20
+ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:29:9-31:20
 	android:name
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:27:13-46
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:30:13-46
 activity#com.finals.lagunauniversitysdo.form
-ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:29:9-51
+ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:32:9-51
 	android:name
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:29:19-39
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:32:19-39
 activity#com.finals.lagunauniversitysdo.CustomScannerActivity
-ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:30:9-32:52
+ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:33:9-35:52
 	android:screenOrientation
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:32:13-49
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:35:13-49
 	android:name
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:31:13-50
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:34:13-50
 activity#com.finals.lagunauniversitysdo.personnel_MainActivity
-ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:33:9-36:20
+ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:36:9-39:20
 	android:exported
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:35:13-36
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:38:13-36
 	android:name
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:34:13-51
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:37:13-51
 activity#com.finals.lagunauniversitysdo.dod_MainActivity
-ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:38:9-41:20
+ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:41:9-44:20
 	android:exported
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:40:13-36
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:43:13-36
 	android:name
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:39:13-45
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:42:13-45
 activity#com.finals.lagunauniversitysdo.LoginActivity
-ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:43:9-52:20
+ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:46:9-55:20
 	android:exported
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:45:13-36
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:48:13-36
 	android:name
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:44:13-42
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:47:13-42
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:47:13-50:29
+ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:50:13-53:29
 action#android.intent.action.MAIN
-ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:48:17-69
+ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:51:17-69
 	android:name
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:48:25-66
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:51:25-66
 category#android.intent.category.LAUNCHER
-ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:49:17-77
+ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:52:17-77
 	android:name
-		ADDED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml:49:27-74
+		ADDED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:52:27-74
 uses-sdk
-INJECTED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
-INJECTED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml
-INJECTED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml
+INJECTED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml
+INJECTED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml
 MERGED from [com.google.firebase:firebase-auth:23.0.0] C:\Users\admin\.gradle\caches\transforms-4\68ce7fb03f398182879857f9abe2369d\transformed\firebase-auth-23.0.0\AndroidManifest.xml:21:5-23:151
 MERGED from [com.google.firebase:firebase-auth:23.0.0] C:\Users\admin\.gradle\caches\transforms-4\68ce7fb03f398182879857f9abe2369d\transformed\firebase-auth-23.0.0\AndroidManifest.xml:21:5-23:151
 MERGED from [com.google.firebase:firebase-firestore:25.1.0] C:\Users\admin\.gradle\caches\transforms-4\36edd6dfcf3262023c2ac4fbf457f4df\transformed\firebase-firestore-25.1.0\AndroidManifest.xml:6:5-44
@@ -364,9 +368,9 @@ MERGED from [com.google.firebase:protolite-well-known-types:18.0.0] C:\Users\adm
 	tools:overrideLibrary
 		ADDED from [com.google.firebase:firebase-auth:23.0.0] C:\Users\admin\.gradle\caches\transforms-4\68ce7fb03f398182879857f9abe2369d\transformed\firebase-auth-23.0.0\AndroidManifest.xml:23:9-148
 	android:targetSdkVersion
-		INJECTED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml
 	android:minSdkVersion
-		INJECTED from C:\Users\admin\AndroidStudioProjects\LagunaUniversitySDO\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml
 uses-permission#android.permission.ACCESS_NETWORK_STATE
 ADDED from [com.google.firebase:firebase-auth:23.0.0] C:\Users\admin\.gradle\caches\transforms-4\68ce7fb03f398182879857f9abe2369d\transformed\firebase-auth-23.0.0\AndroidManifest.xml:26:5-79
 MERGED from [com.google.firebase:firebase-firestore:25.1.0] C:\Users\admin\.gradle\caches\transforms-4\36edd6dfcf3262023c2ac4fbf457f4df\transformed\firebase-firestore-25.1.0\AndroidManifest.xml:10:5-79
