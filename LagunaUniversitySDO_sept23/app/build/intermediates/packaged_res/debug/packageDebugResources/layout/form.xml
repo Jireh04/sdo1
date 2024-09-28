@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".form"
+    android:padding="16dp"
+    android:orientation="vertical"> <!-- Set orientation to vertical -->
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Logo and Heading Section -->
+            <LinearLayout
+                android:layout_marginTop="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/lu_logo"
+                    android:contentDescription="University Logo" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="LAGUNA UNIVERSITY"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:textColor="#000000" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Office of the Student Affairs and Services"
+                        android:textSize="14sp"
+                        android:textColor="#000000" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Laguna Sports Complex, Brgy. Bubukal, Santa Cruz, Laguna"
+                        android:textSize="12sp"
+                        android:textColor="#000000" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tel. No. (049) 576-4359"
+                        android:textSize="12sp"
+                        android:textColor="#000000" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Referral Slip Title -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="REFERRAL SLIP"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:paddingTop="10dp" />
+
+            <!-- Date of Filing and Term -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="10dp"
+                android:weightSum="2">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="DATE OF FILING:"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/date_field"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="YYYY-MM-DD HH:MM"
+                        android:focusable="false"
+                        android:clickable="false"
+                        android:enabled="false" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingStart="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="TERM:"
+                        android:textStyle="bold" />
+
+                    <Spinner
+                        android:id="@+id/term_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Referrer Details -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="REFERRER"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:paddingTop="20dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:paddingTop="10dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="NAME:"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/name_field"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Student Name"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:clickable="false" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingStart="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="MOBILE NO.:"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/contact_field"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:hint="Enter your mobile number"
+                        android:inputType="phone" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Department and Email -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:paddingTop="10dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="DEPARTMENT:"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/department_field"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Enter department"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:background="@android:color/transparent" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingStart="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="EMAIL ADDRESS:"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/email_field"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Enter your email"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:background="@android:color/transparent" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Details Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DETAILS"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:paddingTop="20dp" />
+
+            <!-- Violations Dropdown -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="10dp">
+
+                <CheckBox
+                    android:id="@+id/discipline_concerns"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Discipline Concerns" />
+
+                <CheckBox
+                    android:id="@+id/behavioral_concerns"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Behavioral Concerns" />
+
+                <CheckBox
+                    android:id="@+id/learning_difficulty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Learning Difficulty" />
+                <!-- Add more CheckBoxes as needed -->
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="VIOLATIONS"
+                android:textStyle="bold"
+                android:paddingTop="10dp" />
+
+            <Spinner
+                android:id="@+id/violation_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <!-- Insights/Observations -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Please indicate significant insights/observations about the student/s being referred."
+                android:paddingTop="20dp" />
+
+            <EditText
+                android:id="@+id/insights_field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter insights"
+                android:inputType="textMultiLine"
+                android:minLines="4" />
+
+            <!-- Scrollable Table Section -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_marginTop="10dp"
+                android:fillViewport="true">
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TableLayout
+                        android:id="@+id/details_table"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:stretchColumns="1"
+                        android:padding="16dp">
+
+                        <!-- Table Header -->
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@color/green3">
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/violators_name"
+                                android:layout_width="200dp"
+                                android:layout_height="wrap_content"
+                                android:text="NAME"
+                                android:padding="8dp"
+                                android:textColor="@android:color/white" />
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/violators_program"
+                                android:layout_width="100dp"
+                                android:layout_height="wrap_content"
+                                android:text="PROGRAM"
+                                android:padding="8dp"
+                                android:textColor="@android:color/white" />
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/violators_studID"
+                                android:layout_width="150dp"
+                                android:layout_height="wrap_content"
+                                android:text="STUDENT NO"
+                                android:padding="8dp"
+                                android:textColor="@android:color/white" />
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/violators_contact"
+                                android:layout_width="150dp"
+                                android:layout_height="wrap_content"
+                                android:text="CONTACTS"
+                                android:padding="8dp"
+                                android:textColor="@android:color/white" />
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:layout_width="70dp"
+                                android:layout_height="wrap_content"
+                                android:text="    "
+                                android:padding="8dp"
+                                android:textColor="@android:color/white" />
+                        </TableRow>
+
+                        <!-- Add more rows as needed -->
+                    </TableLayout>
+                </ScrollView>
+            </HorizontalScrollView>
+
+            <!-- Privacy Consent Checkbox -->
+            <CheckBox
+                android:id="@+id/privacy_consent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="I hereby affirm that all information supplied herein is complete and accurate. Withholding or giving false information will make me ineligible for admission or subject to dismissal. I also agree to the data privacy policy of Laguna University."
+                android:paddingTop="20dp"
+                android:paddingBottom="10dp" />
+
+            <!-- Submit Button -->
+            <Button
+                android:id="@+id/submit_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Submit"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="@color/design_default_color_primary" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
