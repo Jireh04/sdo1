@@ -51,7 +51,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="open_nav">Open navigation drawer</string>
     <string name="project_id" translatable="false">laguna-university-sdo</string>
-    <style name="Base.Theme.LagunaUniversitySDO" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.LagunaUniversitySDO" parent="Theme.AppCompat.Light.NoActionBar">
         
         <item name="colorPrimary">@color/blue_green</item>
         <item name="colorPrimaryVariant">@color/blue_green</item>

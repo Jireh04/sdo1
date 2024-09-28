@@ -60,6 +60,8 @@
             android:name="com.finals.lagunauniversitysdo.MainActivity"
             android:exported="true" >
         </activity>
+        <activity android:name="com.finals.lagunauniversitysdo.refferalForm_student" >
+        </activity>
         <activity android:name="com.finals.lagunauniversitysdo.QRScannerActivity" >
         </activity>
         <activity android:name="com.finals.lagunauniversitysdo.form" />
