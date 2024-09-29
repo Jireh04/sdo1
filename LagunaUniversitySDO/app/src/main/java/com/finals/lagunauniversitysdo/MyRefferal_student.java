@@ -7,12 +7,12 @@ import android.view.ViewGroup;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
 public class MyRefferal_student extends Fragment {
 
@@ -45,6 +45,9 @@ public class MyRefferal_student extends Fragment {
     }
 
     private void fetchRefferalData() {
+        // Clear any existing rows to avoid duplicates
+        tableLayout.removeAllViews();
+
         // Fetch data from Firestore 'student_refferal_history' collection
         db.collection("student_refferal_history")
                 .get()
@@ -54,17 +57,20 @@ public class MyRefferal_student extends Fragment {
                         for (DocumentSnapshot document : queryDocumentSnapshots) {
                             // Extract the data for each document
                             String dateReported = document.getString("date");
-                            String studentNo = document.getString("stud_id");
-                            String name = document.getString("name");
+                            String studentNo = document.getString("student_id"); // Ensure this key matches what's in Firestore
+                            String name = document.getString("student_name"); // Ensure this key matches what's in Firestore
                             String status = document.getString("status");
 
                             // Add data as a new row in the table
                             addTableRow(dateReported, studentNo, name, status);
                         }
+                    } else {
+                        Toast.makeText(getContext(), "No data found.", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
                     // Handle any errors that occur while fetching data
+                    Toast.makeText(getContext(), "Error fetching data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 

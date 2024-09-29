@@ -17,9 +17,26 @@ import com.google.zxing.integration.android.IntentResult;
 public class QRScannerActivity extends AppCompatActivity {
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
 
+    // Variables to hold user details
+    private String userName;
+    private String userEmail;
+    private Long userContact;
+    private String userProgram;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Retrieve user details from intent
+        Intent intent = getIntent();
+        userName = intent.getStringExtra("NAME");
+        userEmail = intent.getStringExtra("EMAIL");
+        userContact = intent.getLongExtra("CONTACT", 0);
+        userProgram = intent.getStringExtra("PROGRAM");
+
+        // Display welcome message
+        Toast.makeText(this, "Welcome " + userName, Toast.LENGTH_SHORT).show();
+
         checkCameraPermissionAndStartScanner();  // Start scanner directly when activity launches
     }
 
@@ -67,19 +84,21 @@ public class QRScannerActivity extends AppCompatActivity {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (result != null) {
             if (result.getContents() == null) {
+                // Handle cancellation
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+                finish(); // Close the QRScannerActivity and go back to the referral screen
             } else {
                 // Handle the scanned result
                 String scannedText = result.getContents();
 
-                // Start FormActivity and pass the full scanned text
-                Intent intent = new Intent(QRScannerActivity.this, form.class);
-                intent.putExtra("scannedData", scannedText); // Pass full scanned data
-                startActivity(intent);
+                // Start the form activity and pass the scanned data
+                Intent formIntent = new Intent(this,form.class);
+                formIntent.putExtra("scannedData", scannedText); // Pass scanned data to the form
+                startActivity(formIntent); // Start FormActivity
+                finish(); // Close the QRScannerActivity
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
-
 }

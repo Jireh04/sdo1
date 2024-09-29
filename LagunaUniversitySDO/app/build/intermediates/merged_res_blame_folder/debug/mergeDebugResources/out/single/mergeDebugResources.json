@@ -36,10 +36,6 @@
         "source": "C:\\Users\\ranielle anthony\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\drawable\\baseline_logout_24.xml"
     },
     {
-        "merged": "com.finals.lagunauniversitysdo.app-debug-40:/layout_form.xml.flat",
-        "source": "com.finals.lagunauniversitysdo.app-main-42:/layout/form.xml"
-    },
-    {
         "merged": "C:\\Users\\ranielle anthony\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\anim_slide_in.xml.flat",
         "source": "C:\\Users\\ranielle anthony\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\anim\\slide_in.xml"
     },
@@ -258,6 +254,10 @@
     {
         "merged": "C:\\Users\\ranielle anthony\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\layout_fragment_personnel_refferal_form.xml.flat",
         "source": "C:\\Users\\ranielle anthony\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-main-42:\\layout\\fragment_personnel_refferal_form.xml"
+    },
+    {
+        "merged": "com.finals.lagunauniversitysdo.app-debug-40:/layout_fragment_guidance_refferal_student.xml.flat",
+        "source": "com.finals.lagunauniversitysdo.app-main-42:/layout/fragment_guidance_refferal_student.xml"
     },
     {
         "merged": "C:\\Users\\ranielle anthony\\.gradle\\daemon\\8.7\\com.finals.lagunauniversitysdo.app-debug-40:\\drawable_square_border.xml.flat",

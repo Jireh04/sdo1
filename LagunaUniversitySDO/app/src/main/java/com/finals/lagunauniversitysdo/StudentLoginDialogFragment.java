@@ -96,8 +96,6 @@ public class StudentLoginDialogFragment extends DialogFragment {
                             com.google.firebase.firestore.QuerySnapshot querySnapshot = task.getResult();
                             if (querySnapshot != null && !querySnapshot.isEmpty()) {
                                 DocumentSnapshot document = querySnapshot.getDocuments().get(0);
-
-                                // Retrieve required fields
                                 String studId = document.getId();  // Get the document ID (student ID)
                                 String firstName = document.getString("firstname");
                                 String lastName = document.getString("lastname");
@@ -128,7 +126,6 @@ public class StudentLoginDialogFragment extends DialogFragment {
                     }
                 });
     }
-
 
 
 }

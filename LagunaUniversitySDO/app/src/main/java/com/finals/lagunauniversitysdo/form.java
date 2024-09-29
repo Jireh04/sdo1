@@ -8,7 +8,6 @@ import android.util.Patterns;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -22,6 +21,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import android.widget.CheckBox;
+
 
 public class form extends AppCompatActivity {
 
@@ -30,6 +31,11 @@ public class form extends AppCompatActivity {
     private TextView violatorsName, violatorsProgram, violatorsStudID, violatorsContact;
     private TableLayout detailsTable;
     private FirebaseFirestore firestore;
+    private String scannedName;
+    private String scannedContact;
+    private String scannedStudentNo;
+    private String scannedProgram;
+    private String studentReferrer; // Declare a variable to hold the student referrer
 
     // Keys for intent extras
     private static final String STUDENT_NAME_KEY = "STUDENT_NAME";
@@ -80,16 +86,21 @@ public class form extends AppCompatActivity {
         violatorsContact = findViewById(R.id.violators_contact);
     }
 
+
+
     private void populateFieldsFromIntent() {
         // Retrieve data from the first intent
         Intent intent = getIntent();  // Get the current intent
 
         // Retrieve standard student data from the intent
-        String studentName = intent.getStringExtra(STUDENT_NAME_KEY);
+        String studentName = intent.getStringExtra(STUDENT_NAME_KEY); // Student name as referrer
         String studentEmail = intent.getStringExtra(EMAIL_KEY);
         Long studentContact = intent.getLongExtra(CONTACT_NUM_KEY, 0L);
         String studentProgram = intent.getStringExtra(PROGRAM_KEY);
         String studId = intent.getStringExtra(STUD_ID_KEY);
+
+        // Assign the studentName to the studentReferrer variable
+        studentReferrer = studentName != null ? studentName : "";
 
         // Populate fields from the first intent
         nameField.setText(studentName != null ? studentName : "");
@@ -108,39 +119,47 @@ public class form extends AppCompatActivity {
         }
     }
 
-    // Method to process the scanned data and update fields
     private void processScannedData(String scannedData) {
-        // Retrieve the intent again to get student data
-        Intent intent = getIntent();  // Get the current intent
-
-        // Retrieve standard student data from the intent
-        String studentName = intent.getStringExtra(STUDENT_NAME_KEY);
-        String studentEmail = intent.getStringExtra(EMAIL_KEY);
-        Long studentContact = intent.getLongExtra(CONTACT_NUM_KEY, 0L);
-        String studentProgram = intent.getStringExtra(PROGRAM_KEY);
-        String studId = intent.getStringExtra(STUD_ID_KEY);
-
-        // Populate fields with standard student data
-        nameField.setText(studentName != null ? studentName : "");
-        emailField.setText(studentEmail != null ? studentEmail : "");
-        contactField.setText(studentContact != 0L ? String.valueOf(studentContact) : "");
-        programField.setText(studentProgram != null ? studentProgram : "");
-
         // Process the scanned data
         String[] scannedFields = scannedData.split("\n");
 
         if (scannedFields.length >= 3) {
-            String studentNo = scannedFields[0];
-            String scannedName = scannedFields[1];
-            String block = scannedFields[2];
-            String contact = ""; // Adjust if you have contact info from the QR code
+            String studentNo = scannedFields[0];  // Assuming the first line is the student number
+            String scannedName = scannedFields[1];  // Assuming the second line is the scanned name
+            String block = scannedFields[2];  // Assuming the third line is the block
 
-            // Display the student details in the table
-            displayStudentDetails(studentNo, scannedName, contact, block); // Add contact info if available
+            // Display the student details in the table without the contact info
+            displayStudentDetails(scannedName, block, studentNo, ""); // Pass an empty string for contact
+
+            // Store block for later use
+            this.scannedProgram = block; // Store block instead of program
+
+            // Retrieve student data from UserSession
+            String studentName = UserSession.getStudentName();
+            String studentEmail = UserSession.getEmail();
+            Long studentContact = UserSession.getContactNum();
+            String studentProgram = UserSession.getProgram();
+            String studId = UserSession.getStudId();
+
+            // Set studentReferrer to the name retrieved from UserSession
+            this.studentReferrer = studentName != null ? studentName : "";
+
+            // Populate fields with standard student data
+            nameField.setText(studentName != null ? studentName : "");
+            emailField.setText(studentEmail != null ? studentEmail : "");
+            contactField.setText(studentContact != null ? String.valueOf(studentContact) : "");
+            programField.setText(studentProgram != null ? studentProgram : "");
+
+            // Optionally store scanned data in fields or a temporary variable for submission
+            this.scannedName = scannedName; // Store scanned name for later use
+            this.scannedContact = studentContact != null ? String.valueOf(studentContact) : ""; // Store scanned contact
+            this.scannedStudentNo = studentNo; // Store student number
+
         } else {
             Toast.makeText(this, "Invalid QR code format", Toast.LENGTH_LONG).show();
         }
     }
+
 
 
 
@@ -182,89 +201,153 @@ public class form extends AppCompatActivity {
                 String contact = addedUserContacts.get(i);
                 String program = addedUserPrograms.get(i);
                 String studId = addedUserStudIds.get(i);
-
-                displayStudentDetails(studId, name, contact, program);
+                displayStudentDetails(name, program, studId, contact);
             }
         }
     }
 
+    // Helper method to display student details in the table
+    private void displayStudentDetails(String name, String program, String studId, String contact) {
+        TableRow row = new TableRow(this);
 
+        TextView nameCell = new TextView(this);
+        TextView programCell = new TextView(this);
+        TextView studIdCell = new TextView(this);
+        TextView contactCell = new TextView(this);
+
+        nameCell.setText(name);
+        programCell.setText(program);
+        studIdCell.setText(studId);
+        contactCell.setText(contact);
+
+        row.addView(nameCell);
+        row.addView(programCell);
+        row.addView(studIdCell);
+        row.addView(contactCell);
+
+        detailsTable.addView(row);
+    }
     private void saveData() {
-        // Retrieve input fields
-        String name = nameField.getText().toString();
-        String email = emailField.getText().toString();
-        String contact = contactField.getText().toString();
-        String program = programField.getText().toString();
+        // Initialize CheckBox for privacy consent
+        CheckBox privacyConsentCheckbox = findViewById(R.id.privacy_consent);
 
-        // Validate input fields
-        if (!validateFields(name, email, contact, program)) {
-            return; // Exit if validation fails
+        // Check if the privacy consent checkbox is checked
+        if (!privacyConsentCheckbox.isChecked()) {
+            Toast.makeText(this, "You must agree to the privacy policy to proceed.", Toast.LENGTH_SHORT).show();
+            return; // Exit the method if checkbox is not checked
         }
 
-        // Retrieve other field values
+        // Retrieve values from input fields
+        String name = nameField.getText().toString().trim();
+        String email = emailField.getText().toString().trim();
+        String contactString = contactField.getText().toString().trim();
+        String program = programField.getText().toString().trim();
         String term = termSpinner.getSelectedItem().toString();
         String violation = violationSpinner.getSelectedItem().toString();
-        String date = dateField.getText().toString();
+        String date = dateField.getText().toString().trim();
+        String studId = violatorsStudID.getText().toString().trim();
+        String status = "pending"; // Default status
 
-        // Loop through the table rows
-        for (int i = 0; i < detailsTable.getChildCount(); i++) {
-            TableRow tableRow = (TableRow) detailsTable.getChildAt(i);
+        // Retrieve insights from insights_field
+        String insights = ((EditText) findViewById(R.id.insights_field)).getText().toString().trim();
 
-            // Extract values from the row
-            TextView studIdView = (TextView) tableRow.getChildAt(0);
-            TextView nameView = (TextView) tableRow.getChildAt(1);
-            TextView contactView = (TextView) tableRow.getChildAt(2);
-            TextView programView = (TextView) tableRow.getChildAt(3);
-
-            String studId = studIdView.getText().toString();
-            String nameFromTable = nameView.getText().toString();
-            String contactFromTable = contactView.getText().toString();
-            String programFromTable = programView.getText().toString();
-
-            // Prepare data to save for each student
-            Map<String, Object> studentData = new HashMap<>();
-            studentData.put("stud_id", studId);
-            studentData.put("name", nameFromTable);
-            studentData.put("contact", contactFromTable);
-            studentData.put("program", programFromTable);
-            studentData.put("term", term);
-            studentData.put("violation", violation);
-            studentData.put("date", date);
-            studentData.put("status", "pending");
-
-            // Include scanned data if applicable
-            String scannedStudentNo = ""; // Capture your scanned data
-            String scannedName = ""; // Capture your scanned data
-            String scannedBlock = ""; // Capture your scanned data
-            studentData.put("scanned_student_no", scannedStudentNo);
-            studentData.put("scanned_name", scannedName);
-            studentData.put("scanned_block", scannedBlock);
-
-            // Save the data to Firestore
-            firestore.collection("student_refferal_history")
-                    .add(studentData)
-                    .addOnSuccessListener(documentReference -> {
-                        Log.d("FirestoreSave", "Row saved successfully: " + nameFromTable);
-                        Toast.makeText(form.this, "Row saved successfully", Toast.LENGTH_SHORT).show();
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e("FirestoreSave", "Error saving row: " + e.getMessage());
-                        Toast.makeText(form.this, "Error saving row: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
+        // Validate inputs
+        if (!validateInputs(name, email, contactString, program)) {
+            return; // Exit the method if validation fails
         }
 
-        // After saving all rows, navigate back or do any additional action
-        Intent intent = new Intent(form.this, refferalForm_student.class); // Replace with your desired fragment/activity
-        startActivity(intent);
-        finish();
+        // Parse the contact string safely
+        Long contact;
+        try {
+            contact = Long.parseLong(contactString);
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Invalid contact number", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Retrieve previously added students for submission
+        ArrayList<String> addedUserNames = getIntent().getStringArrayListExtra("ADDED_USER_NAMES");
+        ArrayList<String> addedUserContacts = getIntent().getStringArrayListExtra("ADDED_USER_CONTACTS");
+        ArrayList<String> addedUserPrograms = getIntent().getStringArrayListExtra("ADDED_USER_PROGRAMS");
+        ArrayList<String> addedUserStudIds = getIntent().getStringArrayListExtra("ADDED_USER_STUD_IDS");
+
+        // Retrieve checkbox states and create a single string for user concerns
+        String userConcern = "";
+        CheckBox disciplineCheckbox = findViewById(R.id.discipline_concerns);
+        CheckBox behavioralCheckbox = findViewById(R.id.behavioral_concerns);
+        CheckBox learningCheckbox = findViewById(R.id.learning_difficulty);
+
+        // Build the user concern string based on checked checkboxes
+        if (disciplineCheckbox.isChecked()) {
+            userConcern = "Discipline Concerns";
+        } else if (behavioralCheckbox.isChecked()) {
+            userConcern = "Behavioral Concerns";
+        } else if (learningCheckbox.isChecked()) {
+            userConcern = "Learning Difficulty";
+        }
+
+        // Check if there are added students and add them to Firestore
+        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudIds != null) {
+            for (int i = 0; i < addedUserNames.size(); i++) {
+                Map<String, Object> studentData = new HashMap<>();
+                studentData.put("student_name", addedUserNames.get(i));
+                studentData.put("student_program", addedUserPrograms.get(i));
+                studentData.put("student_id", addedUserStudIds.get(i)); // Added Student ID
+                studentData.put("term", term);
+                studentData.put("violation", violation);
+                studentData.put("date", date);
+                studentData.put("status", status);
+                studentData.put("user_concern", userConcern); // Add user concern to the student data
+                studentData.put("insights_student", insights); // Add insights to the student data
+                studentData.put("student_referrer", studentReferrer); // Add student_referrer to Firestore data
+
+                // Add each student's data directly to the Firestore collection
+                firestore.collection("student_refferal_history")
+                        .add(studentData)
+                        .addOnSuccessListener(documentReference -> {
+                            Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
+                            // Just finish the current activity to return to the previous one
+                            finish();
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(this, "Failed to submit data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Log.e("Firestore", "Error adding document", e);
+                        });
+            }
+        }
+
+        // Add the scanned data to Firestore as well without contact info
+        if (scannedName != null && scannedStudentNo != null && scannedProgram != null) {
+            Map<String, Object> scannedStudentData = new HashMap<>();
+            scannedStudentData.put("student_name", scannedName);
+            scannedStudentData.put("student_program", scannedProgram);
+            scannedStudentData.put("student_id", scannedStudentNo); // Use scanned student number
+            scannedStudentData.put("term", term);
+            scannedStudentData.put("violation", violation);
+            scannedStudentData.put("date", date);
+            scannedStudentData.put("status", status);
+            scannedStudentData.put("user_concern", userConcern); // Add user concern to scanned student data
+            scannedStudentData.put("insights_student", insights); // Add insights to scanned student data
+            scannedStudentData.put("student_referrer", studentReferrer); // Add student_referrer to Firestore data
+
+            // Add scanned student's data directly to the Firestore collection
+            firestore.collection("student_refferal_history")
+                    .add(scannedStudentData)
+                    .addOnSuccessListener(documentReference -> {
+                        Toast.makeText(this, "Scanned student data submitted successfully", Toast.LENGTH_SHORT).show();
+                        // Just finish the current activity to return to the previous one
+                        finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "Failed to submit scanned student data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.e("Firestore", "Error adding scanned student document", e);
+                    });
+        }
     }
 
 
 
-
-
-    // Validate input fields
-    private boolean validateFields(String name, String email, String contact, String program) {
+    private boolean validateInputs(String name, String email, String contact, String program) {
         if (TextUtils.isEmpty(name)) {
             nameField.setError("Name is required");
             return false;
@@ -274,7 +357,7 @@ public class form extends AppCompatActivity {
             return false;
         }
         if (TextUtils.isEmpty(contact)) {
-            contactField.setError("Contact number is required");
+            contactField.setError("Contact is required");
             return false;
         }
         if (TextUtils.isEmpty(program)) {
@@ -284,38 +367,15 @@ public class form extends AppCompatActivity {
         return true;
     }
 
-    // Parse contact number safely
-    private Long parseContactNumber(String contact) {
-        try {
-            return Long.parseLong(contact);
-        } catch (NumberFormatException e) {
-            contactField.setError("Invalid contact number");
-            return null; // Invalid number
-        }
+
+    // Clear input fields
+    private void clearFields() {
+        nameField.setText("");
+        emailField.setText("");
+        contactField.setText("");
+        programField.setText("");
+        termSpinner.setSelection(0);
+        violationSpinner.setSelection(0);
+        setCurrentDateTime();
     }
-
-    // Display student details in the table
-    private void displayStudentDetails(String studId, String name, String contact, String program) {
-        TableRow tableRow = new TableRow(this);
-        TextView studIdView = new TextView(this);
-        TextView nameView = new TextView(this);
-        TextView contactView = new TextView(this);
-        TextView programView = new TextView(this);
-
-        // Set text for TextViews
-        studIdView.setText(studId);
-        nameView.setText(name);
-        contactView.setText(contact);
-        programView.setText(program);
-
-        // Add TextViews to TableRow
-        tableRow.addView(studIdView);
-        tableRow.addView(nameView);
-        tableRow.addView(contactView);
-        tableRow.addView(programView);
-
-        // Add TableRow to TableLayout
-        detailsTable.addView(tableRow);
-    }
-
 }
