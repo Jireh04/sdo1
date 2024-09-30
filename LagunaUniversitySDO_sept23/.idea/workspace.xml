@@ -51,6 +51,12 @@
       <ProjectState />
     </projectState>
   </component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Jireh04/sdo1.git",
+    "accountId": "85af3946-d188-413a-8106-a37e67a50cb5"
+  }
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
 }</component>
