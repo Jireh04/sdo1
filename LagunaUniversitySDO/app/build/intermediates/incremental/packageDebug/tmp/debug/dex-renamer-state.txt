@@ -1,9 +1,9 @@
-#Sat Sep 28 07:27:50 SGT 2024
-base.0=C\:\\Users\\admin\\AndroidStudioProjects\\SDOnew\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
-base.1=C\:\\Users\\admin\\AndroidStudioProjects\\SDOnew\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
-base.2=C\:\\Users\\admin\\AndroidStudioProjects\\SDOnew\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\4\\classes.dex
-base.3=C\:\\Users\\admin\\AndroidStudioProjects\\SDOnew\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes2.dex
-base.4=C\:\\Users\\admin\\AndroidStudioProjects\\SDOnew\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes3.dex
+#Mon Sep 30 22:44:08 SGT 2024
+base.0=C\:\\Users\\admin\\Documents\\GitHub\\sdo\\LagunaUniversitySDO\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
+base.1=C\:\\Users\\admin\\Documents\\GitHub\\sdo\\LagunaUniversitySDO\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
+base.2=C\:\\Users\\admin\\Documents\\GitHub\\sdo\\LagunaUniversitySDO\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\4\\classes.dex
+base.3=C\:\\Users\\admin\\Documents\\GitHub\\sdo\\LagunaUniversitySDO\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes2.dex
+base.4=C\:\\Users\\admin\\Documents\\GitHub\\sdo\\LagunaUniversitySDO\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes3.dex
 path.0=classes.dex
 path.1=0/classes.dex
 path.2=4/classes.dex
