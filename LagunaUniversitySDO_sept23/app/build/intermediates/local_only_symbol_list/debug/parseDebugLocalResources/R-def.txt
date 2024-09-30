@@ -100,6 +100,8 @@ id offense_type_edit_text
 id page_number_container
 id pagination_controls
 id personnel_login_button
+id personnel_myRefferal
+id personnel_refferalForm
 id pick_date_time_button
 id pick_qr_code_button
 id prev_button
@@ -147,6 +149,7 @@ layout fragment_student_dashboard
 layout fragment_student_login_dialog
 layout menu_item_image
 layout nav_header
+layout personnel_main
 layout qr_scanner_overlay
 menu nav_menu
 menu personnel_menu

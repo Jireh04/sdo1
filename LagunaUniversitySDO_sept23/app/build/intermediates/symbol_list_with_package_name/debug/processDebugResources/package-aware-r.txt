@@ -3619,6 +3619,8 @@ id pathRelative
 id peekHeight
 id percent
 id personnel_login_button
+id personnel_myRefferal
+id personnel_refferalForm
 id pick_date_time_button
 id pick_qr_code_button
 id pin
@@ -4020,6 +4022,7 @@ layout notification_template_custom_big
 layout notification_template_icon_group
 layout notification_template_part_chronometer
 layout notification_template_part_time
+layout personnel_main
 layout qr_scanner_overlay
 layout select_dialog_item_material
 layout select_dialog_multichoice_material

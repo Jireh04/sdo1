@@ -1,5 +1,6 @@
 package com.finals.lagunauniversitysdo;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -25,6 +26,22 @@ public class PersonnelLoginDialogFragment extends DialogFragment {
     ImageButton closeButton;
 
     private FirebaseFirestore db;
+    private LoginDialogListener listener; // Declare the listener
+
+    public interface LoginDialogListener {
+        void onLoginSuccess(String userId); // Define the callback method
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        // Ensure that the host activity implements the interface
+        if (context instanceof LoginDialogListener) {
+            listener = (LoginDialogListener) context;
+        } else {
+            throw new RuntimeException(context.toString() + " must implement LoginDialogListener");
+        }
+    }
 
     @Nullable
     @Override
@@ -80,9 +97,16 @@ public class PersonnelLoginDialogFragment extends DialogFragment {
                             if (querySnapshot != null && !querySnapshot.isEmpty()) {
                                 // Authentication successful
                                 Toast.makeText(getActivity(), "Personnel logged in", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(getActivity(), personnel_MainActivity.class);
-                                startActivity(intent);
-                                dismiss();
+
+                                // Get the user ID (document ID)
+                                String userId = querySnapshot.getDocuments().get(0).getId(); // Get the ID of the first matched document
+
+                                // Notify the listener about the login success
+                                if (listener != null) {
+                                    listener.onLoginSuccess(userId);
+                                }
+
+                                dismiss(); // Dismiss the dialog
                             } else {
                                 // No match found
                                 Toast.makeText(getActivity(), "Invalid credentials", Toast.LENGTH_SHORT).show();
@@ -95,4 +119,3 @@ public class PersonnelLoginDialogFragment extends DialogFragment {
                 });
     }
 }
-

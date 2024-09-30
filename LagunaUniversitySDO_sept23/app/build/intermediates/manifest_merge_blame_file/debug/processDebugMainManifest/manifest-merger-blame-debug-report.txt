@@ -9,18 +9,18 @@
 9        android:targetSdkVersion="34" />
 10
 11    <uses-permission android:name="android.permission.INTERNET" />
-11-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:5:5-66
-11-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:5:22-64
+11-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:5:5-66
+11-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:5:22-64
 12    <uses-permission android:name="android.permission.CAMERA" />
-12-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:6:5-65
-12-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:6:22-62
+12-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:6:5-65
+12-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:6:22-62
 13
 14    <uses-feature
-14-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:7:5-84
+14-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:7:5-84
 15        android:name="android.hardware.camera"
-15-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:7:19-57
+15-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:7:19-57
 16        android:required="true" />
-16-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:7:58-81
+16-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:7:58-81
 17
 18    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 18-->[com.google.firebase:firebase-auth:23.0.0] C:\Users\admin\.gradle\caches\transforms-4\68ce7fb03f398182879857f9abe2369d\transformed\firebase-auth-23.0.0\AndroidManifest.xml:26:5-79
@@ -73,85 +73,85 @@
 42-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\admin\.gradle\caches\transforms-4\d795244dd84f2397a8356a7926641188\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:44:9-33
 43
 44    <application
-44-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:10:5-57:19
+44-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:10:5-57:19
 45        android:allowBackup="true"
-45-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:11:9-35
+45-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:11:9-35
 46        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
 46-->[androidx.core:core:1.13.0] C:\Users\admin\.gradle\caches\transforms-4\082a5359c999085d8d4a334dbd7e341f\transformed\core-1.13.0\AndroidManifest.xml:28:18-86
 47        android:dataExtractionRules="@xml/data_extraction_rules"
-47-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:12:9-65
+47-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:12:9-65
 48        android:debuggable="true"
 49        android:extractNativeLibs="false"
 50        android:fullBackupContent="@xml/backup_rules"
-50-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:13:9-54
+50-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:13:9-54
 51        android:icon="@mipmap/ic_launcher"
-51-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:14:9-43
+51-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:14:9-43
 52        android:label="@string/app_name"
-52-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:15:9-41
+52-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:15:9-41
 53        android:roundIcon="@mipmap/ic_launcher_round"
-53-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:16:9-54
+53-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:16:9-54
 54        android:supportsRtl="true"
-54-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:17:9-35
+54-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:17:9-35
 55        android:testOnly="true"
 56        android:theme="@style/Theme.LagunaUniversitySDO" >
-56-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:18:9-57
+56-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:18:9-57
 57
 58        <!-- MainActivity declaration -->
 59        <activity
-59-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:22:9-25:20
+59-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:22:9-25:20
 60            android:name="com.finals.lagunauniversitysdo.MainActivity"
-60-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:23:13-41
+60-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:23:13-41
 61            android:exported="true" >
-61-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:24:13-36
+61-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:24:13-36
 62        </activity>
 63        <activity android:name="com.finals.lagunauniversitysdo.refferalForm_student" >
-63-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:26:9-28:20
-63-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:27:13-49
+63-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:26:9-28:20
+63-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:27:13-49
 64        </activity>
 65        <activity android:name="com.finals.lagunauniversitysdo.QRScannerActivity" >
-65-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:29:9-31:20
-65-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:30:13-46
+65-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:29:9-31:20
+65-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:30:13-46
 66        </activity>
 67        <activity android:name="com.finals.lagunauniversitysdo.form" />
-67-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:32:9-51
-67-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:32:19-39
+67-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:32:9-51
+67-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:32:19-39
 68        <activity
-68-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:33:9-35:52
+68-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:33:9-35:52
 69            android:name="com.finals.lagunauniversitysdo.CustomScannerActivity"
-69-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:34:13-50
+69-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:34:13-50
 70            android:screenOrientation="portrait" />
-70-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:35:13-49
+70-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:35:13-49
 71        <activity
-71-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:36:9-39:20
+71-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:36:9-39:20
 72            android:name="com.finals.lagunauniversitysdo.personnel_MainActivity"
-72-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:37:13-51
+72-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:37:13-51
 73            android:exported="true" >
-73-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:38:13-36
+73-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:38:13-36
 74        </activity>
 75        <!-- Prefect Discipline Activity declaration -->
 76        <activity
-76-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:41:9-44:20
+76-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:41:9-44:20
 77            android:name="com.finals.lagunauniversitysdo.dod_MainActivity"
-77-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:42:13-45
+77-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:42:13-45
 78            android:exported="true" >
-78-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:43:13-36
+78-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:43:13-36
 79        </activity>
 80        <!-- LoginActivity declaration with launcher intent filter -->
 81        <activity
-81-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:46:9-55:20
+81-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:46:9-55:20
 82            android:name="com.finals.lagunauniversitysdo.LoginActivity"
-82-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:47:13-42
+82-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:47:13-42
 83            android:exported="true" >
-83-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:48:13-36
+83-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:48:13-36
 84            <intent-filter>
-84-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:50:13-53:29
+84-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:50:13-53:29
 85                <action android:name="android.intent.action.MAIN" />
-85-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:51:17-69
-85-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:51:25-66
+85-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:51:17-69
+85-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:51:25-66
 86
 87                <category android:name="android.intent.category.LAUNCHER" />
-87-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:52:17-77
-87-->C:\Users\admin\AndroidStudioProjects\SDOnew\app\src\main\AndroidManifest.xml:52:27-74
+87-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:52:17-77
+87-->C:\Users\admin\Documents\GitHub\sdo\LagunaUniversitySDO_sept23\app\src\main\AndroidManifest.xml:52:27-74
 88            </intent-filter>
 89        </activity>
 90        <activity

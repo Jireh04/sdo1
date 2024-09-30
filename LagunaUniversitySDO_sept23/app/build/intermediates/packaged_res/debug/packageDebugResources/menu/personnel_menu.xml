@@ -9,12 +9,12 @@
         android:checkableBehavior="single">
 
         <item
-            android:id="@+id/refferalForm"
+            android:id="@+id/personnel_refferalForm"
             android:icon="@drawable/baseline_home_24"
             android:title="Referral Form"/>
 
         <item
-            android:id="@+id/myRefferal"
+            android:id="@+id/personnel_myRefferal"
             android:icon="@drawable/baseline_restart_alt_24"
             android:title="My Referral"/>
 
