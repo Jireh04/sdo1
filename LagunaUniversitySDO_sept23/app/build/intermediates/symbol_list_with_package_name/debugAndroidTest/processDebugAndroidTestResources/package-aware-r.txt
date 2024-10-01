@@ -1,3 +1,0 @@
-com.finals.lagunauniversitysdo.test
-style WhiteBackgroundDialogTheme
-style WhiteBackgroundTheme
