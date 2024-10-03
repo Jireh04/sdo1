@@ -9,6 +9,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
+import android.util.Log;
+import android.text.TextUtils;
+
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,6 +19,7 @@ import androidx.fragment.app.DialogFragment;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class PersonnelLoginDialogFragment extends DialogFragment {
@@ -65,34 +69,69 @@ public class PersonnelLoginDialogFragment extends DialogFragment {
 
         return view;
     }
-
     private void authenticate(String username, String password) {
-        // Check Firestore for matching username and password in 'personnel' collection
+        // Clear previous session data
+        PersonnelSession.clearSession();
+
+        Log.d("Auth", "Attempting to log in personnel with username: " + username);
+
+        // Validate inputs
+        if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
+            Toast.makeText(getActivity(), "Username and password must not be empty.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Use Firebase Firestore to authenticate the personnel user
         db.collection("personnel")
                 .whereEqualTo("username", username)
-                .whereEqualTo("password", password) // Ideally, passwords should be hashed
+                .whereEqualTo("password", password) // Note: Use a secure way to handle passwords!
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<com.google.firebase.firestore.QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<com.google.firebase.firestore.QuerySnapshot> task) {
                         if (task.isSuccessful()) {
+                            Log.d("Auth", "Query successful");
+
                             com.google.firebase.firestore.QuerySnapshot querySnapshot = task.getResult();
                             if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                                // Authentication successful
+                                DocumentSnapshot document = querySnapshot.getDocuments().get(0);
+                                String personnelId = document.getId();  // Get the document ID (personnel ID)
+                                String personnelName = document.getString("name");
+                                String email = document.getString("email");
+                                Long contactNum = document.getLong("contactNum");
+                                String department = document.getString("department");
+                                String personnelUniqueId = document.getString("personnelUniqueId");
+
+                                // Store personnel ID and details in PersonnelSession
+                                PersonnelSession.setPersonnelId(personnelId);
+                                PersonnelSession.setPersonnelUniqueId(personnelUniqueId); // Set unique identifier for personnel
+                                PersonnelSession.setPersonnelDetails(personnelName, email, contactNum, department);
+
+                                Log.d("Auth", "Login successful for personnel: " + personnelName);
                                 Toast.makeText(getActivity(), "Personnel logged in", Toast.LENGTH_SHORT).show();
+
+                                // Proceed to the personnel main activity
                                 Intent intent = new Intent(getActivity(), personnel_MainActivity.class);
+                                intent.putExtra("PERSONNEL_ID", personnelId);
+                                intent.putExtra("PERSONNEL_NAME", personnelName);
+                                intent.putExtra("PERSONNEL_EMAIL", email);
+                                intent.putExtra("PERSONNEL_CONTACT_NUM", contactNum);
+                                intent.putExtra("PERSONNEL_DEPARTMENT", department);
                                 startActivity(intent);
                                 dismiss();
                             } else {
-                                // No match found
+                                Log.d("Auth", "Invalid credentials: No documents found.");
                                 Toast.makeText(getActivity(), "Invalid credentials", Toast.LENGTH_SHORT).show();
                             }
                         } else {
-                            // Error occurred
-                            Toast.makeText(getActivity(), "Error fetching user: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            Log.d("Auth", "Query failed: " + task.getException());
+                            Toast.makeText(getActivity(), "Error fetching personnel: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         }
                     }
                 });
     }
+
+
 }
+
 

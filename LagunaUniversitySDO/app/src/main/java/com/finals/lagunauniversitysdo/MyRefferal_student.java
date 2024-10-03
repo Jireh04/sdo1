@@ -9,8 +9,11 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -18,6 +21,8 @@ public class MyRefferal_student extends Fragment {
 
     private FirebaseFirestore db; // Firestore instance
     private TableLayout tableLayout; // TableLayout to display data
+    private String userId; // User ID of the logged-in student
+    private String studentName; // Full name of the logged-in student
 
     public MyRefferal_student() {
         // Required empty public constructor
@@ -27,6 +32,8 @@ public class MyRefferal_student extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = FirebaseFirestore.getInstance(); // Initialize Firestore
+        userId = UserSession.getStudId(); // Get the currently logged-in user's ID
+        studentName = UserSession.getStudentName(); // Use existing method to get the student's name
     }
 
     @Override
@@ -38,7 +45,7 @@ public class MyRefferal_student extends Fragment {
         // Reference to TableLayout in the XML layout
         tableLayout = view.findViewById(R.id.tableLayout);
 
-        // Fetch and display data from Firestore
+        // Fetch and display referral data specific to the logged-in user
         fetchRefferalData();
 
         return view;
@@ -48,29 +55,35 @@ public class MyRefferal_student extends Fragment {
         // Clear any existing rows to avoid duplicates
         tableLayout.removeAllViews();
 
-        // Fetch data from Firestore 'student_refferal_history' collection
+        // Fetch data from Firestore 'student_refferal_history' collection for the logged-in user
         db.collection("student_refferal_history")
+                .whereEqualTo("student_referrer", studentName) // Filter by the logged-in user's full name
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (!queryDocumentSnapshots.isEmpty()) {
-                        // Iterate through the Firestore documents
-                        for (DocumentSnapshot document : queryDocumentSnapshots) {
-                            // Extract the data for each document
-                            String dateReported = document.getString("date");
-                            String studentNo = document.getString("student_id"); // Ensure this key matches what's in Firestore
-                            String name = document.getString("student_name"); // Ensure this key matches what's in Firestore
-                            String status = document.getString("status");
+                .addOnCompleteListener(new OnCompleteListener<com.google.firebase.firestore.QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<com.google.firebase.firestore.QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            com.google.firebase.firestore.QuerySnapshot queryDocumentSnapshots = task.getResult();
+                            if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                                // Iterate through the Firestore documents
+                                for (DocumentSnapshot document : queryDocumentSnapshots) {
+                                    // Extract the data for each document
+                                    String dateReported = document.getString("date");
+                                    String studentNo = document.getString("student_id"); // Ensure this key matches what's in Firestore
+                                    String name = document.getString("student_name"); // Ensure this key matches what's in Firestore
+                                    String status = document.getString("status");
 
-                            // Add data as a new row in the table
-                            addTableRow(dateReported, studentNo, name, status);
+                                    // Add data as a new row in the table
+                                    addTableRow(dateReported, studentNo, name, status);
+                                }
+                            } else {
+                                Toast.makeText(getContext(), "No data found.", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            // Handle any errors that occur while fetching data
+                            Toast.makeText(getContext(), "Error fetching data: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
-                    } else {
-                        Toast.makeText(getContext(), "No data found.", Toast.LENGTH_SHORT).show();
                     }
-                })
-                .addOnFailureListener(e -> {
-                    // Handle any errors that occur while fetching data
-                    Toast.makeText(getContext(), "Error fetching data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
