@@ -38,7 +38,6 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawer_layout;
-    private TextView toolbarTitle;
     private ImageView userIcon;
     private EditText searchBar;
     private TextView searchResults;
@@ -69,7 +68,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        toolbarTitle = findViewById(R.id.toolbar_title);
         drawer_layout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -81,7 +79,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new refferalForm_student()).commit();
             navigationView.setCheckedItem(R.id.refferalForm);
-            toolbarTitle.setText("Refferal Form");
         }
 
         userIcon = findViewById(R.id.user_icon);

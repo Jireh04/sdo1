@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="true" />
 
@@ -24,9 +26,6 @@
             android:exported="true">
         </activity>
         <activity
-            android:name=".refferalForm_student">
-        </activity>
-        <activity
             android:name=".QRScannerActivity">
         </activity>
         <activity android:name=".form"></activity>
@@ -39,11 +38,9 @@
         </activity>
         <!-- Prefect Discipline Activity declaration -->
         <activity
-            android:name=".dod_MainActivity"
-            android:exported="true">
+            android:name=".Prefect_MainActivity">
         </activity>
         <activity android:name=".PersonnelForm" />
-        <!-- LoginActivity declaration with launcher intent filter -->
         <activity
             android:name=".LoginActivity"
             android:exported="true">

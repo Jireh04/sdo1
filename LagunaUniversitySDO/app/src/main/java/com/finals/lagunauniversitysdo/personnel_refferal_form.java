@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.util.Log;
@@ -64,7 +66,7 @@ public class personnel_refferal_form extends Fragment {
         allDocuments = new ArrayList<>();
 
         // Set button click listeners
-        setButtonListeners(view); // Pass the view here
+        setButtonListeners(view);
 
         return view; // Return the inflated view
     }
@@ -115,8 +117,11 @@ public class personnel_refferal_form extends Fragment {
         String uniqueId = PersonnelSession.getPersonnelUniqueId();
         String personnelName = PersonnelSession.getPersonnelName();
         String personnelEmail = PersonnelSession.getEmail();
-        Long personnelContacts = PersonnelSession.getContactNum();
+        Long personnelContactNum = PersonnelSession.getContactNum();
         String personnelProgram = PersonnelSession.getDepartment();
+
+        Log.d("ContactNum", "Personnel contact number: " + personnelContactNum);
+
 
         // Prepare the intent to pass personnel data
         Intent intent = new Intent(getActivity(), PersonnelForm.class);
@@ -125,10 +130,14 @@ public class personnel_refferal_form extends Fragment {
         intent.putExtra("PERSONNEL_NAME_KEY", personnelName);
         intent.putExtra("PERSONNEL_EMAIL_KEY", personnelEmail);
 
-        // Prepare personnel contact information as an ArrayList
-        ArrayList<Long> personnelContactList = new ArrayList<>();
-        personnelContactList.add(personnelContacts != null ? personnelContacts : 0L);
-        intent.putExtra("PERSONNEL_CONTACT_NUM_KEY", personnelContactList);
+        // Pass personnel contact number directly as a Long
+        if (personnelContactNum != null) {
+            intent.putExtra("PERSONNEL_CONTACT_NUM_KEY", personnelContactNum);
+        } else {
+            intent.putExtra("PERSONNEL_CONTACT_NUM_KEY", 0L); // Default value if contact number is null
+            Log.d("PersonnelForm", "Retrieved contact: " + personnelContactNum);
+        }
+
         intent.putExtra("PERSONNEL_DEPARTMENT_KEY", personnelProgram);
 
         // Check if at least one user is added
@@ -175,7 +184,7 @@ public class personnel_refferal_form extends Fragment {
             intent.putExtra("STUDENT_DEPARTMENT", studentDepartment);
         }
 
-        // Pass student details to the intent
+        // Pass added user details to the intent
         intent.putExtra("ADDED_STUDENT_NAMES", userNames);
         intent.putExtra("ADDED_STUDENT_DEPARTMENTS", userDepartments);
         intent.putExtra("ADDED_STUDENT_EMAILS", userEmails);
@@ -185,6 +194,7 @@ public class personnel_refferal_form extends Fragment {
         // Start the PersonnelForm activity with all the data
         startActivity(intent);
     }
+
 
 
 
@@ -337,27 +347,47 @@ public class personnel_refferal_form extends Fragment {
     }
 
     private void displayStudentDetails(String name, String program, String studId, String contact) {
-        LinearLayout addedUsersContainer = getView().findViewById(R.id.details_table);
+        TableLayout detailsTable = getActivity().findViewById(R.id.details_table);
 
-        LinearLayout studentLayout = new LinearLayout(getActivity());
-        studentLayout.setOrientation(LinearLayout.HORIZONTAL);
-        studentLayout.setPadding(10, 10, 10, 10);
+        // Create a new table row
+        TableRow newRow = new TableRow(getActivity());
+        newRow.setLayoutParams(new TableRow.LayoutParams(
+                TableRow.LayoutParams.MATCH_PARENT,
+                TableRow.LayoutParams.WRAP_CONTENT
+        ));
 
-        TextView studentInfo = new TextView(getActivity());
-        studentInfo.setText(name + " (" + studId + ")");
-        studentInfo.setTextSize(18);
+        // Add TextViews for student details
+        addTextViewToRow(newRow, name);      // Name
+        addTextViewToRow(newRow, program);   // Program
+        addTextViewToRow(newRow, studId);    // Student ID
+        addTextViewToRow(newRow, contact);   // Contact
 
-        ImageButton removeButton = new ImageButton(getActivity());
-        removeButton.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
-
-        removeButton.setOnClickListener(v -> {
+        // Create delete button
+        ImageButton deleteButton = new ImageButton(getActivity());
+        deleteButton.setImageResource(R.drawable.baseline_delete_outline_24);
+        deleteButton.setBackgroundResource(android.R.color.transparent); // Make button background transparent
+        deleteButton.setOnClickListener(v -> {
+            detailsTable.removeView(newRow); // Remove the row when button is clicked
             addedUserIds.remove(studId);
             addedUserDetails.remove(studId);
-            addedUsersContainer.removeView(studentLayout);
+            Toast.makeText(getActivity(), name + " removed", Toast.LENGTH_SHORT).show(); // Show confirmation
         });
 
-        studentLayout.addView(studentInfo);
-        studentLayout.addView(removeButton);
-        addedUsersContainer.addView(studentLayout);
+        // Add the delete button to the row
+        newRow.addView(deleteButton);
+        // Add the row to the table
+        detailsTable.addView(newRow);
     }
+
+    // Helper method to add TextViews to the row
+    private void addTextViewToRow(TableRow row, String text) {
+        TextView textView = new TextView(getActivity());
+        textView.setText(text);
+        textView.setPadding(8, 8, 8, 8);
+        textView.setTextSize(16);
+        row.addView(textView);
+    }
+
+
+
 }

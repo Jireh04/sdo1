@@ -7,7 +7,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.os.Handler;
 
@@ -24,48 +23,46 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.android.material.navigation.NavigationView;
 
-public class personnel_MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-
-    private DrawerLayout drawer_layout;
+public class Prefect_MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private DrawerLayout drawerLayout;
     private ImageView userIcon;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private String loggedInPersonnelId; // Changed from loggedInUserId
+    private String loggedInPrefectId; // Prefect ID
     private String userName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.personnel_activitymain);
+        setContentView(R.layout.prefect_activitymain);
 
-        // Retrieve loggedInPersonnelId from the Intent
+        // Retrieve loggedInPrefectId from the Intent
         Intent intent = getIntent();
-        loggedInPersonnelId = intent.getStringExtra("PERSONNEL_ID"); // Use new key for personnel ID
+        loggedInPrefectId = intent.getStringExtra("PREFECT_ID");
 
-        // Check if personnelId is retrieved successfully
-        if (loggedInPersonnelId == null) {
-            Toast.makeText(this, "Error: Personnel ID not passed", Toast.LENGTH_SHORT).show();
+        // Check if loggedInPrefectId is retrieved successfully
+        if (loggedInPrefectId == null) {
+            Toast.makeText(this, "Error: Prefect ID not passed", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        Log.d("personnel_MainActivity", "Logged in personnel ID: " + loggedInPersonnelId);  // Log the personnel ID for debugging
+        Log.d("Prefect_MainActivity", "Logged in prefect ID: " + loggedInPrefectId);  // Log the prefect ID for debugging
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        drawer_layout = findViewById(R.id.drawer_layout);
+        drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer_layout, toolbar, R.string.open_nav, R.string.close_nav);
-        drawer_layout.addDrawerListener(toggle);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open_nav, R.string.close_nav);
+        drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Change to personnel_refferal_form
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new personnel_refferal_form()).commit();
-            navigationView.setCheckedItem(R.id.refferalForm);
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new dashboard_prefect()).commit();
+            navigationView.setCheckedItem(R.id.Dashboard);
         }
 
         userIcon = findViewById(R.id.user_icon);
@@ -74,15 +71,16 @@ public class personnel_MainActivity extends AppCompatActivity implements Navigat
         userIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Firestore query to get user data based on loggedInPersonnelId
-                db.collection("personnel").document(loggedInPersonnelId).get()
+                // Firestore query to get prefect data based on loggedInPrefectId
+                db.collection("prefect").document(loggedInPrefectId).get()
                         .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                             @Override
                             public void onSuccess(DocumentSnapshot documentSnapshot) {
                                 if (documentSnapshot.exists()) {
+                                    // Assuming 'name' is the field for prefect name
                                     userName = documentSnapshot.getString("name");
 
-                                    PopupMenu popup = new PopupMenu(personnel_MainActivity.this, v);
+                                    PopupMenu popup = new PopupMenu(Prefect_MainActivity.this, v);
                                     popup.getMenuInflater().inflate(R.menu.user_menu, popup.getMenu());
 
                                     MenuItem menuItem = popup.getMenu().findItem(R.id.menu_user_name);
@@ -100,15 +98,15 @@ public class personnel_MainActivity extends AppCompatActivity implements Navigat
                                             if (id == R.id.menu_user_name) {
                                                 return true;
                                             } else if (id == R.id.menu_logout) {
-                                                // Clear user session data
-                                                UserSession.clearSession();
+                                                // Clear PrefectSession data
+                                                PrefectSession.clearSession();
 
-                                                Toast.makeText(personnel_MainActivity.this, "Logging out...", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(Prefect_MainActivity.this, "Logging out...", Toast.LENGTH_SHORT).show();
 
-                                                // Optionally, you can add a delay here for better UX
+                                                // Optionally, add a delay for better UX
                                                 new Handler().postDelayed(() -> {
                                                     // Finish the current activity and start the login activity
-                                                    Intent intent = new Intent(personnel_MainActivity.this, LoginActivity.class); // Change this to your actual login activity
+                                                    Intent intent = new Intent(Prefect_MainActivity.this, LoginActivity.class); // Change this to your login activity
                                                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Clear the back stack
                                                     startActivity(intent);
                                                     finish(); // Close MainActivity
@@ -122,13 +120,13 @@ public class personnel_MainActivity extends AppCompatActivity implements Navigat
                                     });
 
                                 } else {
-                                    // User not found in Firestore
-                                    Toast.makeText(personnel_MainActivity.this, "User not found in Firestore.", Toast.LENGTH_SHORT).show();
+                                    // Prefect not found in Firestore
+                                    Toast.makeText(Prefect_MainActivity.this, "Prefect not found in Firestore.", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         })
                         .addOnFailureListener(e -> {
-                            Toast.makeText(personnel_MainActivity.this, "Error fetching user data", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(Prefect_MainActivity.this, "Error fetching user data", Toast.LENGTH_SHORT).show();
                         });
             }
         });
@@ -139,21 +137,21 @@ public class personnel_MainActivity extends AppCompatActivity implements Navigat
         Fragment selectedFragment = null;
 
         int itemId = item.getItemId();
-        if (itemId == R.id.refferalForm) {
-            selectedFragment = new personnel_refferal_form();
-        } else if (itemId == R.id.myRefferal) {
-            selectedFragment = new personnel_myRefferalForm();
-        } else if (itemId == R.id.myViolation) {
-            selectedFragment = new myViolations_student();
-        } else if (itemId == R.id.guidanceRefferal) {
-            selectedFragment = new guidanceRefferal_student();
+        if (itemId == R.id.Dashboard) {
+            selectedFragment = new dashboard_prefect();
+        } else if (itemId == R.id.Referrals) {
+            selectedFragment = new refferals_prefect();
+        } else if (itemId == R.id.Reports) {
+            selectedFragment = new reports_prefect();
+        } else if (itemId == R.id.guidanceRefferals) {
+            selectedFragment = new guidanceRefferal_prefect();
         }
 
         if (selectedFragment != null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
         }
 
-        drawer_layout.closeDrawer(GravityCompat.START);
+        drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 }

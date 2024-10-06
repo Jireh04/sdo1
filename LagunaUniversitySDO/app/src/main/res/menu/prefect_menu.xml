@@ -9,22 +9,22 @@
         android:checkableBehavior="single">
 
         <item
-            android:id="@+id/refferalForm"
+            android:id="@+id/Dashboard"
             android:icon="@drawable/baseline_home_24"
             android:title="Dashboard"/>
 
         <item
-            android:id="@+id/myRefferal"
+            android:id="@+id/Referrals"
             android:icon="@drawable/baseline_restart_alt_24"
             android:title="Referrals"/>
 
         <item
-            android:id="@+id/myViolation"
+            android:id="@+id/Reports"
             android:icon="@drawable/baseline_category_24"
             android:title="Reports"/>
 
         <item
-            android:id="@+id/guidanceRefferal"
+            android:id="@+id/guidanceRefferals"
             android:icon="@drawable/baseline_hardware_24"
             android:title="Guidance Referral"/>
 

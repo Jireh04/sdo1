@@ -38,8 +38,8 @@ public class LoginActivity extends AppCompatActivity {
         DODLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DODLoginDialogFragment DODDialog = new DODLoginDialogFragment();
-                DODDialog.show(getSupportFragmentManager(), "dod_login_dialog");
+                PrefectLoginDialogFragment PrefectDialog = new PrefectLoginDialogFragment();
+                PrefectDialog.show(getSupportFragmentManager(), "prefect_login_dialog");
             }
         });
 

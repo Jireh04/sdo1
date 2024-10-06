@@ -53,6 +53,9 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("com.google.zxing:core:3.4.1")
+    implementation ("com.google.android.gms:play-services-base:18.1.0")
+    implementation ("com.google.android.gms:play-services-auth:20.5.0")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
