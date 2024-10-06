@@ -59,7 +59,7 @@
         android:id="@+id/nav_view"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header"
-        app:menu="@menu/personnel_menu"
+        app:menu="@menu/prefect_menu"
         android:background="@color/green3"
         android:outlineSpotShadowColor="@color/green3"
         app:itemIconTint="@color/white"

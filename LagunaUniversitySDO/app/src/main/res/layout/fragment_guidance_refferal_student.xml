@@ -61,17 +61,33 @@
                     android:textStyle="bold" />
             </TableRow>
 
+
             <!-- Row for No Records -->
             <TableRow>
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:padding="8dp"
-                    android:text="No records"
-                    android:textColor="@color/black"
-                    android:layout_span="3"
-                    android:gravity="center" />
+                    android:text="April 2, 2021 - 10:10am"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="8dp"
+                    android:text=" 2 weeks community service"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="8dp"
+                    android:text="Ms. Jireh San Juan"
+                    android:textColor="@color/black" />
             </TableRow>
 
         </TableLayout>
