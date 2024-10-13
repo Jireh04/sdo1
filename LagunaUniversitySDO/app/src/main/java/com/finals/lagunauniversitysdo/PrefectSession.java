@@ -8,9 +8,6 @@ public class PrefectSession {
     private static Long contactNum;
     private static String department;
 
-    // Unique identifier for prefect
-    private static String prefectUniqueId; // Unique identifier for prefect
-
     // Student fields
     private static String studentId; // Student ID
     private static String studentName;
@@ -23,9 +20,6 @@ public class PrefectSession {
         prefectId = id;
     }
 
-    public static void setPrefectUniqueId(String uniqueId) { // Method to set unique identifier for prefect
-        prefectUniqueId = uniqueId;
-    }
 
     public static void setPrefectDetails(String name, String email, Long contact, String department) {
         prefectName = name;

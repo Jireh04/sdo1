@@ -29,6 +29,7 @@ public class Prefect_MainActivity extends AppCompatActivity implements Navigatio
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String loggedInPrefectId; // Prefect ID
     private String userName;
+    private DrawerLayout drawer_layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,12 +53,12 @@ public class Prefect_MainActivity extends AppCompatActivity implements Navigatio
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        drawerLayout = findViewById(R.id.drawer_layout);
+        drawer_layout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open_nav, R.string.close_nav);
-        drawerLayout.addDrawerListener(toggle);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer_layout, toolbar, R.string.open_nav, R.string.close_nav);
+        drawer_layout.addDrawerListener(toggle);
         toggle.syncState();
 
         if (savedInstanceState == null) {
@@ -151,7 +152,7 @@ public class Prefect_MainActivity extends AppCompatActivity implements Navigatio
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
         }
 
-        drawerLayout.closeDrawer(GravityCompat.START);
+        drawer_layout.closeDrawer(GravityCompat.START);
         return true;
     }
 }

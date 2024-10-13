@@ -87,11 +87,9 @@ public class PrefectLoginDialogFragment extends DialogFragment {
                                 String prefectEmail = document.getString("email");
                                 Long prefectContactNum = document.getLong("contactNum");
                                 String prefectDepartment = document.getString("department");
-                                String prefectUniqueId = document.getString("prefectUniqueId");
 
                                 // Store Prefect ID and details in PrefectSession
                                 PrefectSession.setPrefectId(prefectId);
-                                PrefectSession.setPrefectUniqueId(prefectUniqueId); // Set unique identifier for prefect
                                 PrefectSession.setPrefectDetails(prefectName, prefectEmail, prefectContactNum, prefectDepartment);
 
                                 Log.d("Auth", "Login successful for prefect: " + prefectName);
