@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@drawable/bg_lu"
+    tools:context=".LoginActivity">
+
+    <!-- Add the title and subtitle TextViews here -->
+    <ImageView
+        android:layout_width="130sp"
+        android:layout_height="130sp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/lu_img" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="LAGUNA UNIVERSITY SDOMS"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#4DDB1F"
+        android:layout_marginTop="20dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Student Discipline Office Management System"
+        android:textSize="18sp"
+        android:textColor="@color/white"
+        android:layout_marginTop="8dp"/>
+
+    <LinearLayout
+        android:layout_width="253dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="70dp"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Are you..."
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="25sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/student_login_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/green3"
+            android:text="Student"
+            android:textSize="18sp"
+            app:cornerRadius="20dp" />
+
+        <Button
+            android:id="@+id/personnel_login_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/blue2"
+            android:text="LU Personnel"
+            android:textSize="18sp"
+            app:cornerRadius="20dp" />
+
+        <Button
+            android:id="@+id/dod_login_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/red2"
+            android:text="Prefect Discipline"
+            android:textSize="18sp"
+            app:cornerRadius="20dp" />
+    </LinearLayout>
+</LinearLayout>
+
