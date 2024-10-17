@@ -1,136 +1,89 @@
 package com.finals.lagunauniversitysdo;
 
 public class PrefectSession {
-    // Prefect fields (since there's only one account)
-    private static String prefectId; // Prefect ID
+    private static String prefectId;
     private static String prefectName;
-    private static String email;
-    private static Long contactNum;
-    private static String department;
+    private static String prefectEmail;
+    private static Long prefectContactNum;
+    private static String prefectDepartment;
+    private static String prefectUsername;  // New variable for username
+    private static String prefectPassword;  // New variable for password
 
-    // Student fields
-    private static String studentId; // Student ID
-    private static String studentName;
-    private static String studentEmail;
-    private static Long studentContactNum;
-    private static String studentDepartment;
-
-    // Setters for Prefect
-    public static void setPrefectId(String id) {
-        prefectId = id;
-    }
-
-
-    public static void setPrefectDetails(String name, String email, Long contact, String department) {
-        prefectName = name;
-        PrefectSession.email = email;
-        contactNum = contact;
-        PrefectSession.department = department; // Correctly set prefect department
-    }
-
-    // Individual setters for Prefect
-    public static void setPrefectName(String name) {
-        prefectName = name;
-    }
-
-    public static void setEmail(String email) {
-        PrefectSession.email = email;
-    }
-
-    public static void setContactNum(Long contact) {
-        contactNum = contact;
-    }
-
-    public static void setDepartment(String department) {
-        PrefectSession.department = department; // Use the class variable correctly
-    }
-
-    // Setters for Student
-    public static void setStudentId(String id) {
-        studentId = id;
-    }
-
-    public static void setStudentName(String name) {
-        studentName = name;
-    }
-
-    public static void setStudentEmail(String email) {
-        studentEmail = email;
-    }
-
-    public static void setStudentContactNum(Long contact) {
-        studentContactNum = contact;
-    }
-
-    public static void setStudentDepartment(String department) {
-        studentDepartment = department; // Set student department correctly
-    }
-
-    // Submission Method
-    public static void submitData() {
-        // Here, you would implement logic to handle data submission (e.g., save to a database)
-        System.out.println("Submitting prefect and student data...");
-
-        // Clear the session after submission
-        clearSession();
-        System.out.println("Data submitted and session cleared.");
-    }
-
-    // Getters for Prefect
+    // Getter and setter methods for all fields
     public static String getPrefectId() {
         return prefectId;
+    }
+
+    public static void setPrefectId(String id) {
+        prefectId = id;
     }
 
     public static String getPrefectName() {
         return prefectName;
     }
 
-    public static String getEmail() {
-        return email;
+    public static void setPrefectName(String name) {
+        prefectName = name;
     }
 
-    public static Long getContactNum() {
-        return contactNum;
+    public static String getPrefectEmail() {
+        return prefectEmail;
     }
 
-    public static String getDepartment() {
-        return department;
+    public static void setPrefectEmail(String email) {
+        prefectEmail = email;
     }
 
-    // Getters for Student
-    public static String getStudentId() {
-        return studentId;
+    public static Long getPrefectContactNum() {
+        return prefectContactNum;
     }
 
-    public static String getStudentName() {
-        return studentName;
+    public static void setPrefectContactNum(Long contactNum) {
+        prefectContactNum = contactNum;
     }
 
-    public static String getStudentEmail() {
-        return studentEmail;
+    public static String getPrefectDepartment() {
+        return prefectDepartment;
     }
 
-    public static Long getStudentContactNum() {
-        return studentContactNum;
+    public static void setPrefectDepartment(String department) {
+        prefectDepartment = department;
     }
 
-    public static String getStudentDepartment() {
-        return studentDepartment;
+    public static String getPrefectUsername() {
+        return prefectUsername;
     }
 
-    // Clear session
+    public static void setPrefectUsername(String username) {
+        prefectUsername = username;
+    }
+
+    public static String getPrefectPassword() {
+        return prefectPassword;
+    }
+
+    public static void setPrefectPassword(String password) {
+        prefectPassword = password;
+    }
+
+    // Method to store all prefect details at once
+    public static void setPrefectDetails(String name, String email, Long contactNum, String department, String username, String password) {
+        setPrefectName(name);
+        setPrefectEmail(email);
+        setPrefectContactNum(contactNum);
+        setPrefectDepartment(department);
+        setPrefectUsername(username);
+        setPrefectPassword(password);
+    }
+
+    // Optionally, you can add a method to clear the session when needed
     public static void clearSession() {
         prefectId = null;
         prefectName = null;
-        email = null;
-        contactNum = null;
-        department = null;
-
-        // Clear student data
-        studentId = null;
-        studentName = null;
-        studentEmail = null;
-        studentContactNum = null;
-        studentDepartment = null;
+        prefectEmail = null;
+        prefectContactNum = null;
+        prefectDepartment = null;
+        prefectUsername = null;
+        prefectPassword = null;
     }
 }

@@ -88,9 +88,9 @@ public class PrefectLoginDialogFragment extends DialogFragment {
                                 Long prefectContactNum = document.getLong("contactNum");
                                 String prefectDepartment = document.getString("department");
 
-                                // Store Prefect ID and details in PrefectSession
+                                // Store Prefect ID and details in PrefectSession, now with username and password
                                 PrefectSession.setPrefectId(prefectId);
-                                PrefectSession.setPrefectDetails(prefectName, prefectEmail, prefectContactNum, prefectDepartment);
+                                PrefectSession.setPrefectDetails(prefectName, prefectEmail, prefectContactNum, prefectDepartment, username, password);
 
                                 Log.d("Auth", "Login successful for prefect: " + prefectName);
                                 Toast.makeText(getActivity(), "Prefect logged in", Toast.LENGTH_SHORT).show();
@@ -115,4 +115,5 @@ public class PrefectLoginDialogFragment extends DialogFragment {
                     }
                 });
     }
+
 }

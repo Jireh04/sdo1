@@ -7,6 +7,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:id="@+id/violationsLayout"
         android:orientation="vertical"
         android:padding="16dp">
 
@@ -22,6 +23,7 @@
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:id="@+id/violations"
             android:background="#E0E0E0">
 
             <TableRow android:background="@color/green3">
@@ -40,6 +42,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:padding="8dp"
+                    android:id="@+id/ViolationView"
                     android:text="Violation"
                     android:textColor="@color/white"
                     android:textSize="16sp"
@@ -50,6 +53,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:padding="8dp"
+                    android:id="@+id/typeOfViolationView"
                     android:text="Type of Offense"
                     android:textColor="@color/white"
                     android:textSize="16sp"
@@ -60,6 +64,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:padding="8dp"
+                    android:id="@+id/statusView"
                     android:text="Status"
                     android:textColor="@color/white"
                     android:textSize="16sp"
@@ -70,6 +75,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:padding="8dp"
+                    android:id="@+id/dateView"
                     android:text="Date of Incident"
                     android:textColor="@color/white"
                     android:textSize="16sp"
@@ -77,45 +83,16 @@
             </TableRow>
 
             <TableRow>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="1"
-                    android:textColor="@color/black" />
-
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:padding="8dp"
-                    android:text="Non-conformity to the uniform regulations"
-                    android:textColor="@color/black" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:padding="8dp"
-                    android:text="Light Offense"
-                    android:textColor="@color/black" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:padding="8dp"
-                    android:text="Settled"
-                    android:textColor="@color/black" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:padding="8dp"
-                    android:text="April 2, 2024 - 01:37 am"
-                    android:textColor="@color/black" />
+                    android:gravity="center"
+                    android:text="No referrals"
+                    android:textColor="@color/light_grey"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
             </TableRow>
 
         </TableLayout>

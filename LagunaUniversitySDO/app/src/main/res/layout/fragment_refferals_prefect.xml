@@ -1,14 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".refferals_prefect">
+    android:padding="16dp">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="REFFERALS PREFECT" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-</FrameLayout>
+        <!-- Box layout with clickable words -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="10dp"
+            android:gravity="center">
+
+            <!-- Pending button -->
+            <Button
+                android:id="@+id/btn_pending"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PENDING"
+                android:layout_marginEnd="16dp"
+                android:onClick="onPendingClick"/>
+
+            <!-- Accepted Referral button -->
+            <Button
+                android:id="@+id/btn_accepted"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ACCEPTED REFERRAL"
+                android:layout_marginEnd="16dp"
+                android:onClick="onAcceptedClick"/>
+
+            <!-- Rejected Referral button -->
+            <Button
+                android:id="@+id/btn_rejected"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="REJECTED REFERRAL"
+                android:onClick="onRejectedClick"/>
+        </LinearLayout>
+
+        <!-- ScrollView with a LinearLayout to display pending referrals -->
+        <ScrollView
+            android:id="@+id/scroll_view_pending"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"> <!-- Initially hidden -->
+
+            <LinearLayout
+                android:id="@+id/linear_layout_pending"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </ScrollView>
+
+        <!-- Layout for accepted referrals -->
+        <LinearLayout
+            android:id="@+id/linear_layout_accepted"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- ScrollView for accepted referrals -->
+        <ScrollView
+            android:id="@+id/scroll_view_accepted"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+            <!-- Your list of accepted referrals here -->
+        </ScrollView>
+
+        <!-- Layout for rejected referrals -->
+        <LinearLayout
+            android:id="@+id/linear_layout_rejected"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- ScrollView for rejected referrals -->
+        <ScrollView
+            android:id="@+id/scroll_view_rejected"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+            <!-- Your list of rejected referrals here -->
+        </ScrollView>
+
+
+
+
+    </LinearLayout>
+</ScrollView>
