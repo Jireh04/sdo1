@@ -1,0 +1,48 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Display student name -->
+    <TextView
+        android:id="@+id/studentNameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Name: "
+        android:textSize="18sp"/>
+
+    <!-- Display student ID -->
+    <TextView
+        android:id="@+id/studentIdTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ID: "
+        android:textSize="18sp"/>
+
+    <!-- Display log entry -->
+    <TextView
+        android:id="@+id/logEntryTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Log Entry: "
+        android:textSize="16sp"
+        android:paddingTop="16dp"
+        android:layout_marginTop="16dp"/>
+
+    <TextView
+        android:id="@+id/referrerTypeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Referrer Type: "
+        android:padding="16dp"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/referrerNameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Referrer Name: "
+       />
+
+</LinearLayout>

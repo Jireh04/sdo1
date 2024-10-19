@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -22,7 +21,6 @@ public class reporters extends Fragment {
     private RecyclerView recyclerViewReporters;
     private ReporterAdapter reporterAdapter;
     private FirebaseFirestore db;
-
     private Map<String, List<ReferralLog>> referrerLogsMap;
 
     @Nullable
@@ -80,48 +78,65 @@ public class reporters extends Fragment {
 
     private void processReferralData(Iterable<QueryDocumentSnapshot> documents, String referrerType) {
         for (QueryDocumentSnapshot document : documents) {
-            String referrerName = document.getString(referrerType);
+            String referrerName = document.getString(referrerType);  // Get the referrer name based on type
+
             if (referrerName != null) {
                 // Initialize the list if it doesn't exist yet
                 if (!referrerLogsMap.containsKey(referrerName)) {
                     referrerLogsMap.put(referrerName, new ArrayList<>());
                 }
 
-                // Get the necessary details (student_id, status, date)
+                // Fetch additional data fields from the document
                 String studentId = document.getString("student_id");
                 String status = document.getString("status");
                 String date = document.getString("date");
+                String studentName = document.getString("student_name");
+                String studentProgram = document.getString("student_program");
+                String term = document.getString("term");
+                String userConcern = document.getString("user_concern");
+                String violation = document.getString("violation");
 
-                // Create a new log object
-                ReferralLog log = new ReferralLog(studentId, status, date);
+                // Create a new log object with all the fetched data and referrerType
+                ReferralLog log = new ReferralLog(studentId, status, date, studentName, studentProgram, term, userConcern, violation, referrerType);
 
-                // Add the log to the map
+                // Add the log to the map for the respective referrer
                 referrerLogsMap.get(referrerName).add(log);
             }
         }
 
         // Update the adapter with the unique referrers
         List<String> allReferrers = new ArrayList<>(referrerLogsMap.keySet());
-        reporterAdapter.updateData(allReferrers);
+        reporterAdapter.updateData(allReferrers);  // Update the adapter with referrer names
     }
 
     private void fetchLogsData(String reporterName, View view) {
-        // Retrieve all logs from the HashMap for the selected reporter
         List<ReferralLog> referrerLogs = referrerLogsMap.get(reporterName);
         if (referrerLogs != null) {
             StringBuilder logs = new StringBuilder();
+            String referrerType = "";  // Define a variable for referrerType
 
-            // Build the log string with student_id, status, and date
+            // Construct the log string with all the relevant data
             for (ReferralLog log : referrerLogs) {
                 logs.append("Student ID: ").append(log.getStudentId())
+                        .append("\nName: ").append(log.getStudentName())
+                        .append("\nProgram: ").append(log.getStudentProgram())
                         .append("\nStatus: ").append(log.getStatus())
                         .append("\nDate: ").append(log.getDate())
+                        .append("\nTerm: ").append(log.getTerm())
+                        .append("\nUser Concern: ").append(log.getUserConcern())
+                        .append("\nViolation: ").append(log.getViolation())
                         .append("\n\n");
+
+                // Retrieve the referrerType directly from the log
+                referrerType = log.getReferrerType();
             }
 
-            // Show logs in a dialog for the chosen reporter
-            LogsDialogFragment dialog = LogsDialogFragment.newInstance("Logs:\n" + logs.toString());
-            dialog.show(getParentFragmentManager(), "logsDialog");
+            // If there are logs for the selected referrer, open a dialog
+            if (logs.length() > 0) {
+                // Pass both logs, referrerType, and the selected referrer (reporterName) to the dialog
+                LogsDialogFragment dialog = LogsDialogFragment.newInstance(logs.toString(), referrerType, reporterName);
+                dialog.show(getParentFragmentManager(), "logsDialog");
+            }
         }
     }
 
@@ -130,13 +145,27 @@ public class reporters extends Fragment {
         private String studentId;
         private String status;
         private String date;
+        private String studentName;
+        private String studentProgram;
+        private String term;
+        private String userConcern;
+        private String violation;
+        private String referrerType;  // New field to track the referrer type
 
-        public ReferralLog(String studentId, String status, String date) {
+        public ReferralLog(String studentId, String status, String date, String studentName, String studentProgram,
+                           String term, String userConcern, String violation, String referrerType) {
             this.studentId = studentId;
             this.status = status;
             this.date = date;
+            this.studentName = studentName;
+            this.studentProgram = studentProgram;
+            this.term = term;
+            this.userConcern = userConcern;
+            this.violation = violation;
+            this.referrerType = referrerType;  // Initialize the referrerType
         }
 
+        // Getters for all fields
         public String getStudentId() {
             return studentId;
         }
@@ -147,6 +176,30 @@ public class reporters extends Fragment {
 
         public String getDate() {
             return date;
+        }
+
+        public String getStudentName() {
+            return studentName;
+        }
+
+        public String getStudentProgram() {
+            return studentProgram;
+        }
+
+        public String getTerm() {
+            return term;
+        }
+
+        public String getUserConcern() {
+            return userConcern;
+        }
+
+        public String getViolation() {
+            return violation;
+        }
+
+        public String getReferrerType() {
+            return referrerType;  // Getter for referrerType
         }
     }
 }

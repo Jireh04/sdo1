@@ -43,6 +43,7 @@ public class ReporterAdapter extends RecyclerView.Adapter<ReporterAdapter.Report
         notifyDataSetChanged();
     }
 
+    // Listener interface for handling click events on the "View Logs" button
     public interface OnReporterClickListener {
         void onReporterClick(String reporterName);
     }
@@ -57,11 +58,12 @@ public class ReporterAdapter extends RecyclerView.Adapter<ReporterAdapter.Report
             viewLogsButton = itemView.findViewById(R.id.viewLogsButton);
         }
 
+        // Bind the reporter name and set up the button click listener
         public void bind(String reporterName, OnReporterClickListener listener) {
             reporterNameTextView.setText(reporterName);
+
+            // Set up the button to call the listener with the reporter's name when clicked
             viewLogsButton.setOnClickListener(v -> listener.onReporterClick(reporterName));
         }
     }
-
-
 }

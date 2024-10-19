@@ -86,6 +86,8 @@ public class dashboard_prefect extends Fragment {
         referToGuidanceButton.setOnClickListener(v -> openReferralDashboard());
         viewReporters.setOnClickListener(v -> openViewReporters());
 
+
+
         return rootView;
     }
     private void searchStudents() {
@@ -148,6 +150,12 @@ public class dashboard_prefect extends Fragment {
                                         // Add top padding to the TextView itself (if needed)
                                         studentTextView.setPadding(0, 10, 0, 0);  // Apply top padding to the TextView
 
+                                        // Make the TextView clickable
+                                        studentTextView.setOnClickListener(v -> {
+                                            // Launch the PrefectView (replace with your own method to navigate)
+                                            navigateToPrefectView(studId, name);
+                                        });
+
                                         // Create a Button (or ImageButton) for the "Add" action
                                         Button addButton = new Button(getContext());
                                         addButton.setText("+"); // Text for the button (you can use an image as well)
@@ -198,6 +206,15 @@ public class dashboard_prefect extends Fragment {
             emptySearchTextView.setPadding(0, 180, 0, 0); // Add top padding
             searchResultsContainer.addView(emptySearchTextView);
         }
+    }
+
+    // Method to navigate to PrefectView (replace with actual navigation code)
+    private void navigateToPrefectView(String studId, String name) {
+        // Assuming PrefectViewActivity is the activity that shows the details of the student
+        Intent intent = new Intent(getContext(), PrefectView.class);
+        intent.putExtra("STUDENT_ID", studId); // Pass the student ID
+        intent.putExtra("STUDENT_NAME", name); // Pass the student name
+        startActivity(intent);  // Start the activity
     }
 
     private void openQrScanner() {
