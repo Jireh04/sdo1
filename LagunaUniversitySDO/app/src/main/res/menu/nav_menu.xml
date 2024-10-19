@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/refferalForm"
+            android:icon="@drawable/baseline_home_24"
+            android:title="Referral Form"/>
+
+        <item
+            android:id="@+id/myRefferal"
+            android:icon="@drawable/baseline_restart_alt_24"
+            android:title="My Referral"/>
+
+        <item
+            android:id="@+id/myViolation"
+            android:icon="@drawable/baseline_category_24"
+            android:title="My Violations"/>
+
+        <item
+            android:id="@+id/guidanceRefferal"
+            android:icon="@drawable/baseline_hardware_24"
+            android:title="Guidance Referral"/>
+
+    </group>
+
+
+</menu>
