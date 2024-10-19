@@ -27,6 +27,8 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import java.util.Map;
 import java.util.HashMap;
+
+
 public class dashboard_prefect extends Fragment {
 
     private FirebaseFirestore db;
@@ -38,6 +40,12 @@ public class dashboard_prefect extends Fragment {
     private ImageButton pickQrCodeButton;  // QR code scanner button
 
     private graphs graphObj;
+
+    private int currentPage = 1;
+    private int pageSize = 2;  // Number of results per page
+    private int totalPages = 0;
+    private String lastVisibleStudentId = null;  // Used for pagination
+
 
     public dashboard_prefect() {
         // Required empty public constructor
@@ -78,13 +86,19 @@ public class dashboard_prefect extends Fragment {
         referToGuidanceButton.setOnClickListener(v -> openReferralDashboard());
         viewReporters.setOnClickListener(v -> openViewReporters());
 
+
+
         return rootView;
     }
-
-
     private void searchStudents() {
         // Get the search query
         String queryText = searchBar.getText().toString().trim().toLowerCase();
+
+        // Find the graph layout and hide it
+        View graphLayout = getView().findViewById(R.id.graph_include);
+        if (graphLayout != null) {
+            graphLayout.setVisibility(View.GONE);  // Hide the graph layout
+        }
 
         // Clear previous results before starting new search
         searchResultsContainer.removeAllViews();
@@ -136,6 +150,12 @@ public class dashboard_prefect extends Fragment {
                                         // Add top padding to the TextView itself (if needed)
                                         studentTextView.setPadding(0, 10, 0, 0);  // Apply top padding to the TextView
 
+                                        // Make the TextView clickable
+                                        studentTextView.setOnClickListener(v -> {
+                                            // Launch the PrefectView (replace with your own method to navigate)
+                                            navigateToPrefectView(studId, name);
+                                        });
+
                                         // Create a Button (or ImageButton) for the "Add" action
                                         Button addButton = new Button(getContext());
                                         addButton.setText("+"); // Text for the button (you can use an image as well)
@@ -186,6 +206,15 @@ public class dashboard_prefect extends Fragment {
             emptySearchTextView.setPadding(0, 180, 0, 0); // Add top padding
             searchResultsContainer.addView(emptySearchTextView);
         }
+    }
+
+    // Method to navigate to PrefectView (replace with actual navigation code)
+    private void navigateToPrefectView(String studId, String name) {
+        // Assuming PrefectViewActivity is the activity that shows the details of the student
+        Intent intent = new Intent(getContext(), PrefectView.class);
+        intent.putExtra("STUDENT_ID", studId); // Pass the student ID
+        intent.putExtra("STUDENT_NAME", name); // Pass the student name
+        startActivity(intent);  // Start the activity
     }
 
     private void openQrScanner() {
@@ -248,11 +277,11 @@ public class dashboard_prefect extends Fragment {
                 // Create a new violator entry with the specified fields
                 Map<String, Object> violatorData = new HashMap<>();
                 violatorData.put("date", dateTime);
-                violatorData.put("reporter", reporter);
+                violatorData.put("prefect_referrer", reporter);
                 violatorData.put("location", location);
                 violatorData.put("violation", violation);
                 violatorData.put("remarks", remarks);
-                violatorData.put("stud_id", studId);  // Add the studentId
+                violatorData.put("student_id", studId);  // Add the studentId
                 violatorData.put("student_name", name);  // Add the studentName
 
                 // Add the data to the 'prefect_referral_history' collection

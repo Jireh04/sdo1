@@ -153,8 +153,10 @@
             android:text="Next" />
     </LinearLayout>
 
+
     <!-- Include the graphs layout -->
     <include
+        android:id="@+id/graph_include"
         layout="@layout/graphs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

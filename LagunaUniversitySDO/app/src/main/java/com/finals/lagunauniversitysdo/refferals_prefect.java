@@ -4,8 +4,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.graphics.pdf.PdfDocument;
 import android.content.Intent;
@@ -86,7 +89,6 @@ public class refferals_prefect extends Fragment {
     // Fetch pending referrals from Firestore
     public void onPendingClick() {
 
-
         // Get the LinearLayout and ScrollView for displaying pending referrals
         LinearLayout linearLayoutPending = getView().findViewById(R.id.linear_layout_pending);
         ScrollView scrollViewPending = getView().findViewById(R.id.scroll_view_pending);
@@ -107,6 +109,50 @@ public class refferals_prefect extends Fragment {
         scrollViewPending.setVisibility(View.VISIBLE);
         linearLayoutPending.removeAllViews();
 
+        // Create a HorizontalScrollView to make the TableLayout horizontally scrollable
+        HorizontalScrollView horizontalScrollView = new HorizontalScrollView(getActivity());
+        horizontalScrollView.setLayoutParams(new HorizontalScrollView.LayoutParams(
+                HorizontalScrollView.LayoutParams.MATCH_PARENT,
+                HorizontalScrollView.LayoutParams.WRAP_CONTENT
+        ));
+
+        // Create a TableLayout for organizing referrals into a table
+        TableLayout tableLayout = new TableLayout(getActivity());
+        tableLayout.setLayoutParams(new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.MATCH_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT
+        ));
+        tableLayout.setStretchAllColumns(true);
+
+        // Add table header row
+        TableRow headerRow = new TableRow(getActivity());
+        headerRow.setLayoutParams(new TableRow.LayoutParams(
+                TableRow.LayoutParams.MATCH_PARENT,
+                TableRow.LayoutParams.WRAP_CONTENT
+        ));
+
+        // Create TextViews for table headers
+        TextView headerReferrer = new TextView(getActivity());
+        headerReferrer.setText("Referrer");
+        headerReferrer.setTextSize(16);
+        headerReferrer.setPadding(16, 8, 16, 8);
+        headerRow.addView(headerReferrer);
+
+        TextView headerDate = new TextView(getActivity());
+        headerDate.setText("Date");
+        headerDate.setTextSize(16);
+        headerDate.setPadding(16, 8, 16, 8);
+        headerRow.addView(headerDate);
+
+        TextView headerActions = new TextView(getActivity());
+        headerActions.setText("Actions");
+        headerActions.setTextSize(16);
+        headerActions.setPadding(16, 8, 16, 8);
+        headerRow.addView(headerActions);
+
+        // Add the header row to the table layout
+        tableLayout.addView(headerRow);
+
         // Query both Firestore collections for "pending" status
         db.collection("student_refferal_history")
                 .whereEqualTo("status", "pending")
@@ -120,88 +166,102 @@ public class refferals_prefect extends Fragment {
                                 Map<String, Object> referralData = document.getData();
                                 if (referralData != null) {
                                     String studentReferrer = (String) referralData.get("student_referrer");
-                                    String studentName = (String) referralData.get("student_name"); // Get student_name
-                                    String studentId = (String) referralData.get("student_id"); // Get student_id
-                                    String studentProgram = (String) referralData.get("student_program"); // Get student_program
+                                    String studentName = (String) referralData.get("student_name");
+                                    String studentId = (String) referralData.get("student_id");
+                                    String studentProgram = (String) referralData.get("student_program");
                                     String referralDate = (String) referralData.get("date");
 
-                                    // Create a container for each pending referral
-                                    LinearLayout referralLayout = new LinearLayout(getActivity());
-                                    referralLayout.setOrientation(LinearLayout.VERTICAL);
+                                    // Create a TableRow for each referral
+                                    TableRow tableRow = new TableRow(getActivity());
+                                    tableRow.setLayoutParams(new TableRow.LayoutParams(
+                                            TableRow.LayoutParams.MATCH_PARENT,
+                                            TableRow.LayoutParams.WRAP_CONTENT
+                                    ));
 
-                                    // Create a TextView for student referrer
-                                    TextView textView = new TextView(getActivity());
-                                    textView.setText("Student Referrer: " + studentReferrer + "\nDate: " + referralDate);
-                                    textView.setPadding(16, 8, 16, 8);
-                                    textView.setTextSize(16);
-                                    referralLayout.addView(textView);
+                                    // Create a TextView for the referrer
+                                    TextView referrerTextView = new TextView(getActivity());
+                                    referrerTextView.setText(studentReferrer);
+                                    referrerTextView.setPadding(16, 8, 16, 8);
+                                    referrerTextView.setTextSize(14);
+                                    tableRow.addView(referrerTextView);
 
-                                    // Create another TextView for student details (hidden by default)
-                                    TextView studentDetailsTextView = new TextView(getActivity());
-                                    studentDetailsTextView.setText("Student Name: " + studentName + "\nID: " + studentId + "\nProgram: " + studentProgram);
-                                    studentDetailsTextView.setVisibility(View.GONE); // Initially hidden
-                                    referralLayout.addView(studentDetailsTextView);
+                                    // Create a TextView for the referral date
+                                    TextView dateTextView = new TextView(getActivity());
+                                    dateTextView.setText(referralDate);
+                                    dateTextView.setPadding(16, 8, 16, 8);
+                                    dateTextView.setTextSize(14);
+                                    tableRow.addView(dateTextView);
 
-                                    // Create a button ("v") to toggle the visibility of student details
-                                    Button toggleButton = new Button(getActivity());
-                                    toggleButton.setText("v");
-                                    referralLayout.addView(toggleButton);
+                                    // Create a LinearLayout to hold buttons (View, Accept, Reject)
+                                    LinearLayout buttonLayout = new LinearLayout(getActivity());
+                                    buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
 
-                                    // Toggle visibility of student details when button is clicked
-                                    toggleButton.setOnClickListener(v -> {
-                                        if (studentDetailsTextView.getVisibility() == View.GONE) {
-                                            studentDetailsTextView.setVisibility(View.VISIBLE); // Show student details
-                                        } else {
-                                            studentDetailsTextView.setVisibility(View.GONE); // Hide student details
-                                        }
-                                    });
-
-                                    // Create Accept and Reject buttons
-                                    Button btnAccept = new Button(getActivity());
-                                    btnAccept.setText("Accept");
-                                    Button btnReject = new Button(getActivity());
-                                    btnReject.setText("Reject");
-
-                                    // Add buttons to the layout
-                                    referralLayout.addView(btnAccept);
-                                    referralLayout.addView(btnReject);
-
-                                    // Add the entire layout to the pending section
-                                    linearLayoutPending.addView(referralLayout);
-
-                                    // Set onClick listeners for Accept and Reject buttons
-                                    btnAccept.setOnClickListener(v -> updateReferralStatus(document.getId(), "accepted"));
-                                    btnReject.setOnClickListener(v -> updateReferralStatus(document.getId(), "rejected"));
-                                    // Inside onPendingClick(), after creating Accept and Reject buttons:
+                                    // Create View button
                                     Button btnView = new Button(getActivity());
-                                    btnView.setText("View"); // Name of the button
-                                    referralLayout.addView(btnView);
-
-// Inside the onPendingClick() method, within the btnView.setOnClickListener
+                                    btnView.setText("View");
                                     btnView.setOnClickListener(v -> {
-                                        // Show a dialog to ask if the user wants to download or open the PDF
                                         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                                         builder.setTitle("Choose an option")
                                                 .setMessage("Do you want to download or open the PDF?")
                                                 .setPositiveButton("Download", (dialog, which) -> {
-                                                    // If user selects "Download", generate and download the PDF
                                                     downloadPdf(referralData, studentName, studentId, studentProgram, referralDate);
                                                 })
                                                 .setNegativeButton("Open", (dialog, which) -> {
-                                                    // If user selects "Open", just open the PDF
                                                     generatePdf(referralData, studentName, studentId, studentProgram, referralDate);
                                                 })
-                                                .setCancelable(true) // Optionally make the dialog cancellable
+                                                .setCancelable(true)
                                                 .show();
                                     });
+                                    buttonLayout.addView(btnView);
 
+                                    // Create Accept button with confirmation dialog
+                                    Button btnAccept = new Button(getActivity());
+                                    btnAccept.setText("Accept");
+                                    btnAccept.setOnClickListener(v -> {
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                        builder.setTitle("Confirmation")
+                                                .setMessage("Are you sure you want to accept this referral?")
+                                                .setPositiveButton("Yes", (dialog, which) -> {
+                                                    updateReferralStatus(document.getId(), "accepted");
+                                                })
+                                                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                                                .show();
+                                    });
+                                    buttonLayout.addView(btnAccept);
 
+                                    // Create Reject button with confirmation dialog
+                                    Button btnReject = new Button(getActivity());
+                                    btnReject.setText("Reject");
+                                    btnReject.setOnClickListener(v -> {
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                        builder.setTitle("Confirmation")
+                                                .setMessage("Are you sure you want to reject this referral?")
+                                                .setPositiveButton("Yes", (dialog, which) -> {
+                                                    updateReferralStatus(document.getId(), "rejected");
+                                                })
+                                                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                                                .show();
+                                    });
+                                    buttonLayout.addView(btnReject);
+
+                                    // Add the button layout to the table row
+                                    tableRow.addView(buttonLayout);
+
+                                    // Add the table row to the table layout
+                                    tableLayout.addView(tableRow);
                                 }
                             }
                         }
                     }
                 });
 
+        // Add the table layout to the HorizontalScrollView
+        horizontalScrollView.addView(tableLayout);
+
+        // Add the HorizontalScrollView to the pending section
+        linearLayoutPending.addView(horizontalScrollView);
+
+        // Repeat the same logic for personnel_refferal_history collection
         db.collection("personnel_refferal_history")
                 .whereEqualTo("status", "pending")
                 .get()
@@ -210,94 +270,92 @@ public class refferals_prefect extends Fragment {
                         QuerySnapshot querySnapshot = task.getResult();
                         if (querySnapshot != null) {
                             for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                                // Get the data from Firestore (as a Map)
                                 Map<String, Object> referralData = document.getData();
                                 if (referralData != null) {
                                     String personnelReferrer = (String) referralData.get("personnel_referrer");
-                                    String studentName = (String) referralData.get("student_name"); // Get student_name
-                                    String studentId = (String) referralData.get("student_id"); // Get student_id
-                                    String studentProgram = (String) referralData.get("student_program"); // Get student_program
+                                    String studentName = (String) referralData.get("student_name");
+                                    String studentId = (String) referralData.get("student_id");
+                                    String studentProgram = (String) referralData.get("student_program");
                                     String referralDate = (String) referralData.get("date");
 
-                                    // Create a container for each pending referral
-                                    LinearLayout referralLayout = new LinearLayout(getActivity());
-                                    referralLayout.setOrientation(LinearLayout.VERTICAL);
+                                    TableRow tableRow = new TableRow(getActivity());
+                                    tableRow.setLayoutParams(new TableRow.LayoutParams(
+                                            TableRow.LayoutParams.MATCH_PARENT,
+                                            TableRow.LayoutParams.WRAP_CONTENT
+                                    ));
 
-                                    // Create a TextView for personnel referrer
-                                    TextView textView = new TextView(getActivity());
-                                    textView.setText("Personnel Referrer: " + personnelReferrer + "\nDate: " + referralDate);
-                                    textView.setPadding(16, 8, 16, 8);
-                                    textView.setTextSize(16);
-                                    referralLayout.addView(textView);
+                                    TextView referrerTextView = new TextView(getActivity());
+                                    referrerTextView.setText(personnelReferrer);
+                                    referrerTextView.setPadding(16, 8, 16, 8);
+                                    referrerTextView.setTextSize(14);
+                                    tableRow.addView(referrerTextView);
 
-                                    // Create another TextView for student details (hidden by default)
-                                    TextView studentDetailsTextView = new TextView(getActivity());
-                                    studentDetailsTextView.setText("Student Name: " + studentName + "\nID: " + studentId + "\nProgram: " + studentProgram);
-                                    studentDetailsTextView.setVisibility(View.GONE); // Initially hidden
-                                    referralLayout.addView(studentDetailsTextView);
+                                    TextView dateTextView = new TextView(getActivity());
+                                    dateTextView.setText(referralDate);
+                                    dateTextView.setPadding(16, 8, 16, 8);
+                                    dateTextView.setTextSize(14);
+                                    tableRow.addView(dateTextView);
 
-                                    // Create a button ("v") to toggle the visibility of student details
-                                    Button toggleButton = new Button(getActivity());
-                                    toggleButton.setText("v");
-                                    referralLayout.addView(toggleButton);
+                                    LinearLayout buttonLayout = new LinearLayout(getActivity());
+                                    buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
 
-                                    // Toggle visibility of student details when button is clicked
-                                    toggleButton.setOnClickListener(v -> {
-                                        if (studentDetailsTextView.getVisibility() == View.GONE) {
-                                            studentDetailsTextView.setVisibility(View.VISIBLE); // Show student details
-                                        } else {
-                                            studentDetailsTextView.setVisibility(View.GONE); // Hide student details
-                                        }
-                                    });
-
-                                    // Create Accept and Reject buttons
-                                    Button btnAccept = new Button(getActivity());
-                                    btnAccept.setText("Accept");
-                                    Button btnReject = new Button(getActivity());
-                                    btnReject.setText("Reject");
-
-                                    // Add buttons to the layout
-                                    referralLayout.addView(btnAccept);
-                                    referralLayout.addView(btnReject);
-
-                                    // Add the entire layout to the pending section
-                                    linearLayoutPending.addView(referralLayout);
-
-                                    // Set onClick listeners for Accept and Reject buttons
-                                    btnAccept.setOnClickListener(v -> updateReferralStatus(document.getId(), "accepted"));
-                                    btnReject.setOnClickListener(v -> updateReferralStatus(document.getId(), "rejected"));
-                                    // Inside onPendingClick(), after creating Accept and Reject buttons:
                                     Button btnView = new Button(getActivity());
-                                    btnView.setText("View"); // Name of the button
-                                    referralLayout.addView(btnView);
-
-
-                                    // Inside the onPendingClick() method, within the btnView.setOnClickListener
+                                    btnView.setText("View");
                                     btnView.setOnClickListener(v -> {
-                                        // Show a dialog to ask if the user wants to download or open the PDF
                                         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                                         builder.setTitle("Choose an option")
                                                 .setMessage("Do you want to download or open the PDF?")
                                                 .setPositiveButton("Download", (dialog, which) -> {
-                                                    // If user selects "Download", generate and download the PDF
                                                     downloadPdf(referralData, studentName, studentId, studentProgram, referralDate);
                                                 })
                                                 .setNegativeButton("Open", (dialog, which) -> {
-                                                    // If user selects "Open", just open the PDF
                                                     generatePdf(referralData, studentName, studentId, studentProgram, referralDate);
                                                 })
-                                                .setCancelable(true) // Optionally make the dialog cancellable
+                                                .setCancelable(true)
                                                 .show();
                                     });
+                                    buttonLayout.addView(btnView);
 
+                                    Button btnAccept = new Button(getActivity());
+                                    btnAccept.setText("Accept");
+                                    btnAccept.setOnClickListener(v -> {
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                        builder.setTitle("Confirmation")
+                                                .setMessage("Are you sure you want to accept this referral?")
+                                                .setPositiveButton("Yes", (dialog, which) -> {
+                                                    updateReferralStatus(document.getId(), "accepted");
+                                                })
+                                                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                                                .show();
+                                    });
+                                    buttonLayout.addView(btnAccept);
 
+                                    Button btnReject = new Button(getActivity());
+                                    btnReject.setText("Reject");
+                                    btnReject.setOnClickListener(v -> {
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                        builder.setTitle("Confirmation")
+                                                .setMessage("Are you sure you want to reject this referral?")
+                                                .setPositiveButton("Yes", (dialog, which) -> {
+                                                    updateReferralStatus(document.getId(), "rejected");
+                                                })
+                                                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                                                .show();
+                                    });
+                                    buttonLayout.addView(btnReject);
 
+                                    tableRow.addView(buttonLayout);
+                                    tableLayout.addView(tableRow);
                                 }
                             }
                         }
                     }
                 });
     }
+
+
+
+
     // Define a request code for permission requests
     private static final int REQUEST_PERMISSION = 1;
 

@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+
 public class PrefectReferralDashboard extends Fragment {
     private static final int REQUEST_CODE_QR_SCAN = 1;
     private static final int ITEMS_PER_PAGE = 2;
@@ -55,7 +56,6 @@ public class PrefectReferralDashboard extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
 
         // Initialize UI components
         initUI(view);
@@ -88,19 +88,18 @@ public class PrefectReferralDashboard extends Fragment {
 
         ImageButton pickQRCodeButton = view.findViewById(R.id.pick_qr_code_button);
         pickQRCodeButton.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), QRScannerActivity.class);
+            Intent intent = new Intent(getActivity(), Prefect_QRScannerActivity.class);
             startActivityForResult(intent, REQUEST_CODE_QR_SCAN);
         });
 
         proceedToReferral.setOnClickListener(v -> proceedToReferral());
     }
 
-
     private void proceedToReferral() {
         // Retrieve prefect ID and check login status
         String prefectId = PrefectSession.getPrefectId();
         if (prefectId == null || prefectId.isEmpty()) {
-            Toast.makeText(getActivity(), "Please log in as personnel before proceeding.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Please log in as prefect before proceeding.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -110,22 +109,21 @@ public class PrefectReferralDashboard extends Fragment {
         Long prefectContactNum = PrefectSession.getPrefectContactNum();
         String prefectDepartment = PrefectSession.getPrefectDepartment();
 
-
         // Prepare the intent to pass prefect data
-        Intent intent = new Intent(getActivity(), PersonnelForm.class);
-        intent.putExtra("PERSONNEL_ID", prefectId);
-        intent.putExtra("PERSONNEL_NAME_KEY", prefectName);
-        intent.putExtra("PERSONNEL_EMAIL_KEY", prefectEmail);
+        Intent intent = new Intent(getActivity(), PrefectForm.class);
+        intent.putExtra("PREFECT_ID", prefectId);
+        intent.putExtra("PREFECT_NAME_KEY", prefectName);
+        intent.putExtra("PREFECT_EMAIL_KEY", prefectEmail);
 
         // Pass prefect contact number directly as a Long
         if (prefectContactNum != null) {
-            intent.putExtra("PERSONNEL_CONTACT_NUM_KEY", prefectContactNum);
+            intent.putExtra("PREFECT_CONTACT_NUM_KEY", prefectContactNum);
         } else {
-            intent.putExtra("PERSONNEL_CONTACT_NUM_KEY", 0L); // Default value if contact number is null
-            Log.d("PersonnelForm", "Retrieved contact: " + prefectContactNum);
+            intent.putExtra("PREFECT_CONTACT_NUM_KEY", 0L); // Default value if contact number is null
+            Log.d("PrefectForm", "Retrieved contact: " + prefectContactNum);
         }
 
-        intent.putExtra("PERSONNEL_DEPARTMENT_KEY", prefectDepartment);
+        intent.putExtra("PREFECT_DEPARTMENT_KEY", prefectDepartment);
 
         // Check if at least one user is added
         if (addedUserIds.isEmpty()) {
@@ -178,7 +176,7 @@ public class PrefectReferralDashboard extends Fragment {
         intent.putExtra("ADDED_STUDENT_CONTACTS", userContacts);
         intent.putExtra("ADDED_STUDENT_IDS", userIds);
 
-        // Start the PersonnelForm activity with all the data
+        // Start the PrefectForm activity with all the data
         startActivity(intent);
     }
 

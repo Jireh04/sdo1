@@ -31,9 +31,6 @@
             android:name=".QRScannerActivity">
         </activity>
 
-        <activity
-            android:name=".PrefectReferralDashboardActivity">
-        </activity>
 
         <activity android:name=".form"></activity>
 
@@ -53,6 +50,12 @@
 
         <activity android:name=".PersonnelForm" />
 
+        <activity android:name=".PrefectForm" />
+
+        <activity android:name=".PrefectView">
+            <!-- Optional: Add configuration for this activity (e.g., theme, launch mode) -->
+        </activity>
+
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -71,8 +74,7 @@
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
 
-        <!-- Add the PrefectReferralDashboardActivity -->
-        <activity android:name=".PrefectReferralDashboardActivity" />
+
 
         <!-- FileProvider declaration -->
         <provider

@@ -1,0 +1,203 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Student Information Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="STUDENT INFORMATION"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:paddingBottom="8dp"
+            android:textColor="#000" />
+
+        <!-- Name, Program, Year/Block, etc. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <!-- Left Column (Name, Program) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/studentNameTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="NAME: "
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#000" />
+
+                <TextView
+                    android:id="@+id/studentIDTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Student No.: "
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#000" />
+
+                <TextView
+                    android:id="@+id/studentProgramTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PROGRAM: "
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#000"
+                    android:paddingTop="8dp" />
+
+            </LinearLayout>
+
+            <!-- Right Column (Contact No, Logs) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingLeft="16dp">
+
+                <TextView
+                    android:id="@+id/studentContactTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CONTACT NO: "
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#000" />
+
+                <TextView
+                    android:id="@+id/logsTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LOGS: "
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#000"
+                    android:paddingTop="8dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Year and Block -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:paddingTop="16dp">
+
+            <!-- Year -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/studentYearTextView"
+                android:text="YEAR: "
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#000" />
+
+            <!-- Block -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/studentBlockTextView"
+                android:text="BLOCK: "
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#000" />
+        </LinearLayout>
+
+        <!-- Buttons (Add Violation and Export as PDF) -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="16dp"
+            android:gravity="end">
+
+            <Button
+                android:id="@+id/addViolationButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Violation"
+                android:textColor="#FFF"
+                android:backgroundTint="@color/red"
+                android:padding="8dp" />
+
+            <Button
+                android:id="@+id/exportPdfButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Export as PDF"
+                android:textColor="#FFF"
+                android:backgroundTint="@color/red"
+                android:padding="8dp"
+                android:layout_marginStart="16dp" />
+        </LinearLayout>
+
+        <!-- Violation Table -->
+        <TableLayout
+            android:id="@+id/violationTable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="1"
+            android:paddingTop="16dp">
+
+            <!-- Header Row -->
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#4CAF50">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="#"
+                    android:textStyle="bold"
+                    android:padding="8dp"
+                    android:textColor="#FFF" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Violation"
+                    android:textStyle="bold"
+                    android:padding="8dp"
+                    android:textColor="#FFF" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Type of Offense"
+                    android:textStyle="bold"
+                    android:padding="8dp"
+                    android:textColor="#FFF" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Date of Incident"
+                    android:textStyle="bold"
+                    android:padding="8dp"
+                    android:textColor="#FFF" />
+            </TableRow>
+
+        </TableLayout>
+
+    </LinearLayout>
+</ScrollView>

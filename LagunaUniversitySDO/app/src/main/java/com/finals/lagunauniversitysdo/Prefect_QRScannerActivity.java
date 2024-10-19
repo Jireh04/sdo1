@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+
 public class Prefect_QRScannerActivity extends AppCompatActivity {
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
 
@@ -101,7 +102,7 @@ public class Prefect_QRScannerActivity extends AppCompatActivity {
                 formIntent.putExtra("PREFECT_ID_KEY", PrefectSession.getPrefectId());
                 formIntent.putExtra("PREFECT_USERNAME_KEY", PrefectSession.getPrefectUsername());
                 formIntent.putExtra("PREFECT_PASSWORD_KEY", PrefectSession.getPrefectPassword());
-
+                formIntent.putExtra("scannedData", scannedData);
                 startActivity(formIntent); // Start PrefectForm activity
                 finish(); // Close the QRScannerActivity
             }
