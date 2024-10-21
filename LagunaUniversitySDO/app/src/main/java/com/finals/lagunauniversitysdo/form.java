@@ -248,8 +248,8 @@ public class form extends AppCompatActivity {
         String studId = violatorsStudID.getText().toString().trim();
         String status = "pending"; // Default status
 
-        // Retrieve insights from insights_field
-        String insights = ((EditText) findViewById(R.id.insights_field)).getText().toString().trim();
+        // Retrieve remarks from remarks_field
+        String remarks = ((EditText) findViewById(R.id.remarks_field)).getText().toString().trim();
 
         // Validate inputs
         if (!validateInputs(name, email, contactString, program)) {
@@ -298,7 +298,7 @@ public class form extends AppCompatActivity {
                 studentData.put("date", date);
                 studentData.put("status", status);
                 studentData.put("user_concern", userConcern); // Add user concern to the student data
-                studentData.put("insights_student", insights); // Add insights to the student data
+                studentData.put("remarks", remarks); // Add remarks to the student data
                 studentData.put("student_referrer", studentReferrer); // Add student_referrer to Firestore data
 
                 // Add each student's data directly to the Firestore collection
@@ -327,7 +327,7 @@ public class form extends AppCompatActivity {
             scannedStudentData.put("date", date);
             scannedStudentData.put("status", status);
             scannedStudentData.put("user_concern", userConcern); // Add user concern to scanned student data
-            scannedStudentData.put("insights_student", insights); // Add insights to scanned student data
+            scannedStudentData.put("remarks", remarks); // Add remarks to scanned student data
             scannedStudentData.put("student_referrer", studentReferrer); // Add student_referrer to Firestore data
 
             // Add scanned student's data directly to the Firestore collection

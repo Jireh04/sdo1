@@ -222,21 +222,21 @@ public class graphs {
         // Light Offense
         LineDataSet lightOffenseDataSet = new LineDataSet(lightOffenseEntries, "Light Offense");
         lightOffenseDataSet.setColor(Color.parseColor("#A8E6CF")); // Circle color
-        lightOffenseDataSet.setCircleColor(Color.parseColor("#009688")); // Border color
+        lightOffenseDataSet.setCircleColor(Color.parseColor("#A8E6CF")); // Border color
         lightOffenseDataSet.setCircleRadius(5f); // Size of the circles
         lightOffenseDataSet.setValueTextColor(Color.parseColor("#444444")); // Text color
 
         // Serious Offense
         LineDataSet seriousOffenseDataSet = new LineDataSet(seriousOffenseEntries, "Serious Offense");
         seriousOffenseDataSet.setColor(Color.parseColor("#8DAEFB")); // Circle color
-        seriousOffenseDataSet.setCircleColor(Color.parseColor("#007BFF")); // Border color
+        seriousOffenseDataSet.setCircleColor(Color.parseColor("#8DAEFB")); // Border color
         seriousOffenseDataSet.setCircleRadius(5f); // Size of the circles
         seriousOffenseDataSet.setValueTextColor(Color.parseColor("#444444")); // Text color
 
         // Major Offense
         LineDataSet majorOffenseDataSet = new LineDataSet(majorOffenseEntries, "Major Offense");
         majorOffenseDataSet.setColor(Color.parseColor("#FF8C94")); // Circle color
-        majorOffenseDataSet.setCircleColor(Color.parseColor("#FF4C4C")); // Border color
+        majorOffenseDataSet.setCircleColor(Color.parseColor("#FF8C94")); // Border color
         majorOffenseDataSet.setCircleRadius(5f); // Size of the circles
         majorOffenseDataSet.setValueTextColor(Color.parseColor("#444444")); // Text color
 
