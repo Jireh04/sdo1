@@ -2,16 +2,16 @@ package com.finals.lagunauniversitysdo;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+public class ReporterView extends AppCompatActivity {
 
-public class PrefectView extends AppCompatActivity {
-
-    // Declare the TextViews for student details
+    // Declare the TextViews for student details and insights
     private TextView studentNameTextView;
     private TextView studentIdTextView;
     private TextView studentProgramTextView;
@@ -59,6 +59,8 @@ public class PrefectView extends AppCompatActivity {
         String studentYear = intent.getStringExtra("STUDENT_YEAR");
         String studentBlock = intent.getStringExtra("STUDENT_BLOCK");
         String violations = intent.getStringExtra("VIOLATIONS"); // Retrieve the violations string
+        String insights = intent.getStringExtra("INSIGHTS"); // Retrieve insights string
+        String referrerName = intent.getStringExtra("REFERRER_NAME"); // Retrieve the referrer name
 
         // Set student details to TextViews
         if (studentId != null && !studentId.isEmpty()) {
@@ -83,7 +85,7 @@ public class PrefectView extends AppCompatActivity {
         // Split violations into an array and populate the table if available
         if (violations != null && !violations.isEmpty()) {
             String[] violationsArray = violations.split("\n"); // Split by newline
-            populateViolationTable(violationsArray); // Populate table with violations
+            populateViolationTable(violationsArray, insights, referrerName); // Pass insights and referrer name to populate the table
         } else {
             logEntryTextView.setText("No violations found."); // Handle no violations case
         }
@@ -102,7 +104,7 @@ public class PrefectView extends AppCompatActivity {
     }
 
     // Method to populate the TableLayout with violation data
-    private void populateViolationTable(String[] violations) {
+    private void populateViolationTable(String[] violations, String insights, String referrerName) {
         // For each violation, add a new row to the table
         for (int i = 0; i < violations.length; i++) {
             // Create a new TableRow
@@ -115,12 +117,28 @@ public class PrefectView extends AppCompatActivity {
             TextView violationDescriptionTextView = new TextView(this);
             violationDescriptionTextView.setText(violations[i]);  // Set the violation description
 
+            // Add insights to a new TextView
+            TextView insightsTextView = new TextView(this);
+            insightsTextView.setText(insights != null ? insights : "No insights available");  // Set insights
+
+            // Create a TextView for the referrer name
+            TextView referrerTextView = new TextView(this);
+            referrerTextView.setText(referrerName != null ? referrerName : "Referrer: Not provided");  // Set referrer name
+
+            // Create a TextView for the date (if you have a date for each violation)
+            TextView dateTextView = new TextView(this);
+            dateTextView.setText("Date: N/A"); // You might need to modify to get the specific date for each violation if applicable
+
             // Add the TextViews to the TableRow
             tableRow.addView(violationNumberTextView);
             tableRow.addView(violationDescriptionTextView);
+            tableRow.addView(insightsTextView); // Add insights TextView to the row
+            tableRow.addView(referrerTextView); // Add referrer name TextView to the row
+            tableRow.addView(dateTextView); // Add date TextView to the row
 
             // Add the TableRow to the TableLayout
             violationTable.addView(tableRow);
         }
     }
+
 }

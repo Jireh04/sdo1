@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/reportersContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Title: REPORTERS -->
+        <TextView
+            android:id="@+id/reportersTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="REPORTERS"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp" />
+
+        <!-- Container for referrer names will be added here -->
+    </LinearLayout>
+</ScrollView>

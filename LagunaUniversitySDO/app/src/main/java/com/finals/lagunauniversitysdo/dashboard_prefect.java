@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import android.content.Intent;
+import android.util.Log;
 
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -120,7 +121,10 @@ public class dashboard_prefect extends Fragment {
 
                                 for (QueryDocumentSnapshot document : querySnapshot) {
                                     String name = document.getString("name");
-                                    String studId = document.getString("stud_id");
+                                    String studentId = document.getString("student_id"); // Changed to student_id
+                                    String program = document.getString("program");
+                                    String year = document.getString("year");
+                                    String block = document.getString("block");
 
                                     // Check if the name contains the search query (case-insensitive)
                                     if (name != null && name.toLowerCase().contains(queryText)) {
@@ -142,7 +146,7 @@ public class dashboard_prefect extends Fragment {
 
                                         // Create a TextView for the student's ID and name
                                         TextView studentTextView = new TextView(getContext());
-                                        studentTextView.setText("ID: " + studId + " - Name: " + name);
+                                        studentTextView.setText("ID: " + studentId + " - Name: " + name);
                                         studentTextView.setTextSize(16);
                                         studentTextView.setLayoutParams(new LinearLayout.LayoutParams(
                                                 0, LinearLayout.LayoutParams.WRAP_CONTENT, 1)); // Make it take all the available space
@@ -152,8 +156,8 @@ public class dashboard_prefect extends Fragment {
 
                                         // Make the TextView clickable
                                         studentTextView.setOnClickListener(v -> {
-                                            // Launch the PrefectView (replace with your own method to navigate)
-                                            navigateToPrefectView(studId, name);
+                                            // Fetch violations for the selected student
+                                            fetchViolations(studentId, name, program, year, block); // Use studentId here
                                         });
 
                                         // Create a Button (or ImageButton) for the "Add" action
@@ -165,7 +169,7 @@ public class dashboard_prefect extends Fragment {
                                         // Set the onClickListener for the button
                                         addButton.setOnClickListener(v -> {
                                             // Show the Add Violator dialog when the button is clicked, passing the student details
-                                            showAddViolatorDialog(studId, name); // Pass studId and name
+                                            showAddViolatorDialog(studentId, name); // Pass studentId and name
                                         });
 
                                         // Add the TextView and Button to the LinearLayout
@@ -207,15 +211,103 @@ public class dashboard_prefect extends Fragment {
             searchResultsContainer.addView(emptySearchTextView);
         }
     }
+    private void fetchViolations(String studentId, String name, String program, String year, String block) {
+        // Reference to the Firestore collections
+        CollectionReference studentReferrals = db.collection("student_refferal_history");
+        CollectionReference prefectReferrals = db.collection("prefect_referral_history");
+        CollectionReference personnelReferrals = db.collection("personnel_refferal_history");
 
-    // Method to navigate to PrefectView (replace with actual navigation code)
-    private void navigateToPrefectView(String studId, String name) {
-        // Assuming PrefectViewActivity is the activity that shows the details of the student
+        // Initialize a StringBuilder to accumulate violations
+        StringBuilder violationsBuilder = new StringBuilder();
+
+        // Fetch violations from each collection using student_id
+        studentReferrals.whereEqualTo("student_id", studentId).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                QuerySnapshot studentSnapshot = task.getResult();
+                if (studentSnapshot != null && !studentSnapshot.isEmpty()) {
+                    for (QueryDocumentSnapshot document : studentSnapshot) {
+                        String violation = document.getString("violation");
+                        String insightsStudent = document.getString("insights_student"); // Fetch insights_student
+                        String date = document.getString("date"); // Fetch date
+                        if (violation != null) {
+                            // Combine insights and violation into one string with date last
+                            violationsBuilder.append(insightsStudent != null ? "(Insights: " + insightsStudent + ") " : "")
+                                    .append(violation)
+                                    .append(date != null ? " [" + date + "]" : "") // Date now comes last
+                                    .append("\n");
+                        }
+                    }
+                }
+            } else {
+                Log.e("FetchViolations", "Error fetching student violations: " + task.getException().getMessage());
+            }
+
+            // Fetch prefect referrals
+            prefectReferrals.whereEqualTo("student_id", studentId).get().addOnCompleteListener(prefectTask -> {
+                if (prefectTask.isSuccessful()) {
+                    QuerySnapshot prefectSnapshot = prefectTask.getResult();
+                    if (prefectSnapshot != null && !prefectSnapshot.isEmpty()) {
+                        for (QueryDocumentSnapshot document : prefectSnapshot) {
+                            String violation = document.getString("violation");
+                            String insightsStudent = document.getString("insights_student"); // Fetch insights_student
+                            String date = document.getString("date"); // Fetch date
+                            if (violation != null) {
+                                // Combine insights and violation into one string with date last
+                                violationsBuilder.append(insightsStudent != null ? "(Insights: " + insightsStudent + ") " : "")
+                                        .append(violation)
+                                        .append(date != null ? " [" + date + "]" : "") // Date now comes last
+                                        .append("\n");
+                            }
+                        }
+                    }
+                } else {
+                    Log.e("FetchViolations", "Error fetching prefect violations: " + prefectTask.getException().getMessage());
+                }
+
+                // Fetch personnel referrals
+                personnelReferrals.whereEqualTo("student_id", studentId).get().addOnCompleteListener(personnelTask -> {
+                    if (personnelTask.isSuccessful()) {
+                        QuerySnapshot personnelSnapshot = personnelTask.getResult();
+                        if (personnelSnapshot != null && !personnelSnapshot.isEmpty()) {
+                            for (QueryDocumentSnapshot document : personnelSnapshot) {
+                                String violation = document.getString("violation");
+                                String insightsStudent = document.getString("insights_student"); // Fetch insights_student
+                                String date = document.getString("date"); // Fetch date
+                                if (violation != null) {
+                                    // Combine insights and violation into one string with date last
+                                    violationsBuilder.append(insightsStudent != null ? "(Insights: " + insightsStudent + ") " : "")
+                                            .append(violation)
+                                            .append(date != null ? " [" + date + "]" : "") // Date now comes last
+                                            .append("\n");
+                                }
+                            }
+                        }
+                    } else {
+                        Log.e("FetchViolations", "Error fetching personnel violations: " + personnelTask.getException().getMessage());
+                    }
+
+                    // Send the violations to PrefectView
+                    String violations = violationsBuilder.toString().trim(); // Get final string
+                    navigateToPrefectView(studentId, name, program, year, block, violations); // Changed to studentId
+                });
+            });
+        });
+    }
+
+
+    // Method to navigate to PrefectView
+    private void navigateToPrefectView(String studentId, String name, String program, String year, String block, String violations) { // Changed to studentId
         Intent intent = new Intent(getContext(), PrefectView.class);
-        intent.putExtra("STUDENT_ID", studId); // Pass the student ID
+        intent.putExtra("STUDENT_ID", studentId); // Pass the student ID
         intent.putExtra("STUDENT_NAME", name); // Pass the student name
+        intent.putExtra("STUDENT_PROGRAM", program); // Pass the student program
+        intent.putExtra("STUDENT_YEAR", year); // Pass the student year
+        intent.putExtra("STUDENT_BLOCK", block); // Pass the student block
+        intent.putExtra("VIOLATIONS", violations); // Pass the collected violations
+
         startActivity(intent);  // Start the activity
     }
+
 
     private void openQrScanner() {
         // Create an Intent to launch the PrefectQRScannerActivity
@@ -280,7 +372,7 @@ public class dashboard_prefect extends Fragment {
                 violatorData.put("prefect_referrer", reporter);
                 violatorData.put("location", location);
                 violatorData.put("violation", violation);
-                violatorData.put("remarks", remarks);
+                violatorData.put("insights_student", remarks);
                 violatorData.put("student_id", studId);  // Add the studentId
                 violatorData.put("student_name", name);  // Add the studentName
 
@@ -319,15 +411,11 @@ public class dashboard_prefect extends Fragment {
     }
 
     private void openViewReporters() {
-
-        reporters ViewReports = new reporters();
-
-        getActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, ViewReports)
-                .addToBackStack(null)
-                .commit();
-
+        Intent intent = new Intent(getActivity(), ReportersActivity.class);
+        startActivity(intent);
     }
+
+
 
 
 }

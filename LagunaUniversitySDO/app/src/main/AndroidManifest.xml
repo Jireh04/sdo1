@@ -53,9 +53,11 @@
         <activity android:name=".PrefectForm" />
 
         <activity android:name=".PrefectView">
+
             <!-- Optional: Add configuration for this activity (e.g., theme, launch mode) -->
         </activity>
-
+        <activity android:name=".ReporterView"/>
+        <activity android:name=".ReportersActivity"/>
         <activity
             android:name=".LoginActivity"
             android:exported="true">
