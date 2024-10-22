@@ -42,7 +42,7 @@ public class form extends AppCompatActivity {
     private static final String EMAIL_KEY = "EMAIL";
     private static final String CONTACT_NUM_KEY = "CONTACT_NUM";
     private static final String PROGRAM_KEY = "PROGRAM";
-    private static final String STUD_ID_KEY = "STUD_ID";
+    private static final String STUDENT_ID_KEY = "STUDENT_ID";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +97,7 @@ public class form extends AppCompatActivity {
         String studentEmail = intent.getStringExtra(EMAIL_KEY);
         Long studentContact = intent.getLongExtra(CONTACT_NUM_KEY, 0L);
         String studentProgram = intent.getStringExtra(PROGRAM_KEY);
-        String studId = intent.getStringExtra(STUD_ID_KEY);
+        String studId = intent.getStringExtra(STUDENT_ID_KEY);
 
         // Assign the studentName to the studentReferrer variable
         studentReferrer = studentName != null ? studentName : "";
@@ -139,7 +139,7 @@ public class form extends AppCompatActivity {
             String studentEmail = UserSession.getEmail();
             Long studentContact = UserSession.getContactNum();
             String studentProgram = UserSession.getProgram();
-            String studId = UserSession.getStudId();
+            String studentId = UserSession.getStudentId();
 
             // Set studentReferrer to the name retrieved from UserSession
             this.studentReferrer = studentName != null ? studentName : "";
@@ -193,14 +193,14 @@ public class form extends AppCompatActivity {
         ArrayList<String> addedUserNames = getIntent().getStringArrayListExtra("ADDED_USER_NAMES");
         ArrayList<String> addedUserContacts = getIntent().getStringArrayListExtra("ADDED_USER_CONTACTS");
         ArrayList<String> addedUserPrograms = getIntent().getStringArrayListExtra("ADDED_USER_PROGRAMS");
-        ArrayList<String> addedUserStudIds = getIntent().getStringArrayListExtra("ADDED_USER_STUD_IDS");
+        ArrayList<String> addedUserStudentIds = getIntent().getStringArrayListExtra("ADDED_USER_STUDENT_IDS");
 
-        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudIds != null) {
+        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudentIds != null) {
             for (int i = 0; i < addedUserNames.size(); i++) {
                 String name = addedUserNames.get(i);
                 String contact = addedUserContacts.get(i);
                 String program = addedUserPrograms.get(i);
-                String studId = addedUserStudIds.get(i);
+                String studId = addedUserStudentIds.get(i);
                 displayStudentDetails(name, program, studId, contact);
             }
         }
@@ -269,7 +269,7 @@ public class form extends AppCompatActivity {
         ArrayList<String> addedUserNames = getIntent().getStringArrayListExtra("ADDED_USER_NAMES");
         ArrayList<String> addedUserContacts = getIntent().getStringArrayListExtra("ADDED_USER_CONTACTS");
         ArrayList<String> addedUserPrograms = getIntent().getStringArrayListExtra("ADDED_USER_PROGRAMS");
-        ArrayList<String> addedUserStudIds = getIntent().getStringArrayListExtra("ADDED_USER_STUD_IDS");
+        ArrayList<String> addedUserStudentIds = getIntent().getStringArrayListExtra("ADDED_USER_STUDENT_IDS");
 
         // Retrieve checkbox states and create a single string for user concerns
         String userConcern = "";
@@ -287,12 +287,12 @@ public class form extends AppCompatActivity {
         }
 
         // Check if there are added students and add them to Firestore
-        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudIds != null) {
+        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudentIds != null) {
             for (int i = 0; i < addedUserNames.size(); i++) {
                 Map<String, Object> studentData = new HashMap<>();
                 studentData.put("student_name", addedUserNames.get(i));
                 studentData.put("student_program", addedUserPrograms.get(i));
-                studentData.put("student_id", addedUserStudIds.get(i)); // Added Student ID
+                studentData.put("student_id", addedUserStudentIds.get(i)); // Added Student ID
                 studentData.put("term", term);
                 studentData.put("violation", violation);
                 studentData.put("date", date);

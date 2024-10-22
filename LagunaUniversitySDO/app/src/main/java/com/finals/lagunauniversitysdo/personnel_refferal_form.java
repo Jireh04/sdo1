@@ -160,7 +160,7 @@ public class personnel_refferal_form extends Fragment {
                 userDepartments.add(userDoc.getString("program"));
                 userEmails.add(userDoc.getString("email"));
                 userContacts.add(userDoc.getLong("contacts"));
-                userIds.add(userDoc.getString("stud_id"));
+                userIds.add(userDoc.getString("student_id"));
             }
         }
 
@@ -219,7 +219,7 @@ public class personnel_refferal_form extends Fragment {
                         allDocuments.clear();
                         for (DocumentSnapshot document : querySnapshot.getDocuments()) {
                             String name = document.getString("name");
-                            String studId = document.getString("stud_id");
+                            String studId = document.getString("student_id");
 
                             if (name != null && name.toLowerCase().contains(searchTerm)) {
                                 allDocuments.add(document);
@@ -255,7 +255,7 @@ public class personnel_refferal_form extends Fragment {
             DocumentSnapshot document = allDocuments.get(i);
             String name = document.getString("name");
             String program = document.getString("program");
-            String studId = document.getString("stud_id");
+            String studId = document.getString("student_id");
             String contact = document.getString("contact");
 
             addSearchResultToLayout(name, studId, contact, searchResultsContainer, program);
@@ -307,7 +307,7 @@ public class personnel_refferal_form extends Fragment {
 
     private DocumentSnapshot findUserDocumentById(String userId) {
         for (DocumentSnapshot doc : allDocuments) {
-            if (doc.getString("stud_id").equals(userId)) {
+            if (doc.getString("student_id").equals(userId)) {
                 return doc;
             }
         }

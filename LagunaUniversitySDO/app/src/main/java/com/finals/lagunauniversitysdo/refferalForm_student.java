@@ -101,13 +101,13 @@ public class refferalForm_student extends Fragment {
             return; // Stop execution if no users are added
         }
 
-        String studId = UserSession.getStudId();
+        String studentId = UserSession.getStudentId();
         String studentName = UserSession.getStudentName();
         String email = UserSession.getEmail();
         Long contactNum = UserSession.getContactNum();
         String program = UserSession.getProgram();
 
-        if (studId != null) {
+        if (studentId != null) {
             Intent intent = new Intent(getActivity(), form.class);
             intent.putExtra("STUDENT_NAME", studentName);
             intent.putExtra("EMAIL", email);
@@ -119,9 +119,9 @@ public class refferalForm_student extends Fragment {
                 intent.putExtra("CONTACT_NUM", 0L); // Default value
             }
 
-            // Add program and stud_id before contact number
+            // Add program and student_id before contact number
             intent.putExtra("PROGRAM", program);
-            intent.putExtra("STUD_ID", studId); // Place stud_id here
+            intent.putExtra("STUDENT_ID", studentId); // Place student_id here
             intent.putExtra("CONTACT_NUM", contactNum); // Then contact number
 
             // Pass the added user details as separate ArrayLists
@@ -129,7 +129,7 @@ public class refferalForm_student extends Fragment {
                 ArrayList<String> userNames = new ArrayList<>();
                 ArrayList<String> userPrograms = new ArrayList<>();
                 ArrayList<String> userContacts = new ArrayList<>();
-                ArrayList<String> userStudIds = new ArrayList<>(); // New ArrayList for stud_id
+                ArrayList<String> userStudentIds = new ArrayList<>(); // New ArrayList for student_id
 
                 for (String userId : addedUserIds) {
                     DocumentSnapshot userDoc = addedUserDetails.get(userId);
@@ -137,7 +137,7 @@ public class refferalForm_student extends Fragment {
                         userNames.add(userDoc.getString("name"));
                         userPrograms.add(userDoc.getString("program"));
                         userContacts.add(userDoc.getString("contact"));
-                        userStudIds.add(userDoc.getString("stud_id")); // Add stud_id to the list
+                        userStudentIds.add(userDoc.getString("student_id")); // Add student_id to the list
                     }
                 }
 
@@ -145,7 +145,7 @@ public class refferalForm_student extends Fragment {
                 intent.putStringArrayListExtra("ADDED_USER_NAMES", userNames);
                 intent.putStringArrayListExtra("ADDED_USER_PROGRAMS", userPrograms);
                 intent.putStringArrayListExtra("ADDED_USER_CONTACTS", userContacts);
-                intent.putStringArrayListExtra("ADDED_USER_STUD_IDS", userStudIds); // Pass the stud_id list
+                intent.putStringArrayListExtra("ADDED_USER_STUDENT_IDS", userStudentIds); // Pass the student_id list
             }
 
             startActivity(intent);
@@ -207,7 +207,7 @@ public class refferalForm_student extends Fragment {
 
     private DocumentSnapshot findUserDocumentById(String userId) {
         for (DocumentSnapshot doc : allDocuments) {
-            if (doc.getString("stud_id").equals(userId)) {
+            if (doc.getString("student_id").equals(userId)) {
                 return doc;
             }
         }
@@ -234,7 +234,7 @@ public class refferalForm_student extends Fragment {
                         allDocuments.clear();
                         for (DocumentSnapshot document : querySnapshot.getDocuments()) {
                             String name = document.getString("name");
-                            String studId = document.getString("stud_id");
+                            String studentId = document.getString("student_id");
                             String contact = document.getString("contact");
 
                             if (name != null && name.toLowerCase().contains(searchTerm)) {
@@ -268,10 +268,10 @@ public class refferalForm_student extends Fragment {
             DocumentSnapshot document = allDocuments.get(i);
             String name = document.getString("name");
             String program = document.getString("program");
-            String studId = document.getString("stud_id");
+            String studentId = document.getString("student_id");
             String contact = document.getString("contact");
 
-            addSearchResultToLayout(name, studId, contact, searchResultsContainer, program);
+            addSearchResultToLayout(name, studentId, contact, searchResultsContainer, program);
         }
 
         updatePaginationControls();

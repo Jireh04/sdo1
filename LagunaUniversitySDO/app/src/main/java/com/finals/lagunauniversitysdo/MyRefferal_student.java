@@ -32,7 +32,7 @@ public class MyRefferal_student extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = FirebaseFirestore.getInstance(); // Initialize Firestore
-        userId = UserSession.getStudId(); // Get the currently logged-in user's ID
+        userId = UserSession.getStudentId(); // Get the currently logged-in user's ID
         studentName = UserSession.getStudentName(); // Use existing method to get the student's name
     }
 

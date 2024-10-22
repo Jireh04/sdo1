@@ -46,7 +46,7 @@ public class PersonnelForm extends AppCompatActivity {
     private static final String EMAIL_KEY = "EMAIL";
     private static final String CONTACT_NUM_KEY = "CONTACT_NUM";
     private static final String PROGRAM_KEY = "PROGRAM";
-    private static final String STUD_ID_KEY = "STUD_ID";
+    private static final String STUDENT_ID_KEY = "STUDENT_ID";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -203,14 +203,14 @@ public class PersonnelForm extends AppCompatActivity {
         ArrayList<String> addedUserNames = getIntent().getStringArrayListExtra("ADDED_USER_NAMES");
         ArrayList<String> addedUserContacts = getIntent().getStringArrayListExtra("ADDED_USER_CONTACTS");
         ArrayList<String> addedUserPrograms = getIntent().getStringArrayListExtra("ADDED_USER_PROGRAMS");
-        ArrayList<String> addedUserStudIds = getIntent().getStringArrayListExtra("ADDED_USER_STUD_IDS");
+        ArrayList<String> addedUserStudentIds = getIntent().getStringArrayListExtra("ADDED_USER_STUDENT_IDS");
 
-        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudIds != null) {
+        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudentIds != null) {
             for (int i = 0; i < addedUserNames.size(); i++) {
                 String name = addedUserNames.get(i);
                 String contact = addedUserContacts.get(i);
                 String program = addedUserPrograms.get(i);
-                String studId = addedUserStudIds.get(i);
+                String studId = addedUserStudentIds.get(i);
                 displayStudentDetails(name, program, studId, contact);
             }
         }
@@ -301,16 +301,16 @@ public class PersonnelForm extends AppCompatActivity {
         ArrayList<String> addedUserNames = getIntent().getStringArrayListExtra("ADDED_USER_NAMES");
         ArrayList<String> addedUserContacts = getIntent().getStringArrayListExtra("ADDED_USER_CONTACTS");
         ArrayList<String> addedUserPrograms = getIntent().getStringArrayListExtra("ADDED_USER_PROGRAMS");
-        ArrayList<String> addedUserStudIds = getIntent().getStringArrayListExtra("ADDED_USER_STUD_IDS");
+        ArrayList<String> addedUserStudentIds = getIntent().getStringArrayListExtra("ADDED_USER_STUDENT_IDS");
 
         // Check if there are added students and add them to Firestore
-        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudIds != null) {
+        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudentIds != null) {
             for (int i = 0; i < addedUserNames.size(); i++) {
-                if (i < addedUserContacts.size() && i < addedUserPrograms.size() && i < addedUserStudIds.size()) {
+                if (i < addedUserContacts.size() && i < addedUserPrograms.size() && i < addedUserStudentIds.size()) {
                     Map<String, Object> studentData = new HashMap<>();
                     studentData.put("student_name", addedUserNames.get(i));
                     studentData.put("student_program", addedUserPrograms.get(i));
-                    studentData.put("student_id", addedUserStudIds.get(i));
+                    studentData.put("student_id", addedUserStudentIds.get(i));
                     studentData.put("term", term);
                     studentData.put("violation", violation);
                     studentData.put("date", date);

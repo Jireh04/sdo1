@@ -1,7 +1,7 @@
 package com.finals.lagunauniversitysdo;
 
 public class UserSession {
-    private static String stud_id;  // Student ID
+    private static String student_id;  // Student ID
     private static String studentName;
     private static String email;
     private static Long contactNum;
@@ -14,7 +14,7 @@ public class UserSession {
 
     // Setters
     public static void setStudId(String id) {
-        stud_id = id;
+        student_id = id;
     }
 
     public static void setStudentDetails(String name, String email, Long contact, String program) {
@@ -38,8 +38,8 @@ public class UserSession {
     }
 
     // Getters
-    public static String getStudId() {
-        return stud_id;
+    public static String getStudentId() {
+        return student_id;
     }
 
     public static String getStudentName() {
@@ -73,7 +73,7 @@ public class UserSession {
 
     // Clear session
     public static void clearSession() {
-        stud_id = null;
+        student_id = null;
         studentName = null;
         email = null;
         contactNum = null;

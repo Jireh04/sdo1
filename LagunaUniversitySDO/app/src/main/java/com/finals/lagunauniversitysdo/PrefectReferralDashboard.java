@@ -145,7 +145,7 @@ public class PrefectReferralDashboard extends Fragment {
                 userDepartments.add(userDoc.getString("program"));
                 userEmails.add(userDoc.getString("email"));
                 userContacts.add(userDoc.getLong("contacts"));
-                userIds.add(userDoc.getString("stud_id"));
+                userIds.add(userDoc.getString("student_id"));
             }
         }
 
@@ -225,7 +225,7 @@ public class PrefectReferralDashboard extends Fragment {
 
     private DocumentSnapshot findUserDocumentById(String userId) {
         for (DocumentSnapshot doc : allDocuments) {
-            if (doc.getString("stud_id").equals(userId)) {
+            if (doc.getString("student_id").equals(userId)) {
                 return doc;
             }
         }
@@ -250,7 +250,7 @@ public class PrefectReferralDashboard extends Fragment {
                     allDocuments.clear();
                     for (DocumentSnapshot document : querySnapshot.getDocuments()) {
                         String name = document.getString("name");
-                        String studId = document.getString("stud_id");
+                        String studId = document.getString("student_id");
                         String contact = document.getString("contact");
 
                         if (name != null && name.toLowerCase().contains(searchTerm)) {
@@ -282,7 +282,7 @@ public class PrefectReferralDashboard extends Fragment {
         for (int i = startIndex; i < endIndex; i++) {
             DocumentSnapshot document = allDocuments.get(i);
             String name = document.getString("name");
-            String studId = document.getString("stud_id");
+            String studId = document.getString("student_id");
             String contact = document.getString("contact");
             String program = document.getString("program");
 

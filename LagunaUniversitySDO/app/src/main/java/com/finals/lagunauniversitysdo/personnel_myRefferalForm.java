@@ -77,7 +77,7 @@ public class personnel_myRefferalForm extends Fragment {
                                 for (DocumentSnapshot document : queryDocumentSnapshots) {
                                     // Extract the data for each document
                                     String dateReported = document.getString("date");
-                                    String personnelNo = document.getString("stud_id"); // Ensure this key matches what's in Firestore
+                                    String personnelNo = document.getString("student_id"); // Ensure this key matches what's in Firestore
                                     String name = document.getString("student_name"); // Ensure this key matches what's in Firestore
                                     String status = document.getString("status");
 
