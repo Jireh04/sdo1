@@ -304,10 +304,10 @@
                 android:paddingTop="20dp" />
 
             <EditText
-                android:id="@+id/insights_field"
+                android:id="@+id/remarks_field"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Enter insights"
+                android:hint="Enter remarks"
                 android:inputType="textMultiLine"
                 android:minLines="4" />
 

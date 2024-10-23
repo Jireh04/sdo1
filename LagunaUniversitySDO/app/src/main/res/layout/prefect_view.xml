@@ -1,7 +1,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#F5F5F5"> <!-- Light background for better contrast -->
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,9 +14,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="STUDENT INFORMATION"
+            android:layout_gravity="center"
             android:textStyle="bold"
-            android:textSize="18sp"
-            android:paddingBottom="8dp"
+            android:textSize="20sp"
+            android:paddingBottom="12dp"
             android:textColor="#000" />
 
         <!-- Name, Program, Year/Block, etc. -->
@@ -23,7 +25,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:weightSum="2">
+            android:weightSum="2"
+            android:paddingBottom="16dp">
 
             <!-- Left Column (Name, Program) -->
             <LinearLayout
@@ -38,7 +41,7 @@
                     android:layout_height="wrap_content"
                     android:text="NAME: "
                     android:textStyle="bold"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textColor="#000" />
 
                 <TextView
@@ -47,7 +50,7 @@
                     android:layout_height="wrap_content"
                     android:text="Student No.: "
                     android:textStyle="bold"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textColor="#000" />
 
                 <TextView
@@ -56,10 +59,9 @@
                     android:layout_height="wrap_content"
                     android:text="PROGRAM: "
                     android:textStyle="bold"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textColor="#000"
                     android:paddingTop="8dp" />
-
             </LinearLayout>
 
             <!-- Right Column (Contact No, Logs) -->
@@ -76,8 +78,8 @@
                     android:layout_height="wrap_content"
                     android:text="CONTACT NO: "
                     android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:textColor="#000" />
+                    android:textSize="18sp"
+                android:textColor="#000" />
 
                 <TextView
                     android:id="@+id/logsTextView"
@@ -85,9 +87,9 @@
                     android:layout_height="wrap_content"
                     android:text="LOGS: "
                     android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:textColor="#000"
-                    android:paddingTop="8dp" />
+                    android:textSize="18sp"
+                android:textColor="#000"
+                android:paddingTop="8dp" />
             </LinearLayout>
         </LinearLayout>
 
@@ -107,7 +109,7 @@
                 android:id="@+id/studentYearTextView"
                 android:text="YEAR: "
                 android:textStyle="bold"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textColor="#000" />
 
             <!-- Block -->
@@ -118,13 +120,13 @@
                 android:id="@+id/studentBlockTextView"
                 android:text="BLOCK: "
                 android:textStyle="bold"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textColor="#000" />
         </LinearLayout>
 
         <!-- Buttons (Add Violation and Export as PDF) -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingTop="16dp"
@@ -137,7 +139,8 @@
                 android:text="Add Violation"
                 android:textColor="#FFF"
                 android:backgroundTint="@color/red"
-                android:padding="8dp" />
+                android:padding="10dp"
+                android:layout_marginEnd="8dp" /> <!-- Added margin -->
 
             <Button
                 android:id="@+id/exportPdfButton"
@@ -146,8 +149,7 @@
                 android:text="Export as PDF"
                 android:textColor="#FFF"
                 android:backgroundTint="@color/red"
-                android:padding="8dp"
-                android:layout_marginStart="16dp" />
+                android:padding="10dp" />
         </LinearLayout>
 
         <!-- Violation Table -->
@@ -156,7 +158,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:stretchColumns="1"
-            android:paddingTop="16dp">
+            android:padding="16dp"
+            android:background="#FFF"
+            android:elevation="2dp"> <!-- Added background and elevation for depth -->
 
             <!-- Header Row -->
             <TableRow
@@ -198,6 +202,5 @@
             </TableRow>
 
         </TableLayout>
-
     </LinearLayout>
 </ScrollView>

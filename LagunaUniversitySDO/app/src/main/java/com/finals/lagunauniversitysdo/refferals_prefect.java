@@ -1,4 +1,5 @@
 package com.finals.lagunauniversitysdo;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -78,10 +79,38 @@ public class refferals_prefect extends Fragment {
         Button btnAccepted = view.findViewById(R.id.btn_accepted);
         Button btnRejected = view.findViewById(R.id.btn_rejected);
 
-        // Set click listeners for each button
-        btnPending.setOnClickListener(v -> onPendingClick());
-        btnAccepted.setOnClickListener(v -> onAcceptedClick());
-        btnRejected.setOnClickListener(v -> onRejectedClick());
+// Define the colors
+        int colorGreen = getResources().getColor(R.color.green);  // Assuming you have a green color in colors.xml
+        int colorGray = getResources().getColor(R.color.light_grey);    // Assuming you have a gray color in colors.xml
+
+// Set click listeners for each button
+        btnPending.setOnClickListener(v -> {
+            onPendingClick();
+
+            // Change button colors
+            btnPending.setBackgroundColor(colorGreen);  // Set clicked button to green
+            btnAccepted.setBackgroundColor(colorGray);  // Set other buttons to gray
+            btnRejected.setBackgroundColor(colorGray);
+        });
+
+        btnAccepted.setOnClickListener(v -> {
+            onAcceptedClick();
+
+            // Change button colors
+            btnPending.setBackgroundColor(colorGray);   // Set other buttons to gray
+            btnAccepted.setBackgroundColor(colorGreen); // Set clicked button to green
+            btnRejected.setBackgroundColor(colorGray);
+        });
+
+        btnRejected.setOnClickListener(v -> {
+            onRejectedClick();
+
+            // Change button colors
+            btnPending.setBackgroundColor(colorGray);   // Set other buttons to gray
+            btnAccepted.setBackgroundColor(colorGray);  // Set other buttons to gray
+            btnRejected.setBackgroundColor(colorGreen); // Set clicked button to green
+        });
+
 
         return view;
     }
@@ -557,8 +586,8 @@ public class refferals_prefect extends Fragment {
 
     // Fetch accepted referrals from Firestore
     public void onAcceptedClick() {
-        // Get the LinearLayout and ScrollView for displaying accepted referrals
-        LinearLayout linearLayoutAccepted = getView().findViewById(R.id.linear_layout_accepted);
+        // Get the TableLayout and ScrollView for displaying accepted referrals
+        TableLayout tableLayoutAccepted = getView().findViewById(R.id.table_layout_accepted);
         ScrollView scrollViewAccepted = getView().findViewById(R.id.scroll_view_accepted);
 
         // Get views for pending and rejected
@@ -575,7 +604,37 @@ public class refferals_prefect extends Fragment {
 
         // Show the ScrollView for accepted
         scrollViewAccepted.setVisibility(View.VISIBLE);
-        linearLayoutAccepted.removeAllViews();
+        tableLayoutAccepted.removeAllViews();
+
+        // Add table header for better readability
+        TableRow headerRow = new TableRow(getContext());
+        headerRow.setPadding(16, 16, 16, 16);
+
+        TextView headerStudent = new TextView(getContext());
+        headerStudent.setText("Student Name");
+        headerStudent.setTextSize(18);
+        headerStudent.setTypeface(null, Typeface.BOLD);
+        headerStudent.setPadding(16, 8, 16, 8);
+
+        TextView headerDate = new TextView(getContext());
+        headerDate.setText("Referral Date");
+        headerDate.setTextSize(18);
+        headerDate.setTypeface(null, Typeface.BOLD);
+        headerDate.setPadding(14, 8, 12, 8);
+
+        TextView headerStatus = new TextView(getContext());
+        headerStatus.setText("Status");
+        headerStatus.setTextSize(18);
+        headerStatus.setTypeface(null, Typeface.BOLD);
+        headerStatus.setPadding(12, 8, 16, 8);
+
+        // Add headers to the row
+        headerRow.addView(headerStudent);
+        headerRow.addView(headerDate);
+        headerRow.addView(headerStatus);
+
+        // Add header row to the table
+        tableLayoutAccepted.addView(headerRow);
 
         // Query both Firestore collections for "accepted" status
         db.collection("student_refferal_history")
@@ -592,12 +651,30 @@ public class refferals_prefect extends Fragment {
                                     String studentName = (String) referralData.get("student_name");
                                     String referralDate = (String) referralData.get("referral_date");
 
-                                    // Create a TextView for each accepted referral
-                                    TextView textView = new TextView(getActivity());
-                                    textView.setText("Student: " + studentName + "\nDate: " + referralDate + "\nStatus: Accepted");
-                                    textView.setPadding(16, 8, 16, 8);
-                                    textView.setTextSize(16);
-                                    linearLayoutAccepted.addView(textView);
+                                    // Create a new table row
+                                    TableRow row = new TableRow(getContext());
+                                    row.setPadding(16, 8, 16, 8);
+
+                                    // Create and add TextViews for each column in the row
+                                    TextView textStudentName = new TextView(getActivity());
+                                    textStudentName.setText(studentName);
+                                    textStudentName.setPadding(16, 8, 16, 8);
+
+                                    TextView textReferralDate = new TextView(getActivity());
+                                    textReferralDate.setText(referralDate);
+                                    textReferralDate.setPadding(14, 8, 12, 8);
+
+                                    TextView textStatus = new TextView(getActivity());
+                                    textStatus.setText("Accepted");
+                                    textStatus.setPadding(12, 8, 16, 8);
+
+                                    // Add the TextViews to the row
+                                    row.addView(textStudentName);
+                                    row.addView(textReferralDate);
+                                    row.addView(textStatus);
+
+                                    // Add the row to the table
+                                    tableLayoutAccepted.addView(row);
                                 }
                             }
                         }
@@ -618,18 +695,37 @@ public class refferals_prefect extends Fragment {
                                     String studentName = (String) referralData.get("student_name");
                                     String referralDate = (String) referralData.get("date");
 
-                                    // Create a TextView for each accepted referral
-                                    TextView textView = new TextView(getActivity());
-                                    textView.setText("Student: " + studentName + "\nDate: " + referralDate + "\nStatus: Accepted");
-                                    textView.setPadding(16, 8, 16, 8);
-                                    textView.setTextSize(16);
-                                    linearLayoutAccepted.addView(textView);
+                                    // Create a new table row
+                                    TableRow row = new TableRow(getContext());
+                                    row.setPadding(16, 8, 16, 8);
+
+                                    // Create and add TextViews for each column in the row
+                                    TextView textStudentName = new TextView(getActivity());
+                                    textStudentName.setText(studentName);
+                                    textStudentName.setPadding(16, 8, 16, 8);
+
+                                    TextView textReferralDate = new TextView(getActivity());
+                                    textReferralDate.setText(referralDate);
+                                    textReferralDate.setPadding(14, 8, 12, 8);
+
+                                    TextView textStatus = new TextView(getActivity());
+                                    textStatus.setText("Accepted");
+                                    textStatus.setPadding(12, 8, 16, 8);
+
+                                    // Add the TextViews to the row
+                                    row.addView(textStudentName);
+                                    row.addView(textReferralDate);
+                                    row.addView(textStatus);
+
+                                    // Add the row to the table
+                                    tableLayoutAccepted.addView(row);
                                 }
                             }
                         }
                     }
                 });
     }
+
 
     // Fetch rejected referrals from Firestore
     public void onRejectedClick() {
@@ -653,6 +749,39 @@ public class refferals_prefect extends Fragment {
         scrollViewRejected.setVisibility(View.VISIBLE);
         linearLayoutRejected.removeAllViews();
 
+        // Create a TableLayout for rejected referrals
+        TableLayout tableLayout = new TableLayout(getActivity());
+        tableLayout.setLayoutParams(new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.MATCH_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT));
+        tableLayout.setStretchAllColumns(true);
+
+        // Add TableHeader
+        TableRow headerRow = new TableRow(getActivity());
+        TextView headerStudent = new TextView(getActivity());
+        headerStudent.setText("Student Name");
+        headerStudent.setTextSize(16);
+        headerStudent.setPadding(16, 8, 16, 8);
+        headerStudent.setTypeface(null, Typeface.BOLD);
+        headerRow.addView(headerStudent);
+
+        TextView headerDate = new TextView(getActivity());
+        headerDate.setText("Referral Date");
+        headerDate.setTextSize(16);
+        headerDate.setPadding(14, 8, 14, 8);
+        headerDate.setTypeface(null, Typeface.BOLD);
+        headerRow.addView(headerDate);
+
+        TextView headerStatus = new TextView(getActivity());
+        headerStatus.setText("Status");
+        headerStatus.setTextSize(16);
+        headerStatus.setPadding(16, 8, 16, 8);
+        headerStatus.setTypeface(null, Typeface.BOLD);
+        headerRow.addView(headerStatus);
+
+        // Add the header row to the table
+        tableLayout.addView(headerRow);
+
         // Query both Firestore collections for "rejected" status
         db.collection("student_refferal_history")
                 .whereEqualTo("status", "rejected")
@@ -668,12 +797,29 @@ public class refferals_prefect extends Fragment {
                                     String studentName = (String) referralData.get("student_name");
                                     String referralDate = (String) referralData.get("referral_date");
 
-                                    // Create a TextView for each rejected referral
-                                    TextView textView = new TextView(getActivity());
-                                    textView.setText("Student: " + studentName + "\nDate: " + referralDate + "\nStatus: Rejected");
-                                    textView.setPadding(16, 8, 16, 8);
-                                    textView.setTextSize(16);
-                                    linearLayoutRejected.addView(textView);
+                                    // Create a TableRow for each rejected referral
+                                    TableRow row = new TableRow(getActivity());
+                                    row.setLayoutParams(new TableRow.LayoutParams(
+                                            TableRow.LayoutParams.MATCH_PARENT,
+                                            TableRow.LayoutParams.WRAP_CONTENT));
+
+                                    TextView studentTextView = new TextView(getActivity());
+                                    studentTextView.setText(studentName);
+                                    studentTextView.setPadding(16, 8, 16, 8);
+                                    row.addView(studentTextView);
+
+                                    TextView dateTextView = new TextView(getActivity());
+                                    dateTextView.setText(referralDate);
+                                    dateTextView.setPadding(14, 8, 14, 8);
+                                    row.addView(dateTextView);
+
+                                    TextView statusTextView = new TextView(getActivity());
+                                    statusTextView.setText("Rejected");
+                                    statusTextView.setPadding(16, 8, 16, 8);
+                                    row.addView(statusTextView);
+
+                                    // Add the row to the table
+                                    tableLayout.addView(row);
                                 }
                             }
                         }
@@ -694,16 +840,37 @@ public class refferals_prefect extends Fragment {
                                     String studentName = (String) referralData.get("student_name");
                                     String referralDate = (String) referralData.get("date");
 
-                                    // Create a TextView for each rejected referral
-                                    TextView textView = new TextView(getActivity());
-                                    textView.setText("Student: " + studentName + "\nDate: " + referralDate + "\nStatus: Rejected");
-                                    textView.setPadding(16, 8, 16, 8);
-                                    textView.setTextSize(16);
-                                    linearLayoutRejected.addView(textView);
+                                    // Create a TableRow for each rejected referral
+                                    TableRow row = new TableRow(getActivity());
+                                    row.setLayoutParams(new TableRow.LayoutParams(
+                                            TableRow.LayoutParams.MATCH_PARENT,
+                                            TableRow.LayoutParams.WRAP_CONTENT));
+
+                                    TextView studentTextView = new TextView(getActivity());
+                                    studentTextView.setText(studentName);
+                                    studentTextView.setPadding(16, 8, 16, 8);
+                                    row.addView(studentTextView);
+
+                                    TextView dateTextView = new TextView(getActivity());
+                                    dateTextView.setText(referralDate);
+                                    dateTextView.setPadding(14, 8, 14, 8);
+                                    row.addView(dateTextView);
+
+                                    TextView statusTextView = new TextView(getActivity());
+                                    statusTextView.setText("Rejected");
+                                    statusTextView.setPadding(16, 8, 16, 8);
+                                    row.addView(statusTextView);
+
+                                    // Add the row to the table
+                                    tableLayout.addView(row);
                                 }
                             }
                         }
                     }
                 });
+
+        // Add the TableLayout to the LinearLayout for rejected referrals
+        linearLayoutRejected.addView(tableLayout);
     }
+
 }

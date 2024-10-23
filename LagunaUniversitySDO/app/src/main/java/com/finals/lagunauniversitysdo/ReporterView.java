@@ -11,7 +11,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 public class ReporterView extends AppCompatActivity {
 
-    // Declare the TextViews for student details and insights
+    // Declare the TextViews for student details and remarks
     private TextView studentNameTextView;
     private TextView studentIdTextView;
     private TextView studentProgramTextView;
@@ -59,7 +59,7 @@ public class ReporterView extends AppCompatActivity {
         String studentYear = intent.getStringExtra("STUDENT_YEAR");
         String studentBlock = intent.getStringExtra("STUDENT_BLOCK");
         String violations = intent.getStringExtra("VIOLATIONS"); // Retrieve the violations string
-        String insights = intent.getStringExtra("INSIGHTS"); // Retrieve insights string
+        String remarks = intent.getStringExtra("REMARKS"); // Retrieve remarks string
         String referrerName = intent.getStringExtra("REFERRER_NAME"); // Retrieve the referrer name
 
         // Set student details to TextViews
@@ -85,7 +85,7 @@ public class ReporterView extends AppCompatActivity {
         // Split violations into an array and populate the table if available
         if (violations != null && !violations.isEmpty()) {
             String[] violationsArray = violations.split("\n"); // Split by newline
-            populateViolationTable(violationsArray, insights, referrerName); // Pass insights and referrer name to populate the table
+            populateViolationTable(violationsArray, remarks, referrerName); // Pass remarks and referrer name to populate the table
         } else {
             logEntryTextView.setText("No violations found."); // Handle no violations case
         }
@@ -104,7 +104,7 @@ public class ReporterView extends AppCompatActivity {
     }
 
     // Method to populate the TableLayout with violation data
-    private void populateViolationTable(String[] violations, String insights, String referrerName) {
+    private void populateViolationTable(String[] violations, String remarks, String referrerName) {
         // For each violation, add a new row to the table
         for (int i = 0; i < violations.length; i++) {
             // Create a new TableRow
@@ -117,9 +117,9 @@ public class ReporterView extends AppCompatActivity {
             TextView violationDescriptionTextView = new TextView(this);
             violationDescriptionTextView.setText(violations[i]);  // Set the violation description
 
-            // Add insights to a new TextView
-            TextView insightsTextView = new TextView(this);
-            insightsTextView.setText(insights != null ? insights : "No insights available");  // Set insights
+            // Add remarks to a new TextView
+            TextView remarksTextView = new TextView(this);
+            remarksTextView.setText(remarks != null ? remarks : "No remarks available");  // Set remarks
 
             // Create a TextView for the referrer name
             TextView referrerTextView = new TextView(this);
@@ -132,7 +132,7 @@ public class ReporterView extends AppCompatActivity {
             // Add the TextViews to the TableRow
             tableRow.addView(violationNumberTextView);
             tableRow.addView(violationDescriptionTextView);
-            tableRow.addView(insightsTextView); // Add insights TextView to the row
+            tableRow.addView(remarksTextView); // Add remarks TextView to the row
             tableRow.addView(referrerTextView); // Add referrer name TextView to the row
             tableRow.addView(dateTextView); // Add date TextView to the row
 

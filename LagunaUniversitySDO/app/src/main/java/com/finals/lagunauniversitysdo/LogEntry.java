@@ -2,7 +2,7 @@ package com.finals.lagunauniversitysdo;
 
 
 public class LogEntry {
-    private String insightsStudent;
+    private String remarksStudent;
     private String status;
     private String studentId;
     private String studentName;
@@ -12,9 +12,9 @@ public class LogEntry {
     private String violation;
 
     // Constructor
-    public LogEntry(String insightsStudent, String status, String studentId, String studentName,
+    public LogEntry(String remarksStudent, String status, String studentId, String studentName,
                     String studentProgram, String term, String userConcern, String violation) {
-        this.insightsStudent = insightsStudent;
+        this.remarksStudent = remarksStudent;
         this.status = status;
         this.studentId = studentId;
         this.studentName = studentName;
@@ -25,7 +25,7 @@ public class LogEntry {
     }
 
     // Getters for all fields
-    public String getInsightsStudent() { return insightsStudent; }
+    public String getremarksStudent() { return remarksStudent; }
     public String getStatus() { return status; }
     public String getStudentId() { return studentId; }
     public String getStudentName() { return studentName; }

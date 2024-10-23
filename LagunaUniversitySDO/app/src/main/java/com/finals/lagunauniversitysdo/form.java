@@ -42,7 +42,7 @@ public class form extends AppCompatActivity {
     private static final String EMAIL_KEY = "EMAIL";
     private static final String CONTACT_NUM_KEY = "CONTACT_NUM";
     private static final String PROGRAM_KEY = "PROGRAM";
-    private static final String STUD_ID_KEY = "STUD_ID";
+    private static final String STUDENT_ID_KEY = "STUDENT_ID";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,18 +86,17 @@ public class form extends AppCompatActivity {
         violatorsContact = findViewById(R.id.violators_contact);
     }
 
-
-
     private void populateFieldsFromIntent() {
-        // Retrieve data from the first intent
         Intent intent = getIntent();  // Get the current intent
 
         // Retrieve standard student data from the intent
-        String studentName = intent.getStringExtra(STUDENT_NAME_KEY); // Student name as referrer
+        String studentName = intent.getStringExtra(STUDENT_NAME_KEY);
+        Log.d("FormActivity", "Student Name: " + studentName); // Debugging line
+
         String studentEmail = intent.getStringExtra(EMAIL_KEY);
         Long studentContact = intent.getLongExtra(CONTACT_NUM_KEY, 0L);
         String studentProgram = intent.getStringExtra(PROGRAM_KEY);
-        String studId = intent.getStringExtra(STUD_ID_KEY);
+        String studId = intent.getStringExtra(STUDENT_ID_KEY);
 
         // Assign the studentName to the studentReferrer variable
         studentReferrer = studentName != null ? studentName : "";
@@ -139,7 +138,7 @@ public class form extends AppCompatActivity {
             String studentEmail = UserSession.getEmail();
             Long studentContact = UserSession.getContactNum();
             String studentProgram = UserSession.getProgram();
-            String studId = UserSession.getStudId();
+            String studentId = UserSession.getStudentId();
 
             // Set studentReferrer to the name retrieved from UserSession
             this.studentReferrer = studentName != null ? studentName : "";
@@ -193,14 +192,14 @@ public class form extends AppCompatActivity {
         ArrayList<String> addedUserNames = getIntent().getStringArrayListExtra("ADDED_USER_NAMES");
         ArrayList<String> addedUserContacts = getIntent().getStringArrayListExtra("ADDED_USER_CONTACTS");
         ArrayList<String> addedUserPrograms = getIntent().getStringArrayListExtra("ADDED_USER_PROGRAMS");
-        ArrayList<String> addedUserStudIds = getIntent().getStringArrayListExtra("ADDED_USER_STUD_IDS");
+        ArrayList<String> addedUserStudentIds = getIntent().getStringArrayListExtra("ADDED_USER_STUDENT_IDS");
 
-        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudIds != null) {
+        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudentIds != null) {
             for (int i = 0; i < addedUserNames.size(); i++) {
                 String name = addedUserNames.get(i);
                 String contact = addedUserContacts.get(i);
                 String program = addedUserPrograms.get(i);
-                String studId = addedUserStudIds.get(i);
+                String studId = addedUserStudentIds.get(i);
                 displayStudentDetails(name, program, studId, contact);
             }
         }
@@ -248,8 +247,8 @@ public class form extends AppCompatActivity {
         String studId = violatorsStudID.getText().toString().trim();
         String status = "pending"; // Default status
 
-        // Retrieve insights from insights_field
-        String insights = ((EditText) findViewById(R.id.insights_field)).getText().toString().trim();
+        // Retrieve remarks from remarks_field
+        String remarks = ((EditText) findViewById(R.id.remarks_field)).getText().toString().trim();
 
         // Validate inputs
         if (!validateInputs(name, email, contactString, program)) {
@@ -269,7 +268,7 @@ public class form extends AppCompatActivity {
         ArrayList<String> addedUserNames = getIntent().getStringArrayListExtra("ADDED_USER_NAMES");
         ArrayList<String> addedUserContacts = getIntent().getStringArrayListExtra("ADDED_USER_CONTACTS");
         ArrayList<String> addedUserPrograms = getIntent().getStringArrayListExtra("ADDED_USER_PROGRAMS");
-        ArrayList<String> addedUserStudIds = getIntent().getStringArrayListExtra("ADDED_USER_STUD_IDS");
+        ArrayList<String> addedUserStudentIds = getIntent().getStringArrayListExtra("ADDED_USER_STUDENT_IDS");
 
         // Retrieve checkbox states and create a single string for user concerns
         String userConcern = "";
@@ -287,18 +286,18 @@ public class form extends AppCompatActivity {
         }
 
         // Check if there are added students and add them to Firestore
-        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudIds != null) {
+        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudentIds != null) {
             for (int i = 0; i < addedUserNames.size(); i++) {
                 Map<String, Object> studentData = new HashMap<>();
                 studentData.put("student_name", addedUserNames.get(i));
                 studentData.put("student_program", addedUserPrograms.get(i));
-                studentData.put("student_id", addedUserStudIds.get(i)); // Added Student ID
+                studentData.put("student_id", addedUserStudentIds.get(i)); // Added Student ID
                 studentData.put("term", term);
                 studentData.put("violation", violation);
                 studentData.put("date", date);
                 studentData.put("status", status);
                 studentData.put("user_concern", userConcern); // Add user concern to the student data
-                studentData.put("insights_student", insights); // Add insights to the student data
+                studentData.put("remarks", remarks); // Add remarks to the student data
                 studentData.put("student_referrer", studentReferrer); // Add student_referrer to Firestore data
 
                 // Add each student's data directly to the Firestore collection
@@ -327,7 +326,7 @@ public class form extends AppCompatActivity {
             scannedStudentData.put("date", date);
             scannedStudentData.put("status", status);
             scannedStudentData.put("user_concern", userConcern); // Add user concern to scanned student data
-            scannedStudentData.put("insights_student", insights); // Add insights to scanned student data
+            scannedStudentData.put("remarks", remarks); // Add remarks to scanned student data
             scannedStudentData.put("student_referrer", studentReferrer); // Add student_referrer to Firestore data
 
             // Add scanned student's data directly to the Firestore collection

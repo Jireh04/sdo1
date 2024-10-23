@@ -1,14 +1,17 @@
 package com.finals.lagunauniversitysdo;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ScrollView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -21,21 +24,23 @@ import android.content.Intent;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ReportersActivity extends AppCompatActivity {
+public class ReportersFragment extends Fragment {
 
     private LinearLayout reportersContainer;
     private FirebaseFirestore db;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_reporters); // Your layout file name
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_reporters, container, false);
 
-        reportersContainer = findViewById(R.id.reportersContainer);
+        reportersContainer = view.findViewById(R.id.reportersContainer);
         db = FirebaseFirestore.getInstance(); // Initialize Firestore
 
         // Fetch referrer data
         fetchReferrerData();
+
+        return view; // Return the inflated view
     }
 
     private void fetchReferrerData() {
@@ -81,7 +86,7 @@ public class ReportersActivity extends AppCompatActivity {
 
     private void showNoDataMessage() {
         // Ensure that the title remains visible
-        TextView noDataTextView = new TextView(this);
+        TextView noDataTextView = new TextView(getContext());
         noDataTextView.setText("No referrer names available");
         noDataTextView.setTextSize(18); // Adjust text size as needed
         noDataTextView.setLayoutParams(new LinearLayout.LayoutParams(
@@ -95,37 +100,24 @@ public class ReportersActivity extends AppCompatActivity {
     }
 
     private void displayReferrerNames(Map<String, String> referrerMap) {
+
+
         for (Map.Entry<String, String> entry : referrerMap.entrySet()) {
             String referrerName = entry.getKey();
             String referrerType = entry.getValue();
 
-            // Create a horizontal layout to hold the name and button
-            LinearLayout horizontalLayout = new LinearLayout(this);
-            horizontalLayout.setOrientation(LinearLayout.HORIZONTAL);
-            horizontalLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            ));
-            horizontalLayout.setPadding(16, 16, 16, 16); // Optional padding
+            // Inflate the layout for each referrer item (referrer_item.xml)
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            View referrerItemView = inflater.inflate(R.layout.reporter_item, reportersContainer, false);
 
-            // Create a TextView for the referrer name
-            TextView referrerTextView = new TextView(this);
-            referrerTextView.setText(referrerType + ": " + referrerName); // Display type and name together
-            referrerTextView.setTextSize(18); // Adjust text size as needed
-            referrerTextView.setLayoutParams(new LinearLayout.LayoutParams(
-                    0,
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    1 // Weight to allow the TextView to take remaining space
-            ));
+            // Find the TextView and Button in the inflated layout
+            TextView referrerTextView = referrerItemView.findViewById(R.id.reporterName);
+            Button viewLogsButton = referrerItemView.findViewById(R.id.viewLogsButton);
 
-            // Create a Button for "View Logs"
-            Button viewLogsButton = new Button(this);
-            viewLogsButton.setText("View Logs");
-            viewLogsButton.setLayoutParams(new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            ));
-            // Set an OnClickListener for the button
+            // Set the text for the referrer name
+            referrerTextView.setText(referrerType + ": " + referrerName);
+
+            // Set an OnClickListener for the "View Logs" button
             viewLogsButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -134,14 +126,11 @@ public class ReportersActivity extends AppCompatActivity {
                 }
             });
 
-            // Add the TextView and Button to the horizontal layout
-            horizontalLayout.addView(referrerTextView);
-            horizontalLayout.addView(viewLogsButton);
-
-            // Add the horizontal layout to the container
-            reportersContainer.addView(horizontalLayout);
+            // Add the inflated referrer item view to the container
+            reportersContainer.addView(referrerItemView);
         }
     }
+
 
     private void viewLogs(String referrerType, String referrerName) {
         String collectionName;
@@ -175,7 +164,7 @@ public class ReportersActivity extends AppCompatActivity {
                                 String violations = "";  // For accumulating violations
 
                                 // Create the Intent here to pass data to the ReporterView
-                                Intent intent = new Intent(ReportersActivity.this, ReporterView.class);
+                                Intent intent = new Intent(getActivity(), ReporterView.class);
 
                                 // Add referrer name to the intent
                                 intent.putExtra("REFERRER_NAME", referrerName);
@@ -188,7 +177,7 @@ public class ReportersActivity extends AppCompatActivity {
                                     String studentContact = document.getString("student_contact");
                                     String studentYear = document.getString("student_year");
                                     String studentBlock = document.getString("block");
-                                    String insightsStudent = document.getString("insights_student");
+                                    String remarks = document.getString("remarks");
                                     String status = document.getString("status");
                                     String userConcern = document.getString("user_concern");
                                     String violation = document.getString("violation");
@@ -203,7 +192,7 @@ public class ReportersActivity extends AppCompatActivity {
 
                                     // Create a string for the current log entry's details
                                     logDetails += "Student Name: " + studentName + "\n" +
-                                            "Insights: " + (insightsStudent != null ? insightsStudent : "N/A") + "\n" +
+                                            "Remarks: " + (remarks != null ? remarks : "N/A") + "\n" +
                                             "Status: " + status + "\n" +
                                             "User Concern: " + (userConcern != null ? userConcern : "N/A") + "\n" +
                                             "Violation: " + (violation != null ? violation : "None") + "\n\n";
@@ -221,7 +210,7 @@ public class ReportersActivity extends AppCompatActivity {
                                 showLogDetailsDialog(referrerName, logDetails, intent);
                             } else {
                                 // Handle the case where no logs are found
-                                TextView noLogsTextView = new TextView(ReportersActivity.this);
+                                TextView noLogsTextView = new TextView(getActivity());
                                 noLogsTextView.setText("No logs found for this referrer.");
                                 noLogsTextView.setPadding(16, 16, 16, 16);
                                 noLogsTextView.setTextSize(16);
@@ -234,14 +223,14 @@ public class ReportersActivity extends AppCompatActivity {
 
     private void showLogDetailsDialog(String referrerName, String logDetails, Intent intent) {
         // Create an AlertDialog to show detailed log information
-        AlertDialog.Builder detailDialogBuilder = new AlertDialog.Builder(this);
+        AlertDialog.Builder detailDialogBuilder = new AlertDialog.Builder(getContext());
         detailDialogBuilder.setTitle("Log Details for " + referrerName);
 
         // Create a ScrollView to hold the log details
-        ScrollView scrollView = new ScrollView(this);
+        ScrollView scrollView = new ScrollView(getContext());
 
         // Create a LinearLayout to hold the log details and buttons
-        LinearLayout dialogLayout = new LinearLayout(this);
+        LinearLayout dialogLayout = new LinearLayout(getContext());
         dialogLayout.setOrientation(LinearLayout.VERTICAL);
         dialogLayout.setPadding(16, 16, 16, 16);
 
@@ -249,7 +238,7 @@ public class ReportersActivity extends AppCompatActivity {
         String[] logEntries = logDetails.split("\n\n");
         for (String logEntry : logEntries) {
             // Create a TextView for each log entry
-            TextView logEntryTextView = new TextView(this);
+            TextView logEntryTextView = new TextView(getContext());
             logEntryTextView.setText(logEntry);
             logEntryTextView.setPadding(0, 0, 0, 10); // Optional spacing between entries
             dialogLayout.addView(logEntryTextView);
@@ -261,7 +250,7 @@ public class ReportersActivity extends AppCompatActivity {
             String violation = logEntry.split("\n")[logEntry.split("\n").length - 1].replace("Violation: ", "");
 
             // Create a Button for each log entry
-            Button viewEntryButton = new Button(this);
+            Button viewEntryButton = new Button(getContext());
             viewEntryButton.setText("View");
             viewEntryButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -298,7 +287,7 @@ public class ReportersActivity extends AppCompatActivity {
                             DocumentSnapshot document = task.getResult().getDocuments().get(0);
 
                             // Create a new Intent to start the ReporterView
-                            Intent intent = new Intent(ReportersActivity.this, ReporterView.class);
+                            Intent intent = new Intent(getContext(), ReporterView.class);
                             intent.putExtra("STUDENT_ID", document.getString("student_id"));
                             intent.putExtra("STUDENT_NAME", document.getString("student_name"));
                             intent.putExtra("STUDENT_PROGRAM", document.getString("student_program"));
@@ -321,7 +310,7 @@ public class ReportersActivity extends AppCompatActivity {
 
     private void showLogsDialog(String referrerName, TextView noLogsTextView) {
         // Create an AlertDialog to show the message
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
         dialogBuilder.setTitle("Report Logs for " + referrerName);
         dialogBuilder.setView(noLogsTextView);
         dialogBuilder.setPositiveButton("Close", null);

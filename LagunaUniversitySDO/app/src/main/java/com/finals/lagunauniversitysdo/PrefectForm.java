@@ -43,7 +43,7 @@ public class PrefectForm extends AppCompatActivity {
     private static final String EMAIL_KEY = "EMAIL";
     private static final String CONTACT_NUM_KEY = "CONTACT_NUM";
     private static final String PROGRAM_KEY = "PROGRAM";
-    private static final String STUD_ID_KEY = "STUD_ID";
+    private static final String STUDENT_ID_KEY = "STUDENT_ID";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -225,14 +225,14 @@ public class PrefectForm extends AppCompatActivity {
         ArrayList<String> addedUserNames = getIntent().getStringArrayListExtra("ADDED_USER_NAMES");
         ArrayList<String> addedUserContacts = getIntent().getStringArrayListExtra("ADDED_USER_CONTACTS");
         ArrayList<String> addedUserPrograms = getIntent().getStringArrayListExtra("ADDED_USER_PROGRAMS");
-        ArrayList<String> addedUserStudIds = getIntent().getStringArrayListExtra("ADDED_USER_STUD_IDS");
+        ArrayList<String> addedUserStudentIds = getIntent().getStringArrayListExtra("ADDED_USER_STUDENT_IDS");
 
-        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudIds != null) {
+        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudentIds != null) {
             for (int i = 0; i < addedUserNames.size(); i++) {
                 String name = addedUserNames.get(i);
                 String contact = addedUserContacts.get(i);
                 String program = addedUserPrograms.get(i);
-                String studId = addedUserStudIds.get(i);
+                String studId = addedUserStudentIds.get(i);
                 displayStudentDetails(name, program, studId, contact);
             }
         }
@@ -297,8 +297,8 @@ public class PrefectForm extends AppCompatActivity {
         String studId = violatorsStudID.getText().toString().trim();
         String status = "pending"; // Default status
 
-        // Retrieve insights from insights_field
-        String insights = ((EditText) findViewById(R.id.insights_field)).getText().toString().trim();
+        // Retrieve remarks from remarks_field
+        String remarks = ((EditText) findViewById(R.id.remarks_field)).getText().toString().trim();
 
         // Validate inputs
         if (!validateInputs(name, email, contactString, program)) {
@@ -324,21 +324,21 @@ public class PrefectForm extends AppCompatActivity {
         ArrayList<String> addedUserNames = getIntent().getStringArrayListExtra("ADDED_USER_NAMES");
         ArrayList<String> addedUserContacts = getIntent().getStringArrayListExtra("ADDED_USER_CONTACTS");
         ArrayList<String> addedUserPrograms = getIntent().getStringArrayListExtra("ADDED_USER_PROGRAMS");
-        ArrayList<String> addedUserStudIds = getIntent().getStringArrayListExtra("ADDED_USER_STUD_IDS");
+        ArrayList<String> addedUserStudentIds = getIntent().getStringArrayListExtra("ADDED_USER_STUDENT_IDS");
 
         // Check if there are added students and add them to Firestore
-        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudIds != null) {
+        if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudentIds != null) {
             for (int i = 0; i < addedUserNames.size(); i++) {
-                if (i < addedUserContacts.size() && i < addedUserPrograms.size() && i < addedUserStudIds.size()) {
+                if (i < addedUserContacts.size() && i < addedUserPrograms.size() && i < addedUserStudentIds.size()) {
                     Map<String, Object> studentData = new HashMap<>();
                     studentData.put("student_name", addedUserNames.get(i));
                     studentData.put("student_program", addedUserPrograms.get(i));
-                    studentData.put("student_id", addedUserStudIds.get(i));
+                    studentData.put("student_id", addedUserStudentIds.get(i));
                     studentData.put("term", term);
                     studentData.put("violation", violation);
                     studentData.put("date", date);
                     studentData.put("status", status);
-                    studentData.put("insights_student", insights);
+                    studentData.put("remarks", remarks);
                     studentData.put("prefect_referrer", prefectReferrer); // Changed to prefect_referrer
 
                     // Add each student's data directly to the Firestore collection
@@ -356,15 +356,15 @@ public class PrefectForm extends AppCompatActivity {
         }
 
         // Extract displayed students from the table and save them to Firestore
-        saveDisplayedStudentsToFirestore(term, violation, date, status, insights, prefectReferrer); // Changed to prefect_referrer
+        saveDisplayedStudentsToFirestore(term, violation, date, status, remarks, prefectReferrer); // Changed to prefect_referrer
 
         // Add the scanned data to Firestore as well
         if (scannedName != null && scannedStudentNo != null && scannedProgram != null) {
-            checkAndSaveScannedStudent(scannedName, scannedProgram, scannedStudentNo, term, violation, date, status, insights, prefectReferrer); // Changed to prefect_referrer
+            checkAndSaveScannedStudent(scannedName, scannedProgram, scannedStudentNo, term, violation, date, status, remarks, prefectReferrer); // Changed to prefect_referrer
         }
     }
 
-    private void checkAndSaveScannedStudent(String scannedName, String scannedProgram, String scannedStudentNo, String term, String violation, String date, String status, String insights, String prefectReferrer) {
+    private void checkAndSaveScannedStudent(String scannedName, String scannedProgram, String scannedStudentNo, String term, String violation, String date, String status, String remarks, String prefectReferrer) {
         // Query Firestore to check if the student already exists
         firestore.collection("prefect_referral_history")
                 .whereEqualTo("student_id", scannedStudentNo) // Check by student ID
@@ -381,7 +381,7 @@ public class PrefectForm extends AppCompatActivity {
                             scannedStudentData.put("violation", violation);
                             scannedStudentData.put("date", date);
                             scannedStudentData.put("status", status);
-                            scannedStudentData.put("insights_student", insights); // Add insights to the scanned student data
+                            scannedStudentData.put("remarks", remarks); // Add remarks to the scanned student data
                             scannedStudentData.put("prefect_referrer", prefectReferrer); // Changed to prefect_referrer
 
                             // Add scanned student's data directly to the Firestore collection
@@ -406,7 +406,7 @@ public class PrefectForm extends AppCompatActivity {
                 });
     }
 
-    private void saveDisplayedStudentsToFirestore(String term, String violation, String date, String status, String insights, String prefectReferrer) {
+    private void saveDisplayedStudentsToFirestore(String term, String violation, String date, String status, String remarks, String prefectReferrer) {
         // Iterate over the rows in the detailsTable
         for (int i = 0; i < detailsTable.getChildCount(); i++) {
             TableRow row = (TableRow) detailsTable.getChildAt(i);
@@ -425,7 +425,7 @@ public class PrefectForm extends AppCompatActivity {
                 studentData.put("violation", violation);
                 studentData.put("date", date);
                 studentData.put("status", status);
-                studentData.put("insights_student", insights); // Add insights if needed
+                studentData.put("remarks", remarks); // Add remarks if needed
                 studentData.put("prefect_referrer", prefectReferrer); // Changed to prefect_referrer
 
                 // Add each student's data directly to the Firestore collection
@@ -475,7 +475,7 @@ public class PrefectForm extends AppCompatActivity {
         violationSpinner.setSelection(0); // Reset to first item
         dateField.setText("");
         violatorsStudID.setText("");
-        ((EditText) findViewById(R.id.insights_field)).setText("");
+        ((EditText) findViewById(R.id.remarks_field)).setText("");
 
         // Reset checkboxes
         ((CheckBox) findViewById(R.id.discipline_concerns)).setChecked(false);

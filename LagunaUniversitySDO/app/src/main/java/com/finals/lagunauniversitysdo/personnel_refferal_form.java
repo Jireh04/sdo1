@@ -160,7 +160,7 @@ public class personnel_refferal_form extends Fragment {
                 userDepartments.add(userDoc.getString("program"));
                 userEmails.add(userDoc.getString("email"));
                 userContacts.add(userDoc.getLong("contacts"));
-                userIds.add(userDoc.getString("stud_id"));
+                userIds.add(userDoc.getString("student_id"));
             }
         }
 
@@ -201,48 +201,62 @@ public class personnel_refferal_form extends Fragment {
 
     private void performSearch() {
         String searchTerm = searchBar.getText().toString().trim().toLowerCase();
+
+        // Check if the search term is empty
         if (searchTerm.isEmpty()) {
             Toast.makeText(getActivity(), "Please enter a name", Toast.LENGTH_SHORT).show();
             paginationControls.setVisibility(View.GONE);
             return;
         }
 
+        // Get the root view
         LinearLayout searchResultsContainer = getView().findViewById(R.id.search_results_container);
         searchResultsContainer.removeAllViews();
 
+        // Query Firestore for the students collection
         db.collection("students").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
                     QuerySnapshot querySnapshot = task.getResult();
                     if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                        allDocuments.clear();
-                        for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                            String name = document.getString("name");
-                            String studId = document.getString("stud_id");
+                        allDocuments.clear(); // Clear the list of previous results
 
+                        // Loop through each document in the result set
+                        for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                            // Extract fields safely
+                            String name = document.getString("name");
+                            String studentId = document.getString("student_id");
+
+                            // Ensure the name is not null and contains the search term (case insensitive)
                             if (name != null && name.toLowerCase().contains(searchTerm)) {
-                                allDocuments.add(document);
-                                Log.d("SearchResults", "Found Student: " + name + " with ID: " + studId); // Add logging here
+                                allDocuments.add(document); // Add matching documents to the list
+                                Log.d("SearchResults", "Found Student: " + name + " with ID: " + studentId);
                             }
                         }
 
-                        currentPage.set(0);
-                        showPage();
-                        updatePaginationControls();
-                        paginationControls.setVisibility(View.VISIBLE);
+                        if (allDocuments.isEmpty()) {
+                            Toast.makeText(getActivity(), "No matching results", Toast.LENGTH_SHORT).show();
+                            paginationControls.setVisibility(View.GONE);
+                        } else {
+                            // Reset to first page and show results
+                            currentPage.set(0);
+                            showPage(); // No need for rootView, as it's using getView()
+                            updatePaginationControls();
+                            paginationControls.setVisibility(View.VISIBLE);
+                        }
                     } else {
                         Toast.makeText(getActivity(), "No data available", Toast.LENGTH_SHORT).show();
                         paginationControls.setVisibility(View.GONE);
                     }
                 } else {
-                    Toast.makeText(getActivity(), "Error getting user data", Toast.LENGTH_SHORT).show();
-                    Log.e("FirestoreError", "Error getting documents: ", task.getException()); // Add logging for errors
+                    Toast.makeText(getActivity(), "Error fetching data", Toast.LENGTH_SHORT).show();
+                    Log.e("FirestoreError", "Error getting documents: ", task.getException());
                 }
             }
         });
-
     }
+
 
     private void showPage() {
         LinearLayout searchResultsContainer = getView().findViewById(R.id.search_results_container);
@@ -255,7 +269,7 @@ public class personnel_refferal_form extends Fragment {
             DocumentSnapshot document = allDocuments.get(i);
             String name = document.getString("name");
             String program = document.getString("program");
-            String studId = document.getString("stud_id");
+            String studId = document.getString("student_id");
             String contact = document.getString("contact");
 
             addSearchResultToLayout(name, studId, contact, searchResultsContainer, program);
@@ -307,7 +321,7 @@ public class personnel_refferal_form extends Fragment {
 
     private DocumentSnapshot findUserDocumentById(String userId) {
         for (DocumentSnapshot doc : allDocuments) {
-            if (doc.getString("stud_id").equals(userId)) {
+            if (doc.getString("student_id").equals(userId)) {
                 return doc;
             }
         }

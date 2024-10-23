@@ -144,8 +144,6 @@
                 android:layout_height="53dp"
                 android:contentDescription="Scan QR Code"
                 android:src="@drawable/baseline_qr_code_scanner_24" />
-
-
         </TableRow>
 
         <!-- Scrollable Search Results Section -->
@@ -160,7 +158,6 @@
                 android:orientation="vertical"
                 android:padding="8dp" />
         </TableRow>
-
     </TableLayout>
 
     <!-- Pagination Controls -->
@@ -188,7 +185,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:orientation="horizontal"
-            android:gravity="center_vertical"/>
+            android:gravity="center_vertical" />
 
         <Button
             android:id="@+id/next_button"
@@ -196,8 +193,4 @@
             android:layout_height="wrap_content"
             android:text="Next" />
     </LinearLayout>
-
-
 </FrameLayout>
-
-
