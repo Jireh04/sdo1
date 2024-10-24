@@ -13,7 +13,13 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,8 +43,10 @@ public class form extends AppCompatActivity {
     private String scannedProgram;
     private String studentReferrer; // Declare a variable to hold the student referrer
 
+    private String firstName, lastName;
+
     // Keys for intent extras
-    private static final String STUDENT_NAME_KEY = "STUDENT_NAME";
+    private static final String STUDENT_NAME = "NAME";
     private static final String EMAIL_KEY = "EMAIL";
     private static final String CONTACT_NUM_KEY = "CONTACT_NUM";
     private static final String PROGRAM_KEY = "PROGRAM";
@@ -48,6 +56,13 @@ public class form extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.form);
+
+        EdgeToEdge.enable(this);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.form_layout), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
 
         // Initialize UI elements and Firestore
         initializeUIElements();
@@ -68,7 +83,11 @@ public class form extends AppCompatActivity {
         // Set up submit button
         Button submitButton = findViewById(R.id.submit_button);
         submitButton.setOnClickListener(v -> saveData());
+
+
+
     }
+
 
     // Initialize UI elements
     private void initializeUIElements() {
@@ -87,37 +106,46 @@ public class form extends AppCompatActivity {
     }
 
 
-
     private void populateFieldsFromIntent() {
-        // Retrieve data from the first intent
         Intent intent = getIntent();  // Get the current intent
 
         // Retrieve standard student data from the intent
-        String studentName = intent.getStringExtra(STUDENT_NAME_KEY); // Student name as referrer
+        String studentName = intent.getStringExtra("STUDENT_NAME");
         String studentEmail = intent.getStringExtra(EMAIL_KEY);
         Long studentContact = intent.getLongExtra(CONTACT_NUM_KEY, 0L);
         String studentProgram = intent.getStringExtra(PROGRAM_KEY);
         String studId = intent.getStringExtra(STUDENT_ID_KEY);
 
+        // Logging the received data for debugging purposes
+        Log.d("FormActivity", "Received Student Name: " + studentName);
+        Log.d("FormActivity", "Received Student Email: " + studentEmail);
+
+        firstName = intent.getStringExtra("FIRST_NAME");
+        lastName = intent.getStringExtra("LAST_NAME");
+
+        Log.d("FormActivity", "First name: " + firstName);
+        Log.d("FormActivity", "Last name: " + lastName);
+
         // Assign the studentName to the studentReferrer variable
-        studentReferrer = studentName != null ? studentName : "";
+        studentReferrer = (studentName != null) ? studentName : "";
 
-        // Populate fields from the first intent
-        nameField.setText(studentName != null ? studentName : "");
-        emailField.setText(studentEmail != null ? studentEmail : "");
-        contactField.setText(studentContact != 0L ? String.valueOf(studentContact) : "");
-        programField.setText(studentProgram != null ? studentProgram : "");
+        // Populate the fields with the received data, checking for null and default values
+        nameField.setText(studentName != null ? studentName : "");  // Set name if not null
+        emailField.setText(studentEmail != null ? studentEmail : "");  // Set email if not null
+        contactField.setText(studentContact != 0L ? String.valueOf(studentContact) : "");  // Set contact if not default value
+        programField.setText(studentProgram != null ? studentProgram : "");  // Set program if not null
 
-        // Retrieve scanned data
+        // Retrieve and process scanned data if available
         String scannedData = intent.getStringExtra("scannedData");
-
-        // Process the scanned data if available
-        if (scannedData != null) {
+        if (scannedData != null && !scannedData.isEmpty()) {
+            Log.d("FormActivity", "Scanned Data Found: " + scannedData); // Debugging line
             processScannedData(scannedData);
         } else {
+            Log.w("FormActivity", "No scanned data found in the intent"); // Warning log
             Toast.makeText(this, "No scanned data found", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     private void processScannedData(String scannedData) {
         // Process the scanned data
@@ -136,6 +164,8 @@ public class form extends AppCompatActivity {
 
             // Retrieve student data from UserSession
             String studentName = UserSession.getStudentName();
+            String firstName = UserSession.getFirstName();
+            String lastName = UserSession.getLastName();
             String studentEmail = UserSession.getEmail();
             Long studentContact = UserSession.getContactNum();
             String studentProgram = UserSession.getProgram();
@@ -227,6 +257,8 @@ public class form extends AppCompatActivity {
 
         detailsTable.addView(row);
     }
+
+
     private void saveData() {
         // Initialize CheckBox for privacy consent
         CheckBox privacyConsentCheckbox = findViewById(R.id.privacy_consent);

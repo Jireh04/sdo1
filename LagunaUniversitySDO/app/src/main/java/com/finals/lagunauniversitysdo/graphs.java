@@ -127,6 +127,10 @@ public class graphs {
             setupBarChart();
             setupLineChart();
         }
+
+        lineChart.animateX(1000);  // Animates X-axis over 1 second
+        barChart.animateY(1000);   // Animates Y-axis over 1.5 seconds
+
     }
 
     // Example color list (you can customize these colors)

@@ -16,10 +16,12 @@ import android.widget.Toast;
 import android.os.Handler;
 
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -45,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout drawer_layout;
     private ImageView userIcon;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private String loggedInUserId;
+    private String loggedInUserId, UserName, firstName, lastName;
     private String userName;
 
 
@@ -54,9 +56,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        EdgeToEdge.enable(this);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.drawer_layout), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
         // Retrieve loggedInUserId from the Intent
         Intent intent = getIntent();
         loggedInUserId = intent.getStringExtra("USER_ID");
+        UserName = intent.getStringExtra("STUDENT_NAME");
+        firstName = intent.getStringExtra("FIRST_NAME");
+        lastName = intent.getStringExtra("LAST_NAME");
 
         // Check if userId is retrieved successfully
         if (loggedInUserId == null) {
@@ -66,6 +78,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         Log.d("MainActivity", "Logged in user ID: " + loggedInUserId);  // Log the user ID for debugging
+        Log.d("MainActivity", "User name: " + UserName);
+        Log.d("MainActivity", "First name: " + firstName);
+        Log.d("MainActivity", "Last name: " + lastName);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

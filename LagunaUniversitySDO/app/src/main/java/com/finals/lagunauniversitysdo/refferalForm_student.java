@@ -37,7 +37,7 @@ import android.util.Log;
 
 public class refferalForm_student extends Fragment {
     private static final int REQUEST_CODE_QR_SCAN = 1;
-    private static final int ITEMS_PER_PAGE = 2;
+    private static final int ITEMS_PER_PAGE = 5;
 
     private EditText searchBar;
     private Button searchButton;
@@ -49,6 +49,7 @@ public class refferalForm_student extends Fragment {
 
     private Button prevButton, nextButton, proceedtoRefferal;
     private LinearLayout paginationControls, pageNumberContainer;
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -93,7 +94,6 @@ public class refferalForm_student extends Fragment {
 
         proceedtoRefferal.setOnClickListener(v -> proceedToReferral());
     }
-
     private void proceedToReferral() {
         // Check if any users have been added
         if (addedUserIds.isEmpty()) {
@@ -111,20 +111,11 @@ public class refferalForm_student extends Fragment {
             Intent intent = new Intent(getActivity(), form.class);
             intent.putExtra("STUDENT_NAME", studentName);
             intent.putExtra("EMAIL", email);
-
-            // Handle contact number
-            if (contactNum != null) {
-                intent.putExtra("CONTACT_NUM", contactNum);
-            } else {
-                intent.putExtra("CONTACT_NUM", 0L); // Default value
-            }
-
-            // Add program and student_id before contact number
+            intent.putExtra("CONTACT_NUM", contactNum != null ? contactNum : 0L); // Default value
             intent.putExtra("PROGRAM", program);
-            intent.putExtra("STUDENT_ID", studentId); // Place student_id here
-            intent.putExtra("CONTACT_NUM", contactNum); // Then contact number
+            intent.putExtra("STUDENT_ID", studentId);
 
-            // Pass the added user details as separate ArrayLists
+            // Prepare user details for added users
             if (!addedUserIds.isEmpty()) {
                 ArrayList<String> userNames = new ArrayList<>();
                 ArrayList<String> userPrograms = new ArrayList<>();
@@ -156,14 +147,23 @@ public class refferalForm_student extends Fragment {
 
 
 
+    private void addSearchResultToLayout(String name, String studId, Object contactObj, LinearLayout searchResultsContainer, String program) {
+        // Convert the contact field to String (check if it's a Long)
+        String contact;
+        if (contactObj instanceof Long) {
+            contact = String.valueOf(contactObj); // Convert Long to String
+        } else if (contactObj instanceof String) {
+            contact = (String) contactObj; // If it's already a String
+        } else {
+            contact = "Unknown"; // Handle any unexpected cases
+        }
 
-    private void addSearchResultToLayout(String name, String studId, String contact, LinearLayout searchResultsContainer, String program) {
         LinearLayout userLayout = new LinearLayout(getActivity());
         userLayout.setOrientation(LinearLayout.HORIZONTAL);
         userLayout.setPadding(10, 10, 10, 10);
 
         TextView userInfo = new TextView(getActivity());
-        userInfo.setText(studId + ", " + name);
+        userInfo.setText(studId + " | " + name );
         userInfo.setTextSize(18);
 
         Button actionButton = new Button(getActivity());
@@ -172,7 +172,6 @@ public class refferalForm_student extends Fragment {
         actionButton.setTextColor(Color.WHITE);
         actionButton.setAllCaps(false);
 
-        // Set layout parameters for the button with margin and size
         LinearLayout.LayoutParams buttonLayoutParams = new LinearLayout.LayoutParams(
                 150,
                 150
@@ -180,9 +179,8 @@ public class refferalForm_student extends Fragment {
         buttonLayoutParams.setMargins(16, 0, 0, 0);
         actionButton.setLayoutParams(buttonLayoutParams);
 
-        // Set larger text size and more padding
-        actionButton.setTextSize(24); // Larger text size
-        actionButton.setPadding(24, 16, 24, 16); // Increased padding
+        actionButton.setTextSize(24);
+        actionButton.setPadding(24, 16, 24, 16);
 
         actionButton.setOnClickListener(v -> handleAddButtonClick(studId, name, contact, program));
 
@@ -190,6 +188,7 @@ public class refferalForm_student extends Fragment {
         userLayout.addView(actionButton);
         searchResultsContainer.addView(userLayout);
     }
+
 
 
     private void handleAddButtonClick(String studId, String name, String contact, String program) {
@@ -216,6 +215,7 @@ public class refferalForm_student extends Fragment {
 
     private void performSearch(View rootView) {
         String searchTerm = searchBar.getText().toString().trim().toLowerCase();
+
         if (searchTerm.isEmpty()) {
             Toast.makeText(getActivity(), "Please enter a name", Toast.LENGTH_SHORT).show();
             paginationControls.setVisibility(View.GONE);
@@ -225,37 +225,50 @@ public class refferalForm_student extends Fragment {
         LinearLayout searchResultsContainer = rootView.findViewById(R.id.search_results_container);
         searchResultsContainer.removeAllViews();
 
+        // Query Firestore for the students collection
         db.collection("students").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
                     QuerySnapshot querySnapshot = task.getResult();
                     if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                        allDocuments.clear();
+                        allDocuments.clear(); // Clear the list of previous results
+
+                        // Loop through each document in the result set
                         for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                            // Extract fields safely
                             String name = document.getString("name");
                             String studentId = document.getString("student_id");
-                            String contact = document.getString("contact");
+                            String program = document.getString("program");
 
+                            // Ensure the name is not null and contains the search term (case insensitive)
                             if (name != null && name.toLowerCase().contains(searchTerm)) {
-                                allDocuments.add(document);
+                                allDocuments.add(document); // Add matching documents to the list
                             }
                         }
 
-                        currentPage.set(0); // Reset currentPage to 0
-                        showPage(rootView);
-                        updatePaginationControls();
-                        paginationControls.setVisibility(View.VISIBLE);
+                        if (allDocuments.isEmpty()) {
+                            Toast.makeText(getActivity(), "No matching results", Toast.LENGTH_SHORT).show();
+                            paginationControls.setVisibility(View.GONE);
+                        } else {
+                            // Reset to first page and show results
+                            currentPage.set(0);
+                            showPage(rootView);
+                            updatePaginationControls();
+                            paginationControls.setVisibility(View.VISIBLE);
+                        }
                     } else {
                         Toast.makeText(getActivity(), "No data available", Toast.LENGTH_SHORT).show();
                         paginationControls.setVisibility(View.GONE);
                     }
                 } else {
-                    Toast.makeText(getActivity(), "Error getting user data", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Error fetching data", Toast.LENGTH_SHORT).show();
+                    Log.e("FirestoreError", "Error getting documents: ", task.getException());
                 }
             }
         });
     }
+
 
     private void showPage(View rootView) {
         LinearLayout searchResultsContainer = rootView.findViewById(R.id.search_results_container);
@@ -274,7 +287,7 @@ public class refferalForm_student extends Fragment {
             addSearchResultToLayout(name, studentId, contact, searchResultsContainer, program);
         }
 
-        updatePaginationControls();
+        updatePaginationControls(); // Ensure pagination controls are updated after showing the page
     }
 
     private void showPreviousPage() {
@@ -293,18 +306,28 @@ public class refferalForm_student extends Fragment {
 
     private void updatePaginationControls() {
         if (prevButton != null && nextButton != null && pageNumberContainer != null) {
+            // Enable/disable buttons based on the current page
             prevButton.setEnabled(currentPage.get() > 0);
             nextButton.setEnabled((currentPage.get() + 1) * ITEMS_PER_PAGE < allDocuments.size());
 
+            // Clear previous page number indicators
             pageNumberContainer.removeAllViews();
             int totalPages = (int) Math.ceil((double) allDocuments.size() / ITEMS_PER_PAGE);
 
+            // Show page numbers
             for (int i = 0; i < totalPages; i++) {
                 TextView pageNumberTextView = new TextView(getActivity());
                 pageNumberTextView.setText(String.valueOf(i + 1));
                 pageNumberTextView.setPadding(8, 8, 8, 8);
+                // Highlight the current page
                 pageNumberTextView.setTextColor(i == currentPage.get() ? Color.BLUE : Color.BLACK);
                 pageNumberContainer.addView(pageNumberTextView);
+            }
+
+            // Disable buttons if no results are available
+            if (allDocuments.isEmpty()) {
+                prevButton.setEnabled(false);
+                nextButton.setEnabled(false);
             }
         }
     }

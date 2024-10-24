@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class PrefectReferralDashboard extends Fragment {
     private static final int REQUEST_CODE_QR_SCAN = 1;
-    private static final int ITEMS_PER_PAGE = 2;
+    private static final int ITEMS_PER_PAGE = 5;
 
     private EditText searchBar;
     private Button searchButton;
@@ -232,45 +232,65 @@ public class PrefectReferralDashboard extends Fragment {
         return null;
     }
 
+
     private void performSearch() {
         String searchTerm = searchBar.getText().toString().trim().toLowerCase();
+
+        // Check if the search term is empty
         if (searchTerm.isEmpty()) {
             Toast.makeText(getActivity(), "Please enter a name", Toast.LENGTH_SHORT).show();
             paginationControls.setVisibility(View.GONE);
             return;
         }
 
+        // Get the root view's search results container and clear it
         LinearLayout searchResultsContainer = getView().findViewById(R.id.search_results_container);
         searchResultsContainer.removeAllViews();
 
+        // Query Firestore for the students collection
         db.collection("students").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 QuerySnapshot querySnapshot = task.getResult();
                 if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                    allDocuments.clear();
+                    allDocuments.clear(); // Clear previous results
+
+                    // Loop through each document in the result set
                     for (DocumentSnapshot document : querySnapshot.getDocuments()) {
                         String name = document.getString("name");
                         String studId = document.getString("student_id");
                         String contact = document.getString("contact");
 
+                        // Ensure the name is not null and contains the search term (case insensitive)
                         if (name != null && name.toLowerCase().contains(searchTerm)) {
-                            allDocuments.add(document);
+                            allDocuments.add(document); // Add matching documents to the list
+                            Log.d("SearchResults", "Found Student: " + name + " with ID: " + studId + " and Contact: " + contact);
                         }
                     }
 
-                    currentPage.set(0);
-                    showPage();
-                    updatePaginationControls();
-                    paginationControls.setVisibility(View.VISIBLE);
+                    // Handle case where no matching documents were found
+                    if (allDocuments.isEmpty()) {
+                        Toast.makeText(getActivity(), "No matching results", Toast.LENGTH_SHORT).show();
+                        paginationControls.setVisibility(View.GONE);
+                    } else {
+                        // Reset to the first page and show results
+                        currentPage.set(0);
+                        showPage(); // No need for rootView, using getView()
+                        updatePaginationControls();
+                        paginationControls.setVisibility(View.VISIBLE);
+                    }
                 } else {
+                    // No data available case
                     Toast.makeText(getActivity(), "No data available", Toast.LENGTH_SHORT).show();
                     paginationControls.setVisibility(View.GONE);
                 }
             } else {
-                Toast.makeText(getActivity(), "Error getting user data", Toast.LENGTH_SHORT).show();
+                // Error while fetching data
+                Toast.makeText(getActivity(), "Error fetching data", Toast.LENGTH_SHORT).show();
+                Log.e("FirestoreError", "Error getting documents: ", task.getException());
             }
         });
     }
+
 
     private void showPage() {
         LinearLayout searchResultsContainer = getView().findViewById(R.id.search_results_container);

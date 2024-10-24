@@ -41,27 +41,24 @@ public class dashboard_prefect extends Fragment {
 
     private graphs graphObj;
 
-    private int currentPage = 1;
-    private int pageSize = 2;  // Number of results per page
-    private int totalPages = 0;
-    private String lastVisibleStudentId = null;  // Used for pagination
+    private int currentPage = 1;  // Current page number
+    private int pageSize = 5;      // Number of results per page
+    private int totalPages = 0;     // Total number of pages
+    private String lastVisibleStudentId = null; // For pagination
 
+    private Button prevButton, nextButton;
 
     public dashboard_prefect() {
         // Required empty public constructor
     }
 
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_dashboard_prefect, container, false);
 
         // Initialize the graphs class
         graphObj = new graphs(rootView);
-
-        // Fetch data and set up charts
         graphObj.fetchDataFromFirestore();
 
         // Initialize Firebase Firestore
@@ -73,6 +70,8 @@ public class dashboard_prefect extends Fragment {
         searchResultsContainer = rootView.findViewById(R.id.search_results_container);
         referralSection = rootView.findViewById(R.id.referral_section);  // Referral buttons container
         pickQrCodeButton = rootView.findViewById(R.id.pick_qr_code_button);  // QR code scanner button
+        prevButton = rootView.findViewById(R.id.prev_button);
+        nextButton = rootView.findViewById(R.id.next_button);
 
         Button referToGuidanceButton = rootView.findViewById(R.id.referToGuidance);
         Button viewReporters = rootView.findViewById(R.id.ViewReporters);
@@ -86,10 +85,12 @@ public class dashboard_prefect extends Fragment {
         referToGuidanceButton.setOnClickListener(v -> openReferralDashboard());
         viewReporters.setOnClickListener(v -> openViewReporters());
 
-
+        updatePaginationButtons();
 
         return rootView;
     }
+
+
     private void searchStudents() {
         // Get the search query
         String queryText = searchBar.getText().toString().trim().toLowerCase();
@@ -108,19 +109,25 @@ public class dashboard_prefect extends Fragment {
             CollectionReference studentsRef = db.collection("students");
 
             // Fetch students from Firestore
-            studentsRef.get()  // Fetch all students (you can modify this query if needed)
+            studentsRef.orderBy("student_id")  // Ensure there's a field to order by
+                    .startAfter(lastVisibleStudentId)  // Start after the last visible student ID
+                    .limit(pageSize)  // Limit to the number of results per page
+                    .get()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             QuerySnapshot querySnapshot = task.getResult();
+                            totalPages = (int) Math.ceil((double) querySnapshot.size() / pageSize);
+                            updatePaginationButtons(); // Update button visibility
                             boolean foundResults = false;
 
                             if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                                // Iterate through the documents and filter by name (case-insensitive and partial match)
+                                // Iterate through the documents
                                 boolean isFirstItem = true; // Flag to track the first item
+                                lastVisibleStudentId = null; // Reset for new search
 
                                 for (QueryDocumentSnapshot document : querySnapshot) {
                                     String name = document.getString("name");
-                                    String studentId = document.getString("student_id"); // Changed to student_id
+                                    String studentId = document.getString("student_id");
                                     String program = document.getString("program");
                                     String year = document.getString("year");
                                     String block = document.getString("block");
@@ -145,13 +152,10 @@ public class dashboard_prefect extends Fragment {
 
                                         // Create a TextView for the student's ID and name
                                         TextView studentTextView = new TextView(getContext());
-                                        studentTextView.setText( studentId + " |  " + name + " | " + program);
+                                        studentTextView.setText(studentId + " |  " + name + " | " + program);
                                         studentTextView.setTextSize(16);
                                         studentTextView.setLayoutParams(new LinearLayout.LayoutParams(
                                                 0, LinearLayout.LayoutParams.WRAP_CONTENT, 1)); // Make it take all the available space
-
-                                        // Add top padding to the TextView itself (if needed)
-                                        studentTextView.setPadding(0, 10, 0, 0);  // Apply top padding to the TextView
 
                                         // Make the TextView clickable
                                         studentTextView.setOnClickListener(v -> {
@@ -167,8 +171,8 @@ public class dashboard_prefect extends Fragment {
 
                                         // Set the onClickListener for the button
                                         addButton.setOnClickListener(v -> {
-                                            // Show the Add Violator dialog when the button is clicked, passing the student details
-                                            showAddViolatorDialog(studentId, name); // Pass studentId and name
+                                            // Show the Add Violator dialog when the button is clicked
+                                            showAddViolatorDialog(studentId, name);
                                         });
 
                                         // Add the TextView and Button to the LinearLayout
@@ -177,20 +181,18 @@ public class dashboard_prefect extends Fragment {
 
                                         // Add the studentLayout to the searchResultsContainer
                                         searchResultsContainer.addView(studentLayout);
+
+                                        // Store the last visible student ID for pagination
+                                        lastVisibleStudentId = document.getString("student_id");
                                     }
                                 }
 
-                                // If no students matched, show a "No students found" message
-                                if (!foundResults) {
-                                    TextView noResultsTextView = new TextView(getContext());
-                                    noResultsTextView.setText("No students found matching '" + queryText + "'");
-                                    noResultsTextView.setPadding(0, 180, 0, 0); // Add top padding
-                                    searchResultsContainer.addView(noResultsTextView);
-                                }
+                                // Check for pagination
+                                totalPages = (int) Math.ceil((double) querySnapshot.size() / pageSize);
                             } else {
-                                // No students found in Firestore
+                                // If no students matched, show a "No students found" message
                                 TextView noResultsTextView = new TextView(getContext());
-                                noResultsTextView.setText("No students found.");
+                                noResultsTextView.setText("No students found matching '" + queryText + "'");
                                 noResultsTextView.setPadding(0, 180, 0, 0); // Add top padding
                                 searchResultsContainer.addView(noResultsTextView);
                             }
@@ -210,6 +212,39 @@ public class dashboard_prefect extends Fragment {
             searchResultsContainer.addView(emptySearchTextView);
         }
     }
+
+    // Add this method to manage button visibility and listeners
+    private void updatePaginationButtons() {
+        if (currentPage > 1) {
+            prevButton.setVisibility(View.VISIBLE); // Show previous button
+        } else {
+            prevButton.setVisibility(View.GONE); // Hide previous button
+        }
+
+        if (currentPage < totalPages) {
+            nextButton.setVisibility(View.VISIBLE); // Show next button
+        } else {
+            nextButton.setVisibility(View.GONE); // Hide next button
+        }
+
+        // Set onClickListeners for pagination buttons
+        prevButton.setOnClickListener(v -> {
+            if (currentPage > 1) {
+                currentPage--; // Decrement page number
+                searchStudents(); // Re-fetch students for the previous page
+            }
+        });
+
+        nextButton.setOnClickListener(v -> {
+            if (currentPage < totalPages) {
+                currentPage++; // Increment page number
+                searchStudents(); // Re-fetch students for the next page
+            }
+        });
+    }
+
+
+
     private void fetchViolations(String studentId, String name, String program, String year, String block) {
         // Reference to the Firestore collections
         CollectionReference studentReferrals = db.collection("student_refferal_history");
@@ -415,8 +450,5 @@ public class dashboard_prefect extends Fragment {
                 .commit();
 
     }
-
-
-
 
 }

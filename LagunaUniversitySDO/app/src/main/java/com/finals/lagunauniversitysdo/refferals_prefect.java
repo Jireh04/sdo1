@@ -587,10 +587,23 @@ public class refferals_prefect extends Fragment {
     // Fetch accepted referrals from Firestore
     public void onAcceptedClick() {
         // Get the TableLayout and ScrollView for displaying accepted referrals
-        TableLayout tableLayoutAccepted = getView().findViewById(R.id.table_layout_accepted);
-        ScrollView scrollViewAccepted = getView().findViewById(R.id.scroll_view_accepted);
+        TableLayout tableLayoutAccepted = new TableLayout(getContext());
+        tableLayoutAccepted.setLayoutParams(new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.MATCH_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT
+        ));
 
-        // Get views for pending and rejected
+        HorizontalScrollView horizontalScrollView = new HorizontalScrollView(getActivity());
+        horizontalScrollView.setLayoutParams(new HorizontalScrollView.LayoutParams(
+                HorizontalScrollView.LayoutParams.MATCH_PARENT,
+                HorizontalScrollView.LayoutParams.WRAP_CONTENT
+        ));
+
+        // Create a new LinearLayout for accepted referrals
+        LinearLayout linearLayoutAccepted = getView().findViewById(R.id.linear_layout_accepted);
+        linearLayoutAccepted.removeAllViews();  // Clear previous views
+
+        // Get views for pending and accepted
         LinearLayout linearLayoutPending = getView().findViewById(R.id.linear_layout_pending);
         ScrollView scrollViewPending = getView().findViewById(R.id.scroll_view_pending);
         LinearLayout linearLayoutRejected = getView().findViewById(R.id.linear_layout_rejected);
@@ -602,11 +615,7 @@ public class refferals_prefect extends Fragment {
         linearLayoutRejected.removeAllViews();
         scrollViewRejected.setVisibility(View.GONE);
 
-        // Show the ScrollView for accepted
-        scrollViewAccepted.setVisibility(View.VISIBLE);
-        tableLayoutAccepted.removeAllViews();
-
-        // Add table header for better readability
+        // Add headers for the TableLayout
         TableRow headerRow = new TableRow(getContext());
         headerRow.setPadding(16, 16, 16, 16);
 
@@ -636,7 +645,11 @@ public class refferals_prefect extends Fragment {
         // Add header row to the table
         tableLayoutAccepted.addView(headerRow);
 
-        // Query both Firestore collections for "accepted" status
+        // Show the HorizontalScrollView for accepted
+        linearLayoutAccepted.addView(horizontalScrollView);
+        horizontalScrollView.addView(tableLayoutAccepted);
+
+        // Query Firestore for accepted referrals
         db.collection("student_refferal_history")
                 .whereEqualTo("status", "accepted")
                 .get()
@@ -681,6 +694,7 @@ public class refferals_prefect extends Fragment {
                     }
                 });
 
+        // Fetch from personnel_refferal_history if needed
         db.collection("personnel_refferal_history")
                 .whereEqualTo("status", "accepted")
                 .get()
@@ -727,6 +741,7 @@ public class refferals_prefect extends Fragment {
     }
 
 
+
     // Fetch rejected referrals from Firestore
     public void onRejectedClick() {
         // Get the LinearLayout and ScrollView for displaying rejected referrals
@@ -748,6 +763,14 @@ public class refferals_prefect extends Fragment {
         // Show the ScrollView for rejected
         scrollViewRejected.setVisibility(View.VISIBLE);
         linearLayoutRejected.removeAllViews();
+
+
+        // Create a HorizontalScrollView for the TableLayout
+        HorizontalScrollView horizontalScrollView = new HorizontalScrollView(getActivity());
+        horizontalScrollView.setLayoutParams(new HorizontalScrollView.LayoutParams(
+                HorizontalScrollView.LayoutParams.MATCH_PARENT,
+                HorizontalScrollView.LayoutParams.WRAP_CONTENT
+        ));
 
         // Create a TableLayout for rejected referrals
         TableLayout tableLayout = new TableLayout(getActivity());
@@ -869,8 +892,12 @@ public class refferals_prefect extends Fragment {
                     }
                 });
 
-        // Add the TableLayout to the LinearLayout for rejected referrals
-        linearLayoutRejected.addView(tableLayout);
+        // Add the TableLayout to the HorizontalScrollView
+        horizontalScrollView.addView(tableLayout);
+
+        // Add the HorizontalScrollView to the LinearLayout for rejected referrals
+        linearLayoutRejected.addView(horizontalScrollView);
     }
+
 
 }
