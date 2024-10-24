@@ -19,10 +19,10 @@ public class UserSession {
         student_id = id;
     }
 
-    public static void setStudentDetails(String firstName, String lastName, String email, Long contact, String program, String name) {
+    public static void setStudentDetails(String firstName, String lastName, String email, Long contacts, String program, String name) {
         studentName = name;
         UserSession.email = email;
-        contactNum = contact;
+        contactNum = contacts;
         UserSession.program = program;
         UserSession.firstName = firstName;
         UserSession.lastName = lastName;

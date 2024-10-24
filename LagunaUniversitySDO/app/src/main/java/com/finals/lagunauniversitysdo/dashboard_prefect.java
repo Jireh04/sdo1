@@ -360,6 +360,7 @@ public class dashboard_prefect extends Fragment {
         Spinner violationSpinner = dialogView.findViewById(R.id.violationSpinner);
         EditText remarksEditText = dialogView.findViewById(R.id.remarksEditText);
         Button submitButton = dialogView.findViewById(R.id.submitButton);
+        String status = "accepted";
 
         // Set the current date and time automatically in the dateTimeEditText field
         Calendar calendar = Calendar.getInstance();
@@ -368,7 +369,7 @@ public class dashboard_prefect extends Fragment {
         dateTimeEditText.setText(currentDateAndTime);
 
         // Create a list of violations
-        String[] violations = { "Light Offense", "Serious Offense", "Major Offense"};
+        String[] violations = { "-select violation-", "Light Offense", "Serious Offense", "Major Offense"};
 
         // Set up an ArrayAdapter to populate the Spinner
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, violations);
@@ -393,7 +394,7 @@ public class dashboard_prefect extends Fragment {
             String remarks = remarksEditText.getText().toString().trim();
 
             // Simple validation: check if required fields are empty
-            if (dateTime.isEmpty() || reporter.isEmpty() || location.isEmpty() || violation.equals("-select violation-")) {
+            if (dateTime.isEmpty() || reporter.isEmpty() || location.isEmpty() || violation.equals("-select violation-") || remarks.isEmpty()) {
                 Toast.makeText(getContext(), "Please fill in all required fields.", Toast.LENGTH_SHORT).show();
             } else {
                 // Prepare the data to be saved to Firestore
@@ -408,6 +409,7 @@ public class dashboard_prefect extends Fragment {
                 violatorData.put("remarks", remarks);
                 violatorData.put("student_id", studId);  // Add the studentId
                 violatorData.put("student_name", name);  // Add the studentName
+                violatorData.put("status", status);  // Add the status
 
                 // Add the data to the 'prefect_referral_history' collection
                 db.collection("prefect_referral_history")  // Ensure this collection name is correct

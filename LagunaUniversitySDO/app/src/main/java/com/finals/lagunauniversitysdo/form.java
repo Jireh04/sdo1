@@ -24,6 +24,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -33,7 +34,7 @@ import android.widget.CheckBox;
 public class form extends AppCompatActivity {
 
     private Spinner termSpinner, violationSpinner;
-    private EditText dateField, nameField, emailField, contactField, programField;
+    private EditText dateField, nameField, emailField, contactField, programField, remarksField;
     private TextView violatorsName, violatorsProgram, violatorsStudID, violatorsContact;
     private TableLayout detailsTable;
     private FirebaseFirestore firestore;
@@ -43,7 +44,7 @@ public class form extends AppCompatActivity {
     private String scannedProgram;
     private String studentReferrer; // Declare a variable to hold the student referrer
 
-    private String firstName, lastName;
+    private String firstName, lastName, studentId;
 
     // Keys for intent extras
     private static final String STUDENT_NAME = "NAME";
@@ -98,6 +99,7 @@ public class form extends AppCompatActivity {
         emailField = findViewById(R.id.email_field);
         contactField = findViewById(R.id.contact_field);
         programField = findViewById(R.id.department_field);
+        remarksField = findViewById(R.id.remarks_field);
         detailsTable = findViewById(R.id.details_table);
         violatorsName = findViewById(R.id.violators_name);
         violatorsProgram = findViewById(R.id.violators_program);
@@ -114,17 +116,11 @@ public class form extends AppCompatActivity {
         String studentEmail = intent.getStringExtra(EMAIL_KEY);
         Long studentContact = intent.getLongExtra(CONTACT_NUM_KEY, 0L);
         String studentProgram = intent.getStringExtra(PROGRAM_KEY);
-        String studId = intent.getStringExtra(STUDENT_ID_KEY);
+        studentId = intent.getStringExtra(STUDENT_ID_KEY);
 
         // Logging the received data for debugging purposes
         Log.d("FormActivity", "Received Student Name: " + studentName);
         Log.d("FormActivity", "Received Student Email: " + studentEmail);
-
-        firstName = intent.getStringExtra("FIRST_NAME");
-        lastName = intent.getStringExtra("LAST_NAME");
-
-        Log.d("FormActivity", "First name: " + firstName);
-        Log.d("FormActivity", "Last name: " + lastName);
 
         // Assign the studentName to the studentReferrer variable
         studentReferrer = (studentName != null) ? studentName : "";
@@ -169,7 +165,7 @@ public class form extends AppCompatActivity {
             String studentEmail = UserSession.getEmail();
             Long studentContact = UserSession.getContactNum();
             String studentProgram = UserSession.getProgram();
-            String studentId = UserSession.getStudentId();
+            studentId = UserSession.getStudentId();
 
             // Set studentReferrer to the name retrieved from UserSession
             this.studentReferrer = studentName != null ? studentName : "";
@@ -277,14 +273,29 @@ public class form extends AppCompatActivity {
         String term = termSpinner.getSelectedItem().toString();
         String violation = violationSpinner.getSelectedItem().toString();
         String date = dateField.getText().toString().trim();
-        String studId = violatorsStudID.getText().toString().trim();
+        String studId = studentId;
         String status = "pending"; // Default status
 
         // Retrieve remarks from remarks_field
         String remarks = ((EditText) findViewById(R.id.remarks_field)).getText().toString().trim();
 
+        // Retrieve checkbox states and create a single string for user concerns
+        String userConcern = "";
+        CheckBox disciplineCheckbox = findViewById(R.id.discipline_concerns);
+        CheckBox behavioralCheckbox = findViewById(R.id.behavioral_concerns);
+        CheckBox learningCheckbox = findViewById(R.id.learning_difficulty);
+
+        // Build the user concern string based on checked checkboxes
+        if (disciplineCheckbox.isChecked()) {
+            userConcern = "Discipline Concerns";
+        } else if (behavioralCheckbox.isChecked()) {
+            userConcern = "Behavioral Concerns";
+        } else if (learningCheckbox.isChecked()) {
+            userConcern = "Learning Difficulty";
+        }// Validate that at least one concern has been selected
+
         // Validate inputs
-        if (!validateInputs(name, email, contactString, program)) {
+        if (!validateInputs(name, email, contactString, program, remarks, userConcern)) {
             return; // Exit the method if validation fails
         }
 
@@ -303,20 +314,7 @@ public class form extends AppCompatActivity {
         ArrayList<String> addedUserPrograms = getIntent().getStringArrayListExtra("ADDED_USER_PROGRAMS");
         ArrayList<String> addedUserStudentIds = getIntent().getStringArrayListExtra("ADDED_USER_STUDENT_IDS");
 
-        // Retrieve checkbox states and create a single string for user concerns
-        String userConcern = "";
-        CheckBox disciplineCheckbox = findViewById(R.id.discipline_concerns);
-        CheckBox behavioralCheckbox = findViewById(R.id.behavioral_concerns);
-        CheckBox learningCheckbox = findViewById(R.id.learning_difficulty);
 
-        // Build the user concern string based on checked checkboxes
-        if (disciplineCheckbox.isChecked()) {
-            userConcern = "Discipline Concerns";
-        } else if (behavioralCheckbox.isChecked()) {
-            userConcern = "Behavioral Concerns";
-        } else if (learningCheckbox.isChecked()) {
-            userConcern = "Learning Difficulty";
-        }
 
         // Check if there are added students and add them to Firestore
         if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudentIds != null) {
@@ -333,18 +331,27 @@ public class form extends AppCompatActivity {
                 studentData.put("remarks", remarks); // Add remarks to the student data
                 studentData.put("student_referrer", studentReferrer); // Add student_referrer to Firestore data
 
-                // Add each student's data directly to the Firestore collection
-                firestore.collection("student_refferal_history")
-                        .add(studentData)
+                // Get current date and time to use as the document ID for the referral
+                String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date());
+
+                Log.d("Firestore", "Student ID: " + studId);
+
+                firestore.collection("students")
+                        .document(studId) // Use student number as document ID
+                        .collection("student_refferal_history") // Subcollection for the student's referrals
+                        .document(dateTimeId) // Document ID based on date and time
+                        .set(studentData)
                         .addOnSuccessListener(documentReference -> {
                             Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
                             // Just finish the current activity to return to the previous one
                             finish();
+                            clearFields();
                         })
                         .addOnFailureListener(e -> {
                             Toast.makeText(this, "Failed to submit data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             Log.e("Firestore", "Error adding document", e);
                         });
+
             }
         }
 
@@ -369,6 +376,7 @@ public class form extends AppCompatActivity {
                         Toast.makeText(this, "Scanned student data submitted successfully", Toast.LENGTH_SHORT).show();
                         // Just finish the current activity to return to the previous one
                         finish();
+                        clearFields();
                     })
                     .addOnFailureListener(e -> {
                         Toast.makeText(this, "Failed to submit scanned student data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -379,7 +387,7 @@ public class form extends AppCompatActivity {
 
 
 
-    private boolean validateInputs(String name, String email, String contact, String program) {
+    private boolean validateInputs(String name, String email, String contact, String program, String remarks, String userConcern) {
         if (TextUtils.isEmpty(name)) {
             nameField.setError("Name is required");
             return false;
@@ -394,6 +402,14 @@ public class form extends AppCompatActivity {
         }
         if (TextUtils.isEmpty(program)) {
             programField.setError("Program is required");
+            return false;
+        }
+        if (TextUtils.isEmpty(remarks)) {
+            remarksField.setError("Remarks is required");
+            return false;
+        }
+        if (userConcern.isEmpty()) {
+            Toast.makeText(this, "Please select at least one concern.", Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;

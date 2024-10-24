@@ -1,5 +1,6 @@
 package com.finals.lagunauniversitysdo;
 
+import java.util.Date;
 import java.util.Set; // Import the Set class
 import java.util.List; // Import the List class
 import java.util.ArrayList; // Import the ArrayList class
@@ -30,7 +31,7 @@ import android.widget.CheckBox;
 public class PersonnelForm extends AppCompatActivity {
 
     private Spinner termSpinner, violationSpinner;
-    private EditText dateField, nameField, emailField, contactField, programField;
+    private EditText dateField, nameField, emailField, contactField, programField, remarksField;
     private TextView violatorsName, violatorsProgram, violatorsStudID, violatorsContact;
     private TableLayout detailsTable;
     private FirebaseFirestore firestore;
@@ -38,7 +39,7 @@ public class PersonnelForm extends AppCompatActivity {
     private String scannedContact;
     private String scannedStudentNo;
     private String scannedProgram;
-    private String personnelReferrer; // Change the variable name here
+    private String personnelReferrer, personnelID; // Change the variable name here
 
 
     // Keys for intent extras
@@ -83,6 +84,7 @@ public class PersonnelForm extends AppCompatActivity {
         emailField = findViewById(R.id.email_field);
         contactField = findViewById(R.id.contact_field);
         programField = findViewById(R.id.department_field);
+        remarksField = findViewById(R.id.remarks_field);
         detailsTable = findViewById(R.id.details_table);
         violatorsName = findViewById(R.id.violators_name);
         violatorsProgram = findViewById(R.id.violators_program);
@@ -277,8 +279,23 @@ public class PersonnelForm extends AppCompatActivity {
         // Retrieve remarks from remarks_field
         String remarks = ((EditText) findViewById(R.id.remarks_field)).getText().toString().trim();
 
+        // Retrieve checkbox states and create a single string for user concerns
+        String userConcern = "";
+        CheckBox disciplineCheckbox = findViewById(R.id.discipline_concerns);
+        CheckBox behavioralCheckbox = findViewById(R.id.behavioral_concerns);
+        CheckBox learningCheckbox = findViewById(R.id.learning_difficulty);
+
+        // Build the user concern string based on checked checkboxes
+        if (disciplineCheckbox.isChecked()) {
+            userConcern = "Discipline Concerns";
+        } else if (behavioralCheckbox.isChecked()) {
+            userConcern = "Behavioral Concerns";
+        } else if (learningCheckbox.isChecked()) {
+            userConcern = "Learning Difficulty";
+        }// Validate that at least one concern has been selected
+
         // Validate inputs
-        if (!validateInputs(name, email, contactString, program)) {
+        if (!validateInputs(name, email, contactString, program, remarks, userConcern)) {
             return; // Exit the method if validation fails
         }
 
@@ -292,7 +309,11 @@ public class PersonnelForm extends AppCompatActivity {
         }
 
         // Retrieve personnel name for referrer
-        String personnelReferrer = getIntent().getStringExtra("PERSONNEL_NAME_KEY");
+        personnelReferrer = getIntent().getStringExtra("PERSONNEL_NAME_KEY");
+        personnelID = getIntent().getStringExtra("PERSONNEL_ID");
+
+        Log.d("PersonnelReferrer", "Personnel ID: " + personnelID);
+
         if (personnelReferrer == null) {
             personnelReferrer = ""; // Default to empty if not found
         }
@@ -302,6 +323,8 @@ public class PersonnelForm extends AppCompatActivity {
         ArrayList<String> addedUserContacts = getIntent().getStringArrayListExtra("ADDED_USER_CONTACTS");
         ArrayList<String> addedUserPrograms = getIntent().getStringArrayListExtra("ADDED_USER_PROGRAMS");
         ArrayList<String> addedUserStudentIds = getIntent().getStringArrayListExtra("ADDED_USER_STUDENT_IDS");
+
+
 
         // Check if there are added students and add them to Firestore
         if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudentIds != null) {
@@ -315,14 +338,22 @@ public class PersonnelForm extends AppCompatActivity {
                     studentData.put("violation", violation);
                     studentData.put("date", date);
                     studentData.put("status", status);
+                    studentData.put("user_concern", userConcern); // Add user concern to the student data
                     studentData.put("remarks", remarks);
                     studentData.put("personnel_referrer", personnelReferrer); // Add personnel referrer
 
+                    // Get current date and time to use as the document ID for the referral
+                    String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date());
+
                     // Add each student's data directly to the Firestore collection
-                    firestore.collection("personnel_refferal_history")
-                            .add(studentData)
+                    firestore.collection("personnel")
+                            .document(personnelID) // Use personnel number as document ID
+                            .collection("personnel_refferal_history") // Subcollection for the personnel's referrals
+                            .document(dateTimeId) // Document ID based on date and time
+                            .set(studentData)
                             .addOnSuccessListener(documentReference -> {
                                 Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
+                                finish();
                             })
                             .addOnFailureListener(e -> {
                                 Toast.makeText(this, "Failed to submit data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -361,16 +392,22 @@ public class PersonnelForm extends AppCompatActivity {
                             scannedStudentData.put("remarks", remarks); // Add remarks to the scanned student data
                             scannedStudentData.put("personnel_referrer", personnelReferrer); // Add personnel referrer
 
-                            // Add scanned student's data directly to the Firestore collection
-                            firestore.collection("personnel_refferal_history")
-                                    .add(scannedStudentData)
+                            // Get current date and time to use as the document ID for the referral
+                            String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date());
+
+                            // Add each student's data directly to the Firestore collection
+                            firestore.collection("personnel")
+                                    .document(personnelID) // Use personnel number as document ID
+                                    .collection("personnel_refferal_history") // Subcollection for the personnel's referrals
+                                    .document(dateTimeId) // Document ID based on date and time
+                                    .set(scannedStudentData)
                                     .addOnSuccessListener(documentReference -> {
-                                        Toast.makeText(this, "Scanned student data submitted successfully", Toast.LENGTH_SHORT).show();
-                                        finish(); // Finish the current activity to return to the previous one
+                                        Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
+                                        finish();
                                     })
                                     .addOnFailureListener(e -> {
-                                        Toast.makeText(this, "Failed to submit scanned student data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                        Log.e("Firestore", "Error adding scanned student document", e);
+                                        Toast.makeText(this, "Failed to submit data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                        Log.e("Firestore", "Error adding document", e);
                                     });
                         } else {
                             // Student already exists
@@ -405,23 +442,29 @@ public class PersonnelForm extends AppCompatActivity {
                 studentData.put("remarks", remarks); // Add remarks if needed
                 studentData.put("personnel_referrer", personnelReferrer); // Add personnel referrer
 
+                // Get current date and time to use as the document ID for the referral
+                String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date());
+
                 // Add each student's data directly to the Firestore collection
-                firestore.collection("personnel_refferal_history")
-                        .add(studentData)
+                firestore.collection("personnel")
+                        .document(personnelID) // Use personnel number as document ID
+                        .collection("personnel_refferal_history") // Subcollection for the personnel's referrals
+                        .document(dateTimeId) // Document ID based on date and time
+                        .set(studentData)
                         .addOnSuccessListener(documentReference -> {
-                            Toast.makeText(this, "Displayed student data submitted successfully", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
                             finish();
                         })
                         .addOnFailureListener(e -> {
-                            Toast.makeText(this, "Failed to submit displayed student data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            Log.e("Firestore", "Error adding displayed student document", e);
+                            Toast.makeText(this, "Failed to submit data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Log.e("Firestore", "Error adding document", e);
                         });
             }
         }
     }
 
 
-    private boolean validateInputs(String name, String email, String contact, String program) {
+    private boolean validateInputs(String name, String email, String contact, String program, String remarks, String userConcern) {
         if (TextUtils.isEmpty(name)) {
             nameField.setError("Name is required");
             return false;
@@ -438,6 +481,14 @@ public class PersonnelForm extends AppCompatActivity {
             programField.setError("Program is required");
             return false;
         }
+        if (TextUtils.isEmpty(remarks)) {
+            remarksField.setError("Remarks is required");
+            return false;
+        }
+        if (userConcern.isEmpty()) {
+            Toast.makeText(this, "Please select at least one concern.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
         return true;
     }
 
@@ -448,6 +499,7 @@ public class PersonnelForm extends AppCompatActivity {
         emailField.setText("");
         contactField.setText("");
         programField.setText("");
+        remarksField.setText("");
         termSpinner.setSelection(0); // Reset to first item
         violationSpinner.setSelection(0); // Reset to first item
         dateField.setText("");

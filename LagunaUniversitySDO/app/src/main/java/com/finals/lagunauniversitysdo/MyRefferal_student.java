@@ -1,6 +1,7 @@
 package com.finals.lagunauniversitysdo;
 
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,12 +53,15 @@ public class MyRefferal_student extends Fragment {
     }
 
     private void fetchRefferalData() {
-        // Clear any existing rows to avoid duplicates
-        tableLayout.removeAllViews();
+        // Remove all rows except the first one (header)
+        if (tableLayout.getChildCount() > 1) {
+            tableLayout.removeViews(1, tableLayout.getChildCount() - 1); // Keep the first row (header)
+        }
 
         // Fetch data from Firestore 'student_refferal_history' collection for the logged-in user
-        db.collection("student_refferal_history")
-                .whereEqualTo("student_referrer", studentName) // Filter by the logged-in user's full name
+        db.collection("students")
+                .document(userId)
+                .collection("student_refferal_history")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<com.google.firebase.firestore.QuerySnapshot>() {
                     @Override
@@ -100,6 +104,7 @@ public class MyRefferal_student extends Fragment {
         TextView studentNoTextView = new TextView(getContext());
         studentNoTextView.setText(studentNo);
         studentNoTextView.setPadding(8, 8, 8, 8);
+        studentNoTextView.setGravity(Gravity.CENTER);
 
         TextView nameTextView = new TextView(getContext());
         nameTextView.setText(name);
@@ -108,6 +113,7 @@ public class MyRefferal_student extends Fragment {
         TextView statusTextView = new TextView(getContext());
         statusTextView.setText(status);
         statusTextView.setPadding(8, 8, 8, 8);
+        statusTextView.setGravity(Gravity.CENTER);
 
         // Add the TextViews to the TableRow
         tableRow.addView(dateReportedTextView);

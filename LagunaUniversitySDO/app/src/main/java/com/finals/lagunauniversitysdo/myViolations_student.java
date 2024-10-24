@@ -31,8 +31,22 @@ public class myViolations_student extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = FirebaseFirestore.getInstance();
-        currentUserId = getCurrentUserId();
-        Log.d("CurrentUserID", currentUserId != null ? currentUserId : "No user logged in");
+
+
+        // Retrieve the user ID from the Intent
+        if (getActivity() != null) {
+            String userId = getActivity().getIntent().getStringExtra("USER_ID");
+            if (userId != null) {
+                currentUserId = userId;
+                Log.d("CurrentUserID", currentUserId);
+            } else {
+                Log.e("UserError", "User ID is null.");
+                // Handle the situation where user ID is not passed
+            }
+        }
+
+        // Initialize Firestore or other components
+        db = FirebaseFirestore.getInstance();
     }
 
     @Override
@@ -47,14 +61,18 @@ public class myViolations_student extends Fragment {
     private void fetchViolations(View view) {
         LinearLayout violationsLayout = view.findViewById(R.id.violations);
 
-        // Fetch violations from all collections
+        // Fetch violations with status "accepted" from all collections
         fetchViolationsFromCollection("student_refferal_history", violationsLayout);
         fetchViolationsFromCollection("personnel_refferal_history", violationsLayout);
         fetchViolationsFromCollection("prefect_refferal_history", violationsLayout);
     }
 
     private void fetchViolationsFromCollection(String collectionName, LinearLayout violationsLayout) {
-        Log.d("FirestoreQuery", "Fetching violations from: " + collectionName + " for user: " + currentUserId);
+        // Remove all rows except the first one (header)
+        if (violationsLayout.getChildCount() > 1) {
+            violationsLayout.removeViews(1, violationsLayout.getChildCount() - 1); // Keep the first row (header)
+        }
+        Log.d("FirestoreQuery", "Fetching accepted violations from: " + collectionName + " for user: " + currentUserId);
 
         // Check if the user ID is null
         if (currentUserId == null) {
@@ -64,6 +82,7 @@ public class myViolations_student extends Fragment {
 
         db.collection(collectionName)
                 .whereEqualTo("student_id", currentUserId)
+                .whereEqualTo("status", "accepted") // Add this line to filter by status
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -73,8 +92,8 @@ public class myViolations_student extends Fragment {
                                 // Log document data for debugging
                                 Log.d("FirestoreData", document.getId() + " => " + document.getData());
 
-                                String violation = document.getString("violation");
-                                String typeOfOffense = document.getString("type_of_offense");
+                                String violation = document.getString("remarks");
+                                String typeOfOffense = document.getString("violation");
                                 String status = document.getString("status");
                                 String dateOfIncident = document.getString("date"); // Ensure field exists
 
@@ -102,7 +121,7 @@ public class myViolations_student extends Fragment {
         TextView dateTextView = (TextView) violationRow.getChildAt(4);
 
         // Set the data
-        violationIndex.setText(String.valueOf(layout.getChildCount() + 1)); // Set index starting from 1
+        violationIndex.setText(String.valueOf(layout.getChildCount())); // Set index starting from 1
         violationTextView.setText(violation != null ? violation : "N/A");
         offenseTypeTextView.setText(typeOfOffense != null ? typeOfOffense : "N/A");
         statusTextView.setText(status != null ? status : "N/A");
@@ -112,13 +131,4 @@ public class myViolations_student extends Fragment {
         layout.addView(violationRow);
     }
 
-    private String getCurrentUserId() {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            return currentUser.getUid();
-        } else {
-            // Handle the case when there is no logged-in user
-            return null;
-        }
-    }
 }
