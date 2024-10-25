@@ -89,7 +89,10 @@
                 android:id="@+id/table_layout_accepted"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:backgroundTint="@color/light_grey"
                 android:stretchColumns="1">
+
+
             </TableLayout>
 
         </ScrollView>
