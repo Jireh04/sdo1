@@ -108,7 +108,7 @@
         <!-- Scrollable Search Results Section -->
         <HorizontalScrollView
             android:layout_width="match_parent"
-            android:layout_height="400dp"
+            android:layout_height="450dp"
             android:layout_marginTop="80dp"
             android:fillViewport="true">
 
@@ -177,6 +177,7 @@
         layout="@layout/graphs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="420dp" />
+        android:layout_marginTop="270dp"
+        android:layout_marginBottom="10dp"/>
 
 </FrameLayout>

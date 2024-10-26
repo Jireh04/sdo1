@@ -109,7 +109,7 @@ public class form extends AppCompatActivity {
 
 
     private void populateFieldsFromIntent() {
-        Intent intent = getIntent();  // Get the current intent
+        Intent intent = getIntent();
 
         // Retrieve standard student data from the intent
         String studentName = intent.getStringExtra("STUDENT_NAME");
@@ -122,26 +122,68 @@ public class form extends AppCompatActivity {
         Log.d("FormActivity", "Received Student Name: " + studentName);
         Log.d("FormActivity", "Received Student Email: " + studentEmail);
 
-        // Assign the studentName to the studentReferrer variable
-        studentReferrer = (studentName != null) ? studentName : "";
+        // Populate the fields with the received data
+        nameField.setText(studentName != null ? studentName : "");
+        emailField.setText(studentEmail != null ? studentEmail : "");
+        contactField.setText(studentContact != 0L ? String.valueOf(studentContact) : "");
+        programField.setText(studentProgram != null ? studentProgram : "");
 
-        // Populate the fields with the received data, checking for null and default values
-        nameField.setText(studentName != null ? studentName : "");  // Set name if not null
-        emailField.setText(studentEmail != null ? studentEmail : "");  // Set email if not null
-        contactField.setText(studentContact != 0L ? String.valueOf(studentContact) : "");  // Set contact if not default value
-        programField.setText(studentProgram != null ? studentProgram : "");  // Set program if not null
-
-        // Retrieve and process scanned data if available
-        String scannedData = intent.getStringExtra("scannedData");
-        if (scannedData != null && !scannedData.isEmpty()) {
-            Log.d("FormActivity", "Scanned Data Found: " + scannedData); // Debugging line
-            processScannedData(scannedData);
+        // Retrieve and process multiple scanned data if available
+        ArrayList<String> scannedDataList = intent.getStringArrayListExtra("scannedDataList");
+        if (scannedDataList != null && !scannedDataList.isEmpty()) {
+            Log.d("FormActivity", "Scanned Data Found: " + scannedDataList); // Debugging line
+            processMultipleScannedData(scannedDataList);
         } else {
             Log.w("FormActivity", "No scanned data found in the intent"); // Warning log
             Toast.makeText(this, "No scanned data found", Toast.LENGTH_SHORT).show();
         }
+
+        // Optionally, process a single scanned data item if needed
+        String scannedData = intent.getStringExtra("scannedData");
+        if (scannedData != null) {
+            processScannedData(scannedData); // Process the scanned data
+        }
     }
 
+    private void processMultipleScannedData(ArrayList<String> scannedDataList) {
+        for (String scannedData : scannedDataList) {
+            String[] scannedFields = scannedData.split("\n");
+
+            if (scannedFields.length >= 3) {
+                String studentNo = scannedFields[0];  // Assuming the first line is the student number
+                String scannedName = scannedFields[1];  // Assuming the second line is the scanned name
+                String block = scannedFields[2];  // Assuming the third line is the block
+
+                // Display the student details in the table without the contact info
+                displayStudentDetails(scannedName, block, studentNo, ""); // Pass an empty string for contact
+
+                // Store block for later use
+                this.scannedProgram = block; // Store block instead of program
+
+                // Retrieve student data from UserSession
+                String studentName = UserSession.getStudentName();
+                String firstName = UserSession.getFirstName();
+                String lastName = UserSession.getLastName();
+                String studentEmail = UserSession.getEmail();
+                Long studentContact = UserSession.getContactNum();
+                String studentProgram = UserSession.getProgram();
+                studentId = UserSession.getStudentId();
+
+                // Populate fields with standard student data
+                nameField.setText(studentName != null ? studentName : "");
+                emailField.setText(studentEmail != null ? studentEmail : "");
+                contactField.setText(studentContact != null ? String.valueOf(studentContact) : "");
+                programField.setText(studentProgram != null ? studentProgram : "");
+
+                // Store the latest scanned data for submission
+                this.scannedName = scannedName; // Store scanned name for later use
+                this.scannedContact = studentContact != null ? String.valueOf(studentContact) : ""; // Store scanned contact
+                this.scannedStudentNo = studentNo; // Store student number
+            } else {
+                Toast.makeText(this, "Invalid QR code format", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
 
     private void processScannedData(String scannedData) {
         // Process the scanned data
@@ -185,9 +227,6 @@ public class form extends AppCompatActivity {
             Toast.makeText(this, "Invalid QR code format", Toast.LENGTH_LONG).show();
         }
     }
-
-
-
 
     // Set up spinner options
     private void setupSpinners() {

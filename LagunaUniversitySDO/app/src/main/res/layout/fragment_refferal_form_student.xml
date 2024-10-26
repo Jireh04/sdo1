@@ -126,7 +126,7 @@
                 android:layout_width="400dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Search"
+                android:hint="Search student"
                 android:inputType="text"
                 android:imeOptions="actionSearch" />
 

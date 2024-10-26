@@ -51,6 +51,7 @@ import android.graphics.Paint;
 import android.os.Environment;
 
 
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -76,46 +77,62 @@ public class refferals_prefect extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_refferals_prefect, container, false);
 
-        // Initialize buttons
-        Button btnPending = view.findViewById(R.id.btn_pending);
-        Button btnAccepted = view.findViewById(R.id.btn_accepted);
-        Button btnRejected = view.findViewById(R.id.btn_rejected);
+        // Initialize the TabLayout
+        TabLayout tabLayout = view.findViewById(R.id.tabLayout);
+
+        // Set custom background for each tab
+        for (int i = 0; i < tabLayout.getTabCount(); i++) {
+            TabLayout.Tab tab = tabLayout.getTabAt(i);
+            if (tab != null) {
+                TextView customTab = new TextView(requireContext());
+                customTab.setText(tab.getText());
+                customTab.setGravity(Gravity.CENTER);
+                customTab.setBackgroundResource(R.drawable.tab_item_background);
+                tab.setCustomView(customTab);
+            }
+        }
+
+        // Initialize the referral views
+        ScrollView scrollViewPending = view.findViewById(R.id.scroll_view_pending);
+        ScrollView scrollViewAccepted = view.findViewById(R.id.scroll_view_accepted);
+        ScrollView scrollViewRejected = view.findViewById(R.id.scroll_view_rejected);
 
         // Define the colors
-        int colorGreen = getResources().getColor(R.color.green);  // Assuming you have a green color in colors.xml
-        int colorGray = getResources().getColor(R.color.light_grey);    // Assuming you have a gray color in colors.xml
+        int colorBlack = getResources().getColor(R.color.black);  // Assuming you have a green color in colors.xml
+        int colorWhite = getResources().getColor(R.color.white); // Assuming you have a gray color in colors.xml
 
-        // Set click listeners for each button
-        btnPending.setOnClickListener(v -> {
-            onPendingClick();
+        // Set tab selection listener
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                switch (tab.getPosition()) {
+                    case 0: // Pending
+                        onPendingClick();
+                        tab.getCustomView().setSelected(true);
+                        break;
+                    case 1: // Accepted
+                        onAcceptedClick();
+                        tab.getCustomView().setSelected(true);
+                        break;
+                    case 2: // Rejected
+                        onRejectedClick();
+                        tab.getCustomView().setSelected(true);
+                        break;
+                }
+            }
 
-            // Change button colors
-            btnPending.setBackgroundColor(colorGreen);  // Set clicked button to green
-            btnAccepted.setBackgroundColor(colorGray);  // Set other buttons to gray
-            btnRejected.setBackgroundColor(colorGray);
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                tab.getCustomView().setSelected(false);
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
         });
-
-        btnAccepted.setOnClickListener(v -> {
-            onAcceptedClick();
-
-            // Change button colors
-            btnPending.setBackgroundColor(colorGray);   // Set other buttons to gray
-            btnAccepted.setBackgroundColor(colorGreen); // Set clicked button to green
-            btnRejected.setBackgroundColor(colorGray);
-        });
-
-        btnRejected.setOnClickListener(v -> {
-            onRejectedClick();
-
-            // Change button colors
-            btnPending.setBackgroundColor(colorGray);   // Set other buttons to gray
-            btnAccepted.setBackgroundColor(colorGray);  // Set other buttons to gray
-            btnRejected.setBackgroundColor(colorGreen); // Set clicked button to green
-        });
-
 
         return view;
     }
+
 
     // Fetch pending referrals from Firestore
     public void onPendingClick() {
@@ -299,15 +316,6 @@ public class refferals_prefect extends Fragment {
 
                                                         // Add the table row to the table layout
                                                         tableLayout.addView(tableRow);
-
-                                                        // Add a divider after each row
-                                                        View divider = new View(getActivity());
-                                                        divider.setLayoutParams(new TableRow.LayoutParams(
-                                                                TableRow.LayoutParams.MATCH_PARENT,
-                                                                2 // Height of the divider
-                                                        ));
-                                                        divider.setBackgroundColor(Color.GRAY); // Color of the divider
-                                                        tableLayout.addView(divider);
                                                     }
                                                 }
                                             }
@@ -413,14 +421,6 @@ public class refferals_prefect extends Fragment {
                                                 tableRow.addView(buttonLayout);
                                                 tableLayout.addView(tableRow);
 
-                                                // Add a divider after each row
-                                                View divider = new View(getActivity());
-                                                divider.setLayoutParams(new TableRow.LayoutParams(
-                                                        TableRow.LayoutParams.MATCH_PARENT,
-                                                        2 // Height of the divider
-                                                ));
-                                                divider.setBackgroundColor(Color.GRAY); // Color of the divider
-                                                tableLayout.addView(divider);
                                             }
                                         }
                                     }
@@ -787,14 +787,6 @@ public class refferals_prefect extends Fragment {
         // Add the row to the table
         tableLayout.addView(row);
 
-        // Divider between rows
-        View rowDivider = new View(getActivity());
-        rowDivider.setLayoutParams(new TableRow.LayoutParams(
-                TableRow.LayoutParams.MATCH_PARENT,
-                2
-        ));
-        rowDivider.setBackgroundColor(Color.GRAY);
-        tableLayout.addView(rowDivider);
     }
 
 
