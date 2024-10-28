@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class PrefectReferralDashboard extends Fragment {
     private static final int REQUEST_CODE_QR_SCAN = 1;
-    private static final int ITEMS_PER_PAGE = 2;
+    private static final int ITEMS_PER_PAGE = 5;
 
     private EditText searchBar;
     private Button searchButton;
@@ -231,6 +231,8 @@ public class PrefectReferralDashboard extends Fragment {
         }
         return null;
     }
+
+
     private void performSearch() {
         String searchTerm = searchBar.getText().toString().trim().toLowerCase();
 

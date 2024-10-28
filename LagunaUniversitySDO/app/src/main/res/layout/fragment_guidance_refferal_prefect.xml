@@ -1,14 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".guidanceRefferal_prefect">
+    android:orientation="vertical"
+    android:padding="16dp">
 
-    <!-- TODO: Update blank fragment layout -->
+    <!-- Title Bar -->
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="GUIDANCE REFERRAL PREFECT" />
+        android:layout_height="wrap_content"
+        android:background="@color/green"
+        android:padding="16dp"
+        android:text="GUIDANCE REFERRAL"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
-</FrameLayout>
+    <!-- Spinner for Dropdown -->
+    <Spinner
+        android:id="@+id/referral_type_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:entries="@array/referral_type_options" />
+
+    <!-- RecyclerView for Table -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp" />
+
+</LinearLayout>

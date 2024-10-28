@@ -97,22 +97,26 @@ public class StudentLoginDialogFragment extends DialogFragment {
                             if (querySnapshot != null && !querySnapshot.isEmpty()) {
                                 DocumentSnapshot document = querySnapshot.getDocuments().get(0);
                                 String studId = document.getId();  // Get the document ID (student ID)
-                                String firstName = document.getString("firstname");
-                                String lastName = document.getString("lastname");
+                                String firstName = document.getString("first_name");
+                                String lastName = document.getString("last_name");
+                                String name = document.getString("name");
                                 String email = document.getString("email");
                                 Long contactNum = document.getLong("contacts");
                                 String program = document.getString("program");
 
                                 // Store user ID and student details in UserSession
                                 UserSession.setStudId(studId);
-                                UserSession.setStudentDetails(firstName + " " + lastName, email, contactNum, program);
+                                UserSession.setStudentDetails(firstName, lastName, email, contactNum, program, name);
 
-                                Log.d("Auth", "Login successful for user: " + firstName + " " + lastName);
+                                Log.d("Auth", "Login successful for user: " + name );
                                 Toast.makeText(getActivity(), "Student logged in", Toast.LENGTH_SHORT).show();
 
                                 // Proceed to the main activity
                                 Intent intent = new Intent(getActivity(), MainActivity.class);
                                 intent.putExtra("USER_ID", studId);
+                                intent.putExtra("STUDENT_NAME", name);
+                                intent.putExtra("FIRST_NAME", firstName);
+                                intent.putExtra("LAST_NAME", lastName);
                                 startActivity(intent);
                                 dismiss();
                             } else {

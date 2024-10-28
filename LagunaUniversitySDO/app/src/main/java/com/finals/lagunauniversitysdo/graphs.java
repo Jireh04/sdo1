@@ -1,12 +1,14 @@
 package com.finals.lagunauniversitysdo;
 
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
@@ -21,6 +23,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.ParseException;
@@ -55,10 +58,44 @@ public class graphs {
     }
 
     public void fetchDataFromFirestore() {
-        // Fetch data from all collections
-        fetchCollectionData("student_refferal_history");
-        fetchCollectionData("prefect_referral_history");
-        fetchCollectionData("personnel_refferal_history");
+        // Fetch data from nested collections in "students" and "personnel"
+        fetchNestedCollectionData("students", "student_refferal_history");
+        fetchNestedCollectionData("personnel", "personnel_refferal_history");
+
+        // Fetch data from standalone collection "prefect_refferal_history"
+        fetchCollectionData("prefect_refferal_history");
+    }
+
+    private void fetchNestedCollectionData(String mainCollectionName, String subCollectionName) {
+        db.collection(mainCollectionName)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                // Access the nested subcollection for each document
+                                db.collection(mainCollectionName)
+                                        .document(document.getId())
+                                        .collection(subCollectionName)
+                                        .get()
+                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<QuerySnapshot> subTask) {
+                                                if (subTask.isSuccessful()) {
+                                                    // Process the data for this subcollection
+                                                    processFirestoreData(subTask.getResult());
+                                                } else {
+                                                    // Handle error for subcollection fetch
+                                                }
+                                            }
+                                        });
+                            }
+                        } else {
+                            // Handle error for main collection fetch
+                        }
+                    }
+                });
     }
 
     private void fetchCollectionData(String collectionName) {
@@ -76,6 +113,7 @@ public class graphs {
                     }
                 });
     }
+
 
     public void processFirestoreData(QuerySnapshot querySnapshot) {
         // For counting unique students per program (BarChart)
@@ -127,6 +165,10 @@ public class graphs {
             setupBarChart();
             setupLineChart();
         }
+
+        lineChart.animateX(1000);  // Animates X-axis over 1 second
+        barChart.animateY(1000);   // Animates Y-axis over 1.5 seconds
+
     }
 
     // Example color list (you can customize these colors)
@@ -175,7 +217,9 @@ public class graphs {
         // Set the chart description
         barChart.getDescription().setText("Number of Students with Violations per Program");
         barChart.getDescription().setTextSize(12f); // Adjust the size as needed
-        barChart.getDescription().setPosition(barChart.getWidth() - 90, 30);
+        barChart.getDescription().setPosition(barChart.getWidth() * 0.5f, 20);
+        barChart.getDescription().setTextColor(Color.parseColor("#333333"));
+
 
         // Customize X-Axis to display program names
         barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(programLabels));
@@ -183,6 +227,12 @@ public class graphs {
         barChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         barChart.getXAxis().setLabelCount(programLabels.size(), true);
         barChart.getAxisLeft().setGranularity(1f);
+
+        // Set text color for X-axis labels
+        barChart.getXAxis().setTextColor(Color.parseColor("#333333"));
+        barChart.getXAxis().setGridColor(Color.parseColor("#E5E5E5"));
+        barChart.getAxisLeft().setGridColor(Color.parseColor("#E5E5E5"));
+
 
         // Refresh the chart with new data
         barChart.invalidate();
@@ -208,44 +258,77 @@ public class graphs {
             index++;
         }
 
-        // Create and customize the LineChart
+        // Create and customize the LineChart datasets with colors and point styles
         LineDataSet lightOffenseDataSet = new LineDataSet(lightOffenseEntries, "Light Offense");
-        lightOffenseDataSet.setColor(Color.parseColor("#A8E6CF"));
+        lightOffenseDataSet.setColor(Color.parseColor("#A8E6CF")); // Light green color
         lightOffenseDataSet.setDrawCircleHole(false);
         lightOffenseDataSet.setCircleColor(Color.parseColor("#A8E6CF"));
+        lightOffenseDataSet.setDrawValues(false);
+        lightOffenseDataSet.setDrawCircles(true);
+        lightOffenseDataSet.setCircleRadius(5f);
+        lightOffenseDataSet.setCircleHoleRadius(2.5f);
+        lightOffenseDataSet.setLineWidth(2.5f);
+
 
         LineDataSet seriousOffenseDataSet = new LineDataSet(seriousOffenseEntries, "Serious Offense");
-        seriousOffenseDataSet.setColor(Color.parseColor("#8DAEFB"));
+        seriousOffenseDataSet.setColor(Color.parseColor("#8DAEFB")); // Blue color
         seriousOffenseDataSet.setDrawCircleHole(false);
         seriousOffenseDataSet.setCircleColor(Color.parseColor("#8DAEFB"));
+        seriousOffenseDataSet.setDrawValues(false);
+        seriousOffenseDataSet.setDrawCircles(true);
+        seriousOffenseDataSet.setCircleRadius(5f);
+        seriousOffenseDataSet.setCircleHoleRadius(2.5f);
+        seriousOffenseDataSet.setLineWidth(2.5f);
+
 
         LineDataSet majorOffenseDataSet = new LineDataSet(majorOffenseEntries, "Major Offense");
-        majorOffenseDataSet.setColor(Color.parseColor("#FF4C4C"));
+        majorOffenseDataSet.setColor(Color.parseColor("#FF4C4C")); // Red color
         majorOffenseDataSet.setDrawCircleHole(false);
         majorOffenseDataSet.setCircleColor(Color.parseColor("#FF4C4C"));
+        majorOffenseDataSet.setDrawValues(false);
+        majorOffenseDataSet.setDrawCircles(true);
+        majorOffenseDataSet.setCircleRadius(5f);
+        majorOffenseDataSet.setCircleHoleRadius(2.5f);
+        majorOffenseDataSet.setLineWidth(2.5f);
 
+
+        // Combine datasets into LineData
         LineData lineData = new LineData(lightOffenseDataSet, seriousOffenseDataSet, majorOffenseDataSet);
         lineChart.setData(lineData);
 
-        // Set the ValueFormatter for the Y-axis
+        // Set Y-axis value formatter
         lineChart.getAxisLeft().setValueFormatter(new IntegerValueFormatter());
-        lineChart.getAxisRight().setValueFormatter(new IntegerValueFormatter());
+        lineChart.getAxisRight().setEnabled(false); // Disable the right Y-axis if not needed
 
-        // Set the chart description
-        lineChart.getDescription().setText("Type of Offense");
-        lineChart.getDescription().setTextSize(12f);
-        lineChart.getDescription().setPosition(lineChart.getWidth() / 2 + 110, 30);
-
-        // Customize X-Axis to display month-year labels
+        // Customize the X-axis
+        // Customize the X-axis
         lineChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(months));
         lineChart.getXAxis().setGranularity(1f);
         lineChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         lineChart.getXAxis().setLabelCount(months.size(), true);
-        lineChart.getAxisLeft().setGranularity(1f);
+        lineChart.getXAxis().setTextColor(Color.parseColor("#333333"));
+        lineChart.getXAxis().setGridColor(Color.parseColor("#E5E5E5"));
+        lineChart.getAxisLeft().setGridColor(Color.parseColor("#E5E5E5"));
 
-        // Refresh the chart with new data
+    // Set chart description
+        lineChart.getDescription().setText("Monthly Violations by Type");
+        lineChart.getDescription().setTextAlign(Paint.Align.CENTER);
+        lineChart.getDescription().setTextSize(12f);
+        lineChart.getDescription().setPosition(lineChart.getWidth() * 0.5f, 20);
+        lineChart.getDescription().setTextColor(Color.parseColor("#333333"));
+
+    // Configure the legend
+        Legend legend = lineChart.getLegend();
+        legend.setTextColor(Color.parseColor("#333333"));
+        legend.setForm(Legend.LegendForm.LINE);
+
+    // Refresh the chart with new data
         lineChart.invalidate();
     }
+
+
+
+
 
     public class IntegerValueFormatter extends ValueFormatter {
         @Override

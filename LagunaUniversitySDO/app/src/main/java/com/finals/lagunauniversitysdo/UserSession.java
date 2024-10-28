@@ -3,6 +3,8 @@ package com.finals.lagunauniversitysdo;
 public class UserSession {
     private static String student_id;  // Student ID
     private static String studentName;
+    private static String firstName;
+    private static String lastName;
     private static String email;
     private static Long contactNum;
     private static String program;
@@ -17,11 +19,13 @@ public class UserSession {
         student_id = id;
     }
 
-    public static void setStudentDetails(String name, String email, Long contact, String program) {
+    public static void setStudentDetails(String firstName, String lastName, String email, Long contacts, String program, String name) {
         studentName = name;
         UserSession.email = email;
-        contactNum = contact;
+        contactNum = contacts;
         UserSession.program = program;
+        UserSession.firstName = firstName;
+        UserSession.lastName = lastName;
     }
 
     // New setters for scanned data
@@ -44,6 +48,14 @@ public class UserSession {
 
     public static String getStudentName() {
         return studentName;
+    }
+
+    public static String getFirstName() {
+        return firstName;
+    }
+
+    public static String getLastName() {
+        return lastName;
     }
 
     public static String getEmail() {
@@ -75,6 +87,8 @@ public class UserSession {
     public static void clearSession() {
         student_id = null;
         studentName = null;
+        firstName = null;
+        lastName = null;
         email = null;
         contactNum = null;
         program = null;

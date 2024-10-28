@@ -1,6 +1,8 @@
 package com.finals.lagunauniversitysdo;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +51,7 @@ import android.graphics.Paint;
 import android.os.Environment;
 
 
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -74,46 +77,62 @@ public class refferals_prefect extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_refferals_prefect, container, false);
 
-        // Initialize buttons
-        Button btnPending = view.findViewById(R.id.btn_pending);
-        Button btnAccepted = view.findViewById(R.id.btn_accepted);
-        Button btnRejected = view.findViewById(R.id.btn_rejected);
+        // Initialize the TabLayout
+        TabLayout tabLayout = view.findViewById(R.id.tabLayout);
 
-// Define the colors
-        int colorGreen = getResources().getColor(R.color.green);  // Assuming you have a green color in colors.xml
-        int colorGray = getResources().getColor(R.color.light_grey);    // Assuming you have a gray color in colors.xml
+        // Set custom background for each tab
+        for (int i = 0; i < tabLayout.getTabCount(); i++) {
+            TabLayout.Tab tab = tabLayout.getTabAt(i);
+            if (tab != null) {
+                TextView customTab = new TextView(requireContext());
+                customTab.setText(tab.getText());
+                customTab.setGravity(Gravity.CENTER);
+                customTab.setBackgroundResource(R.drawable.tab_item_background);
+                tab.setCustomView(customTab);
+            }
+        }
 
-// Set click listeners for each button
-        btnPending.setOnClickListener(v -> {
-            onPendingClick();
+        // Initialize the referral views
+        ScrollView scrollViewPending = view.findViewById(R.id.scroll_view_pending);
+        ScrollView scrollViewAccepted = view.findViewById(R.id.scroll_view_accepted);
+        ScrollView scrollViewRejected = view.findViewById(R.id.scroll_view_rejected);
 
-            // Change button colors
-            btnPending.setBackgroundColor(colorGreen);  // Set clicked button to green
-            btnAccepted.setBackgroundColor(colorGray);  // Set other buttons to gray
-            btnRejected.setBackgroundColor(colorGray);
+        // Define the colors
+        int colorBlack = getResources().getColor(R.color.black);  // Assuming you have a green color in colors.xml
+        int colorWhite = getResources().getColor(R.color.white); // Assuming you have a gray color in colors.xml
+
+        // Set tab selection listener
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                switch (tab.getPosition()) {
+                    case 0: // Pending
+                        onPendingClick();
+                        tab.getCustomView().setSelected(true);
+                        break;
+                    case 1: // Accepted
+                        onAcceptedClick();
+                        tab.getCustomView().setSelected(true);
+                        break;
+                    case 2: // Rejected
+                        onRejectedClick();
+                        tab.getCustomView().setSelected(true);
+                        break;
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                tab.getCustomView().setSelected(false);
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
         });
-
-        btnAccepted.setOnClickListener(v -> {
-            onAcceptedClick();
-
-            // Change button colors
-            btnPending.setBackgroundColor(colorGray);   // Set other buttons to gray
-            btnAccepted.setBackgroundColor(colorGreen); // Set clicked button to green
-            btnRejected.setBackgroundColor(colorGray);
-        });
-
-        btnRejected.setOnClickListener(v -> {
-            onRejectedClick();
-
-            // Change button colors
-            btnPending.setBackgroundColor(colorGray);   // Set other buttons to gray
-            btnAccepted.setBackgroundColor(colorGray);  // Set other buttons to gray
-            btnRejected.setBackgroundColor(colorGreen); // Set clicked button to green
-        });
-
 
         return view;
     }
+
 
     // Fetch pending referrals from Firestore
     public void onPendingClick() {
@@ -145,6 +164,7 @@ public class refferals_prefect extends Fragment {
                 HorizontalScrollView.LayoutParams.WRAP_CONTENT
         ));
 
+
         // Create a TableLayout for organizing referrals into a table
         TableLayout tableLayout = new TableLayout(getActivity());
         tableLayout.setLayoutParams(new TableLayout.LayoutParams(
@@ -163,18 +183,22 @@ public class refferals_prefect extends Fragment {
         // Create TextViews for table headers
         TextView headerReferrer = new TextView(getActivity());
         headerReferrer.setText("Referrer");
+        headerReferrer.setTypeface(null, Typeface.BOLD);
         headerReferrer.setTextSize(16);
         headerReferrer.setPadding(16, 8, 16, 8);
         headerRow.addView(headerReferrer);
 
         TextView headerDate = new TextView(getActivity());
         headerDate.setText("Date");
+        headerDate.setTypeface(null, Typeface.BOLD);
         headerDate.setTextSize(16);
         headerDate.setPadding(16, 8, 16, 8);
         headerRow.addView(headerDate);
 
         TextView headerActions = new TextView(getActivity());
         headerActions.setText("Actions");
+        headerActions.setGravity(Gravity.CENTER);
+        headerActions.setTypeface(null, Typeface.BOLD);
         headerActions.setTextSize(16);
         headerActions.setPadding(16, 8, 16, 8);
         headerRow.addView(headerActions);
@@ -182,204 +206,230 @@ public class refferals_prefect extends Fragment {
         // Add the header row to the table layout
         tableLayout.addView(headerRow);
 
+        // Add a divider after the header row
+        View headerDivider = new View(getActivity());
+        headerDivider.setLayoutParams(new TableRow.LayoutParams(
+                TableRow.LayoutParams.MATCH_PARENT,
+                2 // Height of the divider
+        ));
+        headerDivider.setBackgroundColor(Color.GRAY); // Color of the divider
+        tableLayout.addView(headerDivider);
+
         // Query both Firestore collections for "pending" status
-        db.collection("student_refferal_history")
-                .whereEqualTo("status", "pending")
-                .get()
-                .addOnCompleteListener(task -> {
+        db.collection("students").get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        QuerySnapshot querySnapshot = task.getResult();
-                        if (querySnapshot != null) {
-                            for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                                // Get the data from Firestore (as a Map)
-                                Map<String, Object> referralData = document.getData();
-                                if (referralData != null) {
-                                    String studentReferrer = (String) referralData.get("student_referrer");
-                                    String studentName = (String) referralData.get("student_name");
-                                    String studentId = (String) referralData.get("student_id");
-                                    String studentProgram = (String) referralData.get("student_program");
-                                    String referralDate = (String) referralData.get("date");
+                        for (DocumentSnapshot studentDocument : task.getResult().getDocuments()) {
+                            db.collection("students").document(studentDocument.getId())
+                                    .collection("student_refferal_history")
+                                    .whereEqualTo("status", "pending")
+                                    .get()
+                                    .addOnCompleteListener(subTask -> {
+                                        if (subTask.isSuccessful()) {
+                                            QuerySnapshot subQuerySnapshot = subTask.getResult();
+                                            if (subQuerySnapshot != null) {
+                                                for (DocumentSnapshot referralDocument : subQuerySnapshot.getDocuments()) {
+                                                    // Get the data from Firestore (as a Map)
+                                                    Map<String, Object> referralData = referralDocument.getData();
+                                                    if (referralData != null) {
+                                                        String studentReferrer = (String) referralData.get("student_referrer");
+                                                        String studentName = (String) referralData.get("student_name");
+                                                        String studentId = (String) referralData.get("refferer_id");
+                                                        String studentProgram = (String) referralData.get("student_program");
+                                                        String referralDate = (String) referralData.get("date");
 
-                                    // Create a TableRow for each referral
-                                    TableRow tableRow = new TableRow(getActivity());
-                                    tableRow.setLayoutParams(new TableRow.LayoutParams(
-                                            TableRow.LayoutParams.MATCH_PARENT,
-                                            TableRow.LayoutParams.WRAP_CONTENT
-                                    ));
+                                                        // Create a TableRow for each referral
+                                                        TableRow tableRow = new TableRow(getActivity());
+                                                        tableRow.setLayoutParams(new TableRow.LayoutParams(
+                                                                TableRow.LayoutParams.MATCH_PARENT,
+                                                                TableRow.LayoutParams.WRAP_CONTENT
+                                                        ));
 
-                                    // Create a TextView for the referrer
-                                    TextView referrerTextView = new TextView(getActivity());
-                                    referrerTextView.setText(studentReferrer);
-                                    referrerTextView.setPadding(16, 8, 16, 8);
-                                    referrerTextView.setTextSize(14);
-                                    tableRow.addView(referrerTextView);
+                                                        // Create a TextView for the referrer
+                                                        TextView referrerTextView = new TextView(getActivity());
+                                                        referrerTextView.setText(studentReferrer);
+                                                        referrerTextView.setPadding(16, 8, 16, 8);
+                                                        referrerTextView.setTextSize(14);
+                                                        tableRow.addView(referrerTextView);
 
-                                    // Create a TextView for the referral date
-                                    TextView dateTextView = new TextView(getActivity());
-                                    dateTextView.setText(referralDate);
-                                    dateTextView.setPadding(16, 8, 16, 8);
-                                    dateTextView.setTextSize(14);
-                                    tableRow.addView(dateTextView);
+                                                        // Create a TextView for the referral date
+                                                        TextView dateTextView = new TextView(getActivity());
+                                                        dateTextView.setText(referralDate);
+                                                        dateTextView.setPadding(16, 8, 16, 8);
+                                                        dateTextView.setTextSize(14);
+                                                        tableRow.addView(dateTextView);
 
-                                    // Create a LinearLayout to hold buttons (View, Accept, Reject)
-                                    LinearLayout buttonLayout = new LinearLayout(getActivity());
-                                    buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
+                                                        // Create a LinearLayout to hold buttons (View, Accept, Reject)
+                                                        LinearLayout buttonLayout = new LinearLayout(getActivity());
+                                                        buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
 
-                                    // Create View button
-                                    Button btnView = new Button(getActivity());
-                                    btnView.setText("View");
-                                    btnView.setOnClickListener(v -> {
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                        builder.setTitle("Choose an option")
-                                                .setMessage("Do you want to download or open the PDF?")
-                                                .setPositiveButton("Download", (dialog, which) -> {
-                                                    downloadPdf(referralData, studentName, studentId, studentProgram, referralDate);
-                                                })
-                                                .setNegativeButton("Open", (dialog, which) -> {
-                                                    generatePdf(referralData, studentName, studentId, studentProgram, referralDate);
-                                                })
-                                                .setCancelable(true)
-                                                .show();
+                                                        // Create View button
+                                                        Button btnView = new Button(getActivity());
+                                                        btnView.setText("View");
+                                                        btnView.setOnClickListener(v -> {
+                                                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                                            builder.setTitle("Choose an option")
+                                                                    .setMessage("Do you want to download or open the PDF?")
+                                                                    .setPositiveButton("Download", (dialog, which) -> {
+                                                                        downloadPdf(referralData, studentName, studentId, studentProgram, referralDate);
+                                                                    })
+                                                                    .setNegativeButton("Open", (dialog, which) -> {
+                                                                        generatePdf(referralData, studentName, studentId, studentProgram, referralDate);
+                                                                    })
+                                                                    .setCancelable(true)
+                                                                    .show();
+                                                        });
+                                                        buttonLayout.addView(btnView);
+
+                                                        // Create Accept button with confirmation dialog
+                                                        Button btnAccept = new Button(getActivity());
+                                                        btnAccept.setText("Accept");
+                                                        btnAccept.setOnClickListener(v -> {
+                                                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                                            builder.setTitle("Confirmation")
+                                                                    .setMessage("Are you sure you want to accept this referral?")
+                                                                    .setPositiveButton("Yes", (dialog, which) -> {
+                                                                        updateReferralStatusStudent(studentId, referralDocument.getId(), "accepted");
+                                                                        Log.d("FirestoreSuccess", "Student referral status updated successfully");
+                                                                    })
+                                                                    .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                                                                    .show();
+                                                        });
+                                                        buttonLayout.addView(btnAccept);
+
+                                                        // Create Reject button with confirmation dialog
+                                                        Button btnReject = new Button(getActivity());
+                                                        btnReject.setText("Reject");
+                                                        btnReject.setOnClickListener(v -> {
+                                                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                                            builder.setTitle("Confirmation")
+                                                                    .setMessage("Are you sure you want to reject this referral?")
+                                                                    .setPositiveButton("Yes", (dialog, which) -> {
+                                                                        updateReferralStatusStudent(studentId, referralDocument.getId(), "rejected");
+                                                                    })
+                                                                    .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                                                                    .show();
+                                                        });
+                                                        buttonLayout.addView(btnReject);
+
+                                                        // Add the button layout to the table row
+                                                        tableRow.addView(buttonLayout);
+
+                                                        // Add the table row to the table layout
+                                                        tableLayout.addView(tableRow);
+                                                    }
+                                                }
+                                            }
+                                        }
                                     });
-                                    buttonLayout.addView(btnView);
-
-                                    // Create Accept button with confirmation dialog
-                                    Button btnAccept = new Button(getActivity());
-                                    btnAccept.setText("Accept");
-                                    btnAccept.setOnClickListener(v -> {
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                        builder.setTitle("Confirmation")
-                                                .setMessage("Are you sure you want to accept this referral?")
-                                                .setPositiveButton("Yes", (dialog, which) -> {
-                                                    updateReferralStatus(document.getId(), "accepted");
-                                                })
-                                                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
-                                                .show();
-                                    });
-                                    buttonLayout.addView(btnAccept);
-
-                                    // Create Reject button with confirmation dialog
-                                    Button btnReject = new Button(getActivity());
-                                    btnReject.setText("Reject");
-                                    btnReject.setOnClickListener(v -> {
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                        builder.setTitle("Confirmation")
-                                                .setMessage("Are you sure you want to reject this referral?")
-                                                .setPositiveButton("Yes", (dialog, which) -> {
-                                                    updateReferralStatus(document.getId(), "rejected");
-                                                })
-                                                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
-                                                .show();
-                                    });
-                                    buttonLayout.addView(btnReject);
-
-                                    // Add the button layout to the table row
-                                    tableRow.addView(buttonLayout);
-
-                                    // Add the table row to the table layout
-                                    tableLayout.addView(tableRow);
-                                }
-                            }
                         }
+
                     }
-                });
+        });
 
-        // Add the table layout to the HorizontalScrollView
         horizontalScrollView.addView(tableLayout);
-
-        // Add the HorizontalScrollView to the pending section
         linearLayoutPending.addView(horizontalScrollView);
 
+
         // Repeat the same logic for personnel_refferal_history collection
-        db.collection("personnel_refferal_history")
-                .whereEqualTo("status", "pending")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        QuerySnapshot querySnapshot = task.getResult();
-                        if (querySnapshot != null) {
-                            for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                                Map<String, Object> referralData = document.getData();
-                                if (referralData != null) {
-                                    String personnelReferrer = (String) referralData.get("personnel_referrer");
-                                    String studentName = (String) referralData.get("student_name");
-                                    String studentId = (String) referralData.get("student_id");
-                                    String studentProgram = (String) referralData.get("student_program");
-                                    String referralDate = (String) referralData.get("date");
+        db.collection("personnel").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (DocumentSnapshot personnelDocument : task.getResult().getDocuments()) {
+                    db.collection("personnel").document(personnelDocument.getId())
+                            .collection("personnel_refferal_history")
+                            .whereEqualTo("status", "pending")
+                            .get()
+                            .addOnCompleteListener(subTask -> {
+                                if (subTask.isSuccessful()) {
+                                    QuerySnapshot subQuerySnapshot = subTask.getResult();
+                                    if (subQuerySnapshot != null) {
+                                        for (DocumentSnapshot referralDocument : subQuerySnapshot.getDocuments()) {
+                                            Map<String, Object> referralData = referralDocument.getData();
+                                            if (referralData != null) {
+                                                String personnelReferrer = (String) referralData.get("personnel_referrer");
+                                                String personnelID = (String) referralData.get("personnel_id");
+                                                String studentName = (String) referralData.get("student_name");
+                                                String studentId = (String) referralData.get("student_id");
+                                                String studentProgram = (String) referralData.get("student_program");
+                                                String referralDate = (String) referralData.get("date");
 
-                                    TableRow tableRow = new TableRow(getActivity());
-                                    tableRow.setLayoutParams(new TableRow.LayoutParams(
-                                            TableRow.LayoutParams.MATCH_PARENT,
-                                            TableRow.LayoutParams.WRAP_CONTENT
-                                    ));
+                                                TableRow tableRow = new TableRow(getActivity());
+                                                tableRow.setLayoutParams(new TableRow.LayoutParams(
+                                                        TableRow.LayoutParams.MATCH_PARENT,
+                                                        TableRow.LayoutParams.WRAP_CONTENT
+                                                ));
 
-                                    TextView referrerTextView = new TextView(getActivity());
-                                    referrerTextView.setText(personnelReferrer);
-                                    referrerTextView.setPadding(16, 8, 16, 8);
-                                    referrerTextView.setTextSize(14);
-                                    tableRow.addView(referrerTextView);
+                                                TextView referrerTextView = new TextView(getActivity());
+                                                referrerTextView.setText(personnelReferrer);
+                                                referrerTextView.setPadding(16, 8, 16, 8);
+                                                referrerTextView.setTextSize(14);
+                                                tableRow.addView(referrerTextView);
 
-                                    TextView dateTextView = new TextView(getActivity());
-                                    dateTextView.setText(referralDate);
-                                    dateTextView.setPadding(16, 8, 16, 8);
-                                    dateTextView.setTextSize(14);
-                                    tableRow.addView(dateTextView);
+                                                TextView dateTextView = new TextView(getActivity());
+                                                dateTextView.setText(referralDate);
+                                                dateTextView.setPadding(16, 8, 16, 8);
+                                                dateTextView.setTextSize(14);
+                                                tableRow.addView(dateTextView);
 
-                                    LinearLayout buttonLayout = new LinearLayout(getActivity());
-                                    buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
+                                                LinearLayout buttonLayout = new LinearLayout(getActivity());
+                                                buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
 
-                                    Button btnView = new Button(getActivity());
-                                    btnView.setText("View");
-                                    btnView.setOnClickListener(v -> {
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                        builder.setTitle("Choose an option")
-                                                .setMessage("Do you want to download or open the PDF?")
-                                                .setPositiveButton("Download", (dialog, which) -> {
-                                                    downloadPdf(referralData, studentName, studentId, studentProgram, referralDate);
-                                                })
-                                                .setNegativeButton("Open", (dialog, which) -> {
-                                                    generatePdf(referralData, studentName, studentId, studentProgram, referralDate);
-                                                })
-                                                .setCancelable(true)
-                                                .show();
-                                    });
-                                    buttonLayout.addView(btnView);
+                                                Button btnView = new Button(getActivity());
+                                                btnView.setText("View");
+                                                btnView.setOnClickListener(v -> {
+                                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                                    builder.setTitle("Choose an option")
+                                                            .setMessage("Do you want to download or open the PDF?")
+                                                            .setPositiveButton("Download", (dialog, which) -> {
+                                                                downloadPdf(referralData, studentName, studentId, studentProgram, referralDate);
+                                                            })
+                                                            .setNegativeButton("Open", (dialog, which) -> {
+                                                                generatePdf(referralData, studentName, studentId, studentProgram, referralDate);
+                                                            })
+                                                            .setCancelable(true)
+                                                            .show();
+                                                });
+                                                buttonLayout.addView(btnView);
 
-                                    Button btnAccept = new Button(getActivity());
-                                    btnAccept.setText("Accept");
-                                    btnAccept.setOnClickListener(v -> {
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                        builder.setTitle("Confirmation")
-                                                .setMessage("Are you sure you want to accept this referral?")
-                                                .setPositiveButton("Yes", (dialog, which) -> {
-                                                    updateReferralStatus(document.getId(), "accepted");
-                                                })
-                                                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
-                                                .show();
-                                    });
-                                    buttonLayout.addView(btnAccept);
+                                                Button btnAccept = new Button(getActivity());
+                                                btnAccept.setText("Accept");
+                                                btnAccept.setOnClickListener(v -> {
+                                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                                    builder.setTitle("Confirmation")
+                                                            .setMessage("Are you sure you want to accept this referral?")
+                                                            .setPositiveButton("Yes", (dialog, which) -> {
+                                                                updateReferralStatusPersonnel(referralDocument.getId(), personnelID, "accepted");
+                                                            })
+                                                            .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                                                            .show();
+                                                });
+                                                buttonLayout.addView(btnAccept);
 
-                                    Button btnReject = new Button(getActivity());
-                                    btnReject.setText("Reject");
-                                    btnReject.setOnClickListener(v -> {
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                        builder.setTitle("Confirmation")
-                                                .setMessage("Are you sure you want to reject this referral?")
-                                                .setPositiveButton("Yes", (dialog, which) -> {
-                                                    updateReferralStatus(document.getId(), "rejected");
-                                                })
-                                                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
-                                                .show();
-                                    });
-                                    buttonLayout.addView(btnReject);
+                                                Button btnReject = new Button(getActivity());
+                                                btnReject.setText("Reject");
+                                                btnReject.setOnClickListener(v -> {
+                                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                                    builder.setTitle("Confirmation")
+                                                            .setMessage("Are you sure you want to reject this referral?")
+                                                            .setPositiveButton("Yes", (dialog, which) -> {
+                                                                updateReferralStatusPersonnel(referralDocument.getId(), personnelID, "rejected");
+                                                            })
+                                                            .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                                                            .show();
+                                                });
+                                                buttonLayout.addView(btnReject);
 
-                                    tableRow.addView(buttonLayout);
-                                    tableLayout.addView(tableRow);
+                                                tableRow.addView(buttonLayout);
+                                                tableLayout.addView(tableRow);
+
+                                            }
+                                        }
+                                    }
                                 }
-                            }
-                        }
-                    }
-                });
+                            });
+                }
+            }
+
+        });
     }
 
 
@@ -559,40 +609,45 @@ public class refferals_prefect extends Fragment {
 
 
     // Method to update referral status in Firestore
-    private void updateReferralStatus(String documentId, String newStatus) {
-        // Update the student referral history
-        db.collection("student_refferal_history").document(documentId)
+    private void updateReferralStatusPersonnel(String referralDocumentId, String personnelId, String newStatus) {
+        // Update the personnel referral history
+        db.collection("personnel").document(personnelId)
+                .collection("personnel_refferal_history").document(referralDocumentId)
                 .update("status", newStatus)
                 .addOnSuccessListener(aVoid -> {
-                    // Status updated successfully, reload the pending list
-                    onPendingClick(); // Refresh the pending referrals
+                    // Status updated successfully for personnel
+                    Log.d("FirestoreSuccess", "Personnel referral status updated successfully");
                 })
                 .addOnFailureListener(e -> {
-                    // Handle failure
+                    // Handle failure (e.g., log the error)
+                    Log.e("FirestoreError", "Error updating personnel referral status", e);
                 });
+    }
 
-        // Update the personnel referral history (if applicable)
-        db.collection("personnel_refferal_history").document(documentId)
+    private void updateReferralStatusStudent(String studentId, String referralDocumentId, String newStatus) {
+        // Update the student referral history
+        db.collection("students").document(studentId)
+                .collection("student_refferal_history").document(referralDocumentId)
                 .update("status", newStatus)
                 .addOnSuccessListener(aVoid -> {
-                    // Status updated successfully, reload the pending list
+                    // Status updated successfully for student, reload the pending list
                     onPendingClick(); // Refresh the pending referrals
                 })
                 .addOnFailureListener(e -> {
-                    // Handle failure
+                    // Handle failure (e.g., log the error)
+                    Log.e("FirestoreError", "Error updating student referral status", e);
                 });
     }
 
 
-    // Fetch accepted referrals from Firestore
-    public void onAcceptedClick() {
-        // Get the TableLayout and ScrollView for displaying accepted referrals
-        TableLayout tableLayoutAccepted = getView().findViewById(R.id.table_layout_accepted);
-        ScrollView scrollViewAccepted = getView().findViewById(R.id.scroll_view_accepted);
 
+    public void onAcceptedClick() {
         // Get views for pending and rejected
         LinearLayout linearLayoutPending = getView().findViewById(R.id.linear_layout_pending);
         ScrollView scrollViewPending = getView().findViewById(R.id.scroll_view_pending);
+
+        LinearLayout linearLayoutAccepted = getView().findViewById(R.id.linear_layout_accepted);
+        ScrollView scrollViewAccepted = getView().findViewById(R.id.scroll_view_accepted);
         LinearLayout linearLayoutRejected = getView().findViewById(R.id.linear_layout_rejected);
         ScrollView scrollViewRejected = getView().findViewById(R.id.scroll_view_rejected);
 
@@ -602,11 +657,32 @@ public class refferals_prefect extends Fragment {
         linearLayoutRejected.removeAllViews();
         scrollViewRejected.setVisibility(View.GONE);
 
-        // Show the ScrollView for accepted
+        // Clear the LinearLayout to remove previous data
+        linearLayoutAccepted.removeAllViews();
         scrollViewAccepted.setVisibility(View.VISIBLE);
-        tableLayoutAccepted.removeAllViews();
 
-        // Add table header for better readability
+        // Create a new TableLayout for accepted referrals
+        TableLayout tableLayoutAccepted = new TableLayout(getContext());
+        tableLayoutAccepted.setLayoutParams(new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.MATCH_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT
+        ));
+
+        // Create a new HorizontalScrollView for displaying the TableLayout
+        HorizontalScrollView horizontalScrollView = new HorizontalScrollView(getActivity());
+        horizontalScrollView.setLayoutParams(new HorizontalScrollView.LayoutParams(
+                HorizontalScrollView.LayoutParams.MATCH_PARENT,
+                HorizontalScrollView.LayoutParams.WRAP_CONTENT
+        ));
+        horizontalScrollView.addView(tableLayoutAccepted);
+
+        // Add the horizontalScrollView to linearLayoutAccepted, ensuring no parent is set
+        if (horizontalScrollView.getParent() != null) {
+            ((ViewGroup) horizontalScrollView.getParent()).removeView(horizontalScrollView);
+        }
+        linearLayoutAccepted.addView(horizontalScrollView);
+
+        // Add headers for the TableLayout
         TableRow headerRow = new TableRow(getContext());
         headerRow.setPadding(16, 16, 16, 16);
 
@@ -628,103 +704,91 @@ public class refferals_prefect extends Fragment {
         headerStatus.setTypeface(null, Typeface.BOLD);
         headerStatus.setPadding(12, 8, 16, 8);
 
-        // Add headers to the row
         headerRow.addView(headerStudent);
         headerRow.addView(headerDate);
         headerRow.addView(headerStatus);
-
-        // Add header row to the table
         tableLayoutAccepted.addView(headerRow);
 
-        // Query both Firestore collections for "accepted" status
-        db.collection("student_refferal_history")
-                .whereEqualTo("status", "accepted")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        QuerySnapshot querySnapshot = task.getResult();
-                        if (querySnapshot != null) {
-                            for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                                // Get the data from Firestore (as a Map)
-                                Map<String, Object> referralData = document.getData();
-                                if (referralData != null) {
-                                    String studentName = (String) referralData.get("student_name");
-                                    String referralDate = (String) referralData.get("referral_date");
+        // Divider after the header row
+        View headerDivider = new View(getActivity());
+        headerDivider.setLayoutParams(new TableRow.LayoutParams(
+                TableRow.LayoutParams.MATCH_PARENT,
+                2
+        ));
+        headerDivider.setBackgroundColor(Color.GRAY);
+        tableLayoutAccepted.addView(headerDivider);
 
-                                    // Create a new table row
-                                    TableRow row = new TableRow(getContext());
-                                    row.setPadding(16, 8, 16, 8);
-
-                                    // Create and add TextViews for each column in the row
-                                    TextView textStudentName = new TextView(getActivity());
-                                    textStudentName.setText(studentName);
-                                    textStudentName.setPadding(16, 8, 16, 8);
-
-                                    TextView textReferralDate = new TextView(getActivity());
-                                    textReferralDate.setText(referralDate);
-                                    textReferralDate.setPadding(14, 8, 12, 8);
-
-                                    TextView textStatus = new TextView(getActivity());
-                                    textStatus.setText("Accepted");
-                                    textStatus.setPadding(12, 8, 16, 8);
-
-                                    // Add the TextViews to the row
-                                    row.addView(textStudentName);
-                                    row.addView(textReferralDate);
-                                    row.addView(textStatus);
-
-                                    // Add the row to the table
-                                    tableLayoutAccepted.addView(row);
+        // Fetch accepted referrals from Firestore
+        db.collection("students").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (DocumentSnapshot studentDocument : task.getResult().getDocuments()) {
+                    db.collection("students").document(studentDocument.getId())
+                            .collection("student_refferal_history")
+                            .whereEqualTo("status", "accepted")
+                            .get()
+                            .addOnCompleteListener(subTask -> {
+                                if (subTask.isSuccessful()) {
+                                    for (DocumentSnapshot referralDocument : subTask.getResult().getDocuments()) {
+                                        addReferralRow(tableLayoutAccepted, referralDocument);
+                                    }
                                 }
-                            }
-                        }
-                    }
-                });
+                            });
+                }
+            }
+        });
 
-        db.collection("personnel_refferal_history")
-                .whereEqualTo("status", "accepted")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        QuerySnapshot querySnapshot = task.getResult();
-                        if (querySnapshot != null) {
-                            for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                                // Get the data from Firestore (as a Map)
-                                Map<String, Object> referralData = document.getData();
-                                if (referralData != null) {
-                                    String studentName = (String) referralData.get("student_name");
-                                    String referralDate = (String) referralData.get("date");
-
-                                    // Create a new table row
-                                    TableRow row = new TableRow(getContext());
-                                    row.setPadding(16, 8, 16, 8);
-
-                                    // Create and add TextViews for each column in the row
-                                    TextView textStudentName = new TextView(getActivity());
-                                    textStudentName.setText(studentName);
-                                    textStudentName.setPadding(16, 8, 16, 8);
-
-                                    TextView textReferralDate = new TextView(getActivity());
-                                    textReferralDate.setText(referralDate);
-                                    textReferralDate.setPadding(14, 8, 12, 8);
-
-                                    TextView textStatus = new TextView(getActivity());
-                                    textStatus.setText("Accepted");
-                                    textStatus.setPadding(12, 8, 16, 8);
-
-                                    // Add the TextViews to the row
-                                    row.addView(textStudentName);
-                                    row.addView(textReferralDate);
-                                    row.addView(textStatus);
-
-                                    // Add the row to the table
-                                    tableLayoutAccepted.addView(row);
+        // Fetch from personnel_refferal_history
+        db.collection("personnel").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (DocumentSnapshot personnelDocument : task.getResult().getDocuments()) {
+                    db.collection("personnel").document(personnelDocument.getId())
+                            .collection("personnel_refferal_history")
+                            .whereEqualTo("status", "accepted")
+                            .get()
+                            .addOnCompleteListener(subTask -> {
+                                if (subTask.isSuccessful()) {
+                                    for (DocumentSnapshot referralDocument : subTask.getResult().getDocuments()) {
+                                        addReferralRow(tableLayoutAccepted, referralDocument);
+                                    }
                                 }
-                            }
-                        }
-                    }
-                });
+                            });
+                }
+            }
+        });
     }
+
+    // Helper function to add a row to the table for each referral
+    private void addReferralRow(TableLayout tableLayout, DocumentSnapshot referralDocument) {
+        String studentName = referralDocument.getString("student_name");
+        String referralDate = referralDocument.getString("date");
+
+        // Create a new table row
+        TableRow row = new TableRow(getContext());
+        row.setPadding(16, 8, 16, 8);
+
+        // Create and add TextViews for each column in the row
+        TextView textStudentName = new TextView(getActivity());
+        textStudentName.setText(studentName);
+        textStudentName.setPadding(16, 8, 16, 8);
+
+        TextView textReferralDate = new TextView(getActivity());
+        textReferralDate.setText(referralDate);
+        textReferralDate.setPadding(14, 8, 12, 8);
+
+        TextView textStatus = new TextView(getActivity());
+        textStatus.setText("Accepted");
+        textStatus.setPadding(12, 8, 16, 8);
+
+        // Add the TextViews to the row
+        row.addView(textStudentName);
+        row.addView(textReferralDate);
+        row.addView(textStatus);
+
+        // Add the row to the table
+        tableLayout.addView(row);
+
+    }
+
 
 
     // Fetch rejected referrals from Firestore
@@ -749,6 +813,13 @@ public class refferals_prefect extends Fragment {
         scrollViewRejected.setVisibility(View.VISIBLE);
         linearLayoutRejected.removeAllViews();
 
+        // Create a HorizontalScrollView for the TableLayout
+        HorizontalScrollView horizontalScrollView = new HorizontalScrollView(getActivity());
+        horizontalScrollView.setLayoutParams(new HorizontalScrollView.LayoutParams(
+                HorizontalScrollView.LayoutParams.MATCH_PARENT,
+                HorizontalScrollView.LayoutParams.WRAP_CONTENT
+        ));
+
         // Create a TableLayout for rejected referrals
         TableLayout tableLayout = new TableLayout(getActivity());
         tableLayout.setLayoutParams(new TableLayout.LayoutParams(
@@ -757,120 +828,134 @@ public class refferals_prefect extends Fragment {
         tableLayout.setStretchAllColumns(true);
 
         // Add TableHeader
-        TableRow headerRow = new TableRow(getActivity());
-        TextView headerStudent = new TextView(getActivity());
-        headerStudent.setText("Student Name");
-        headerStudent.setTextSize(16);
-        headerStudent.setPadding(16, 8, 16, 8);
-        headerStudent.setTypeface(null, Typeface.BOLD);
-        headerRow.addView(headerStudent);
-
-        TextView headerDate = new TextView(getActivity());
-        headerDate.setText("Referral Date");
-        headerDate.setTextSize(16);
-        headerDate.setPadding(14, 8, 14, 8);
-        headerDate.setTypeface(null, Typeface.BOLD);
-        headerRow.addView(headerDate);
-
-        TextView headerStatus = new TextView(getActivity());
-        headerStatus.setText("Status");
-        headerStatus.setTextSize(16);
-        headerStatus.setPadding(16, 8, 16, 8);
-        headerStatus.setTypeface(null, Typeface.BOLD);
-        headerRow.addView(headerStatus);
-
-        // Add the header row to the table
+        TableRow headerRow = createTableRow("Student Name", "Referral Date", "Status");
         tableLayout.addView(headerRow);
 
-        // Query both Firestore collections for "rejected" status
-        db.collection("student_refferal_history")
-                .whereEqualTo("status", "rejected")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        QuerySnapshot querySnapshot = task.getResult();
-                        if (querySnapshot != null) {
-                            for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                                // Get the data from Firestore (as a Map)
-                                Map<String, Object> referralData = document.getData();
-                                if (referralData != null) {
-                                    String studentName = (String) referralData.get("student_name");
-                                    String referralDate = (String) referralData.get("referral_date");
+        // Add a divider after the header row
+        addDivider(tableLayout);
 
-                                    // Create a TableRow for each rejected referral
-                                    TableRow row = new TableRow(getActivity());
-                                    row.setLayoutParams(new TableRow.LayoutParams(
-                                            TableRow.LayoutParams.MATCH_PARENT,
-                                            TableRow.LayoutParams.WRAP_CONTENT));
+        // Query Firestore for "rejected" status
+        fetchRejectedReferrals(tableLayout);
 
-                                    TextView studentTextView = new TextView(getActivity());
-                                    studentTextView.setText(studentName);
-                                    studentTextView.setPadding(16, 8, 16, 8);
-                                    row.addView(studentTextView);
+        // Add the TableLayout to the HorizontalScrollView
+        horizontalScrollView.addView(tableLayout);
 
-                                    TextView dateTextView = new TextView(getActivity());
-                                    dateTextView.setText(referralDate);
-                                    dateTextView.setPadding(14, 8, 14, 8);
-                                    row.addView(dateTextView);
+        // Add the HorizontalScrollView to the LinearLayout for rejected referrals
+        linearLayoutRejected.addView(horizontalScrollView);
+    }
 
-                                    TextView statusTextView = new TextView(getActivity());
-                                    statusTextView.setText("Rejected");
-                                    statusTextView.setPadding(16, 8, 16, 8);
-                                    row.addView(statusTextView);
+    private TableRow createTableRow(String studentName, String referralDate, String status) {
+        TableRow row = new TableRow(getActivity());
+        row.setLayoutParams(new TableRow.LayoutParams(
+                TableRow.LayoutParams.MATCH_PARENT,
+                TableRow.LayoutParams.WRAP_CONTENT));
 
-                                    // Add the row to the table
-                                    tableLayout.addView(row);
+        row.addView(createTextView(studentName, 16, 16));
+        row.addView(createTextView(referralDate, 16, 14));
+        row.addView(createTextView(status, 16, 16));
+
+        return row;
+    }
+
+    private TextView createTextView(String text, int textSize, int padding) {
+        TextView textView = new TextView(getActivity());
+        textView.setText(text);
+        textView.setTextSize(textSize);
+        textView.setPadding(padding, 8, padding, 8);
+        return textView;
+    }
+
+    private void addDivider(TableLayout tableLayout) {
+        View headerDivider = new View(getActivity());
+        headerDivider.setLayoutParams(new TableRow.LayoutParams(
+                TableRow.LayoutParams.MATCH_PARENT,
+                2 // Height of the divider
+        ));
+        headerDivider.setBackgroundColor(Color.GRAY); // Color of the divider
+        tableLayout.addView(headerDivider);
+    }
+
+    private void fetchRejectedReferrals(TableLayout tableLayout) {
+        db.collection("students").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (DocumentSnapshot studentDocument : task.getResult().getDocuments()) {
+                    db.collection("students").document(studentDocument.getId())
+                            .collection("student_refferal_history")
+                            .whereEqualTo("status", "rejected") // Change to "rejected"
+                            .get()
+                            .addOnCompleteListener(subTask -> {
+                                if (subTask.isSuccessful()) {
+                                    QuerySnapshot subQuerySnapshot = subTask.getResult();
+                                    if (subQuerySnapshot != null) {
+                                        for (DocumentSnapshot referralDocument : subQuerySnapshot.getDocuments()) {
+                                            // Get the data from Firestore (as a Map)
+                                            Map<String, Object> referralData = referralDocument.getData();
+                                            if (referralData != null) {
+                                                String studentName = (String) referralData.get("student_name");
+                                                String referralDate = (String) referralData.get("date");
+
+                                                // Create a TableRow for each rejected referral
+                                                TableRow row = createTableRow(studentName, referralDate, "Rejected");
+                                                tableLayout.addView(row);
+                                                addDivider(tableLayout); // Add a divider after each row
+                                            }
+                                        }
+                                    }
                                 }
+                            });
+                }
+            }
+        });
+
+                    db.collection("personnel").get().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            for (DocumentSnapshot personnelDocument : task.getResult().getDocuments()) {
+                                db.collection("personnel").document(personnelDocument.getId())
+                                        .collection("personnel_refferal_history")
+                                        .whereEqualTo("status", "pending")
+                                        .get()
+                                        .addOnCompleteListener(subTask -> {
+                                            if (subTask.isSuccessful()) {
+                                                QuerySnapshot subQuerySnapshot = subTask.getResult();
+                                                if (subQuerySnapshot != null) {
+                                                    for (DocumentSnapshot referralDocument : subQuerySnapshot.getDocuments()) {
+                                                        // Get the data from Firestore (as a Map)
+                                                        Map<String, Object> referralData = referralDocument.getData();
+                                                        if (referralData != null) {
+                                                            String studentName = (String) referralData.get("student_name");
+                                                            String referralDate = (String) referralData.get("date");
+
+                                                            // Create a TableRow for each rejected referral
+                                                            TableRow row = new TableRow(getActivity());
+                                                            row.setLayoutParams(new TableRow.LayoutParams(
+                                                                    TableRow.LayoutParams.MATCH_PARENT,
+                                                                    TableRow.LayoutParams.WRAP_CONTENT));
+
+                                                            TextView studentTextView = new TextView(getActivity());
+                                                            studentTextView.setText(studentName);
+                                                            studentTextView.setPadding(16, 8, 16, 8);
+                                                            row.addView(studentTextView);
+
+                                                            TextView dateTextView = new TextView(getActivity());
+                                                            dateTextView.setText(referralDate);
+                                                            dateTextView.setPadding(14, 8, 14, 8);
+                                                            row.addView(dateTextView);
+
+                                                            TextView statusTextView = new TextView(getActivity());
+                                                            statusTextView.setText("Rejected");
+                                                            statusTextView.setPadding(16, 8, 16, 8);
+                                                            row.addView(statusTextView);
+
+                                                            // Add the row to the table
+                                                            tableLayout.addView(row);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        });
                             }
                         }
-                    }
-                });
-
-        db.collection("personnel_refferal_history")
-                .whereEqualTo("status", "rejected")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        QuerySnapshot querySnapshot = task.getResult();
-                        if (querySnapshot != null) {
-                            for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                                // Get the data from Firestore (as a Map)
-                                Map<String, Object> referralData = document.getData();
-                                if (referralData != null) {
-                                    String studentName = (String) referralData.get("student_name");
-                                    String referralDate = (String) referralData.get("date");
-
-                                    // Create a TableRow for each rejected referral
-                                    TableRow row = new TableRow(getActivity());
-                                    row.setLayoutParams(new TableRow.LayoutParams(
-                                            TableRow.LayoutParams.MATCH_PARENT,
-                                            TableRow.LayoutParams.WRAP_CONTENT));
-
-                                    TextView studentTextView = new TextView(getActivity());
-                                    studentTextView.setText(studentName);
-                                    studentTextView.setPadding(16, 8, 16, 8);
-                                    row.addView(studentTextView);
-
-                                    TextView dateTextView = new TextView(getActivity());
-                                    dateTextView.setText(referralDate);
-                                    dateTextView.setPadding(14, 8, 14, 8);
-                                    row.addView(dateTextView);
-
-                                    TextView statusTextView = new TextView(getActivity());
-                                    statusTextView.setText("Rejected");
-                                    statusTextView.setPadding(16, 8, 16, 8);
-                                    row.addView(statusTextView);
-
-                                    // Add the row to the table
-                                    tableLayout.addView(row);
-                                }
-                            }
-                        }
-                    }
-                });
-
-        // Add the TableLayout to the LinearLayout for rejected referrals
-        linearLayoutRejected.addView(tableLayout);
+                        });
     }
 
 }

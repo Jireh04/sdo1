@@ -23,11 +23,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/green3"
+                android:gravity="center"
                 android:text="REFERRALS"
                 android:textStyle="bold"
                 android:textSize="20sp"
                 android:layout_gravity="start"
-                android:paddingBottom="8dp" />
+                android:paddingBottom="6dp"
+                android:paddingTop="6dp"/>
 
             <!-- HorizontalScrollView to allow horizontal scrolling -->
             <HorizontalScrollView
@@ -48,6 +50,7 @@
                             android:layout_height="wrap_content"
                             android:text="Date Reported"
                             android:textStyle="bold"
+                            android:layout_gravity="center"
                             android:padding="8dp" />
 
                         <TextView
@@ -55,6 +58,7 @@
                             android:layout_height="wrap_content"
                             android:text="Student No."
                             android:textStyle="bold"
+                            android:layout_gravity="center"
                             android:padding="8dp" />
 
                         <TextView
@@ -62,6 +66,7 @@
                             android:layout_height="wrap_content"
                             android:text="Name"
                             android:textStyle="bold"
+                            android:layout_gravity="center"
                             android:padding="8dp" />
 
                         <TextView

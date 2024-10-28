@@ -199,7 +199,7 @@ public class PrefectView extends Fragment {
             String remarks = remarksEditText.getText().toString().trim();
 
             // Simple validation: check if required fields are empty
-            if (dateTime.isEmpty() || reporter.isEmpty() || location.isEmpty() || violation.equals("-select violation-")) {
+            if (dateTime.isEmpty() || reporter.isEmpty() || location.isEmpty() || violation.equals("-select violation-") || remarks.isEmpty() ) {
                 Toast.makeText(getContext(), "Please fill in all required fields.", Toast.LENGTH_SHORT).show();
             } else {
                 // Prepare the data to be saved to Firestore

@@ -1,69 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:orientation="vertical">
 
-    <LinearLayout
+    <!-- TabLayout for tabs -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_margin="10dp"
+        android:background="@color/white"
+        app:tabGravity="fill"
+        app:tabMode="fixed">
 
-        <!-- HorizontalScrollView for buttons -->
-        <HorizontalScrollView
-            android:layout_width="match_parent"
+        <!-- Define each tab with a label -->
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/tab_pending"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="10dp">
+            android:text="PENDING" />
 
-            <TableLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:stretchColumns="*">
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/tab_accepted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ACCEPTED" />
 
-                <TableRow>
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/tab_rejected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="REJECTED" />
+    </com.google.android.material.tabs.TabLayout>
 
-                    <!-- Pending button -->
-                    <Button
-                        android:id="@+id/btn_pending"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="PENDING"
-                        android:layout_marginEnd="16dp"
-                        android:onClick="onPendingClick"
-                        android:layout_gravity="center" />
+    <!-- FrameLayout to switch between the tabs' content -->
+    <FrameLayout
+        android:id="@+id/frame_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp">
 
-                    <!-- Accepted Referral button -->
-                    <Button
-                        android:id="@+id/btn_accepted"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="ACCEPTED REFERRAL"
-                        android:layout_marginEnd="16dp"
-                        android:onClick="onAcceptedClick"
-                        android:layout_gravity="center" />
-
-                    <!-- Rejected Referral button -->
-                    <Button
-                        android:id="@+id/btn_rejected"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="REJECTED REFERRAL"
-                        android:onClick="onRejectedClick"
-                        android:layout_gravity="center" />
-
-                </TableRow>
-
-            </TableLayout>
-
-        </HorizontalScrollView>
-
-        <!-- ScrollView with a LinearLayout to display pending referrals -->
+        <!-- Pending referrals content -->
         <ScrollView
             android:id="@+id/scroll_view_pending"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"> <!-- Initially hidden -->
+            android:visibility="visible">
 
             <LinearLayout
                 android:id="@+id/linear_layout_pending"
@@ -72,45 +56,32 @@
                 android:orientation="vertical" />
         </ScrollView>
 
-        <!-- Layout for accepted referrals -->
-        <LinearLayout
-            android:id="@+id/linear_layout_accepted"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
+        <!-- Accepted referrals content -->
         <ScrollView
             android:id="@+id/scroll_view_accepted"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:visibility="gone">
 
-            <TableLayout
-                android:id="@+id/table_layout_accepted"
+            <LinearLayout
+                android:id="@+id/linear_layout_accepted"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:stretchColumns="1">
-            </TableLayout>
-
+                android:orientation="vertical" />
         </ScrollView>
 
-
-
-        <!-- Layout for rejected referrals -->
-        <LinearLayout
-            android:id="@+id/linear_layout_rejected"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <!-- ScrollView for rejected referrals -->
+        <!-- Rejected referrals content -->
         <ScrollView
             android:id="@+id/scroll_view_rejected"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone">
-            <!-- Your list of rejected referrals here -->
-        </ScrollView>
 
-    </LinearLayout>
-</ScrollView>
+            <LinearLayout
+                android:id="@+id/linear_layout_rejected"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </ScrollView>
+    </FrameLayout>
+</LinearLayout>

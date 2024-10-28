@@ -19,6 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import android.content.Intent;
+import android.widget.Toast;
 
 
 import java.util.HashMap;
@@ -28,6 +29,7 @@ public class ReportersFragment extends Fragment {
 
     private LinearLayout reportersContainer;
     private FirebaseFirestore db;
+    private AlertDialog detailDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -270,11 +272,10 @@ public class ReportersFragment extends Fragment {
         detailDialogBuilder.setPositiveButton("Close", null);
 
         // Create and show the detail dialog
-        AlertDialog detailDialog = detailDialogBuilder.create();
+        detailDialog = detailDialogBuilder.create();
         detailDialog.show();
     }
 
-    // New method to fetch student details from Firestore
     private void fetchStudentDetails(String studentName, String violation, String referrerName) {
         db.collection("student_refferal_history") // Adjust this collection name as necessary
                 .whereEqualTo("student_name", studentName)
@@ -283,24 +284,32 @@ public class ReportersFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                            // Assume you only want the first result for simplicity
+                            // Get the first document found
                             DocumentSnapshot document = task.getResult().getDocuments().get(0);
 
-                            // Create a new Intent to start the ReporterView
-                            Intent intent = new Intent(getContext(), ReporterView.class);
-                            intent.putExtra("STUDENT_ID", document.getString("student_id"));
-                            intent.putExtra("STUDENT_NAME", document.getString("student_name"));
-                            intent.putExtra("STUDENT_PROGRAM", document.getString("student_program"));
-                            intent.putExtra("STUDENT_CONTACT", document.getString("student_contact"));
-                            intent.putExtra("STUDENT_YEAR", document.getString("student_year"));
-                            intent.putExtra("STUDENT_BLOCK", document.getString("block"));
-                            intent.putExtra("VIOLATIONS", violation); // Pass the violation to the intent
-                            intent.putExtra("REFERRER_NAME", referrerName); // Pass the referrer name
+                            // Create a new instance of ReporterView fragment with arguments
+                            ReporterView reporterViewFragment = ReporterView.newInstance(
+                                    document.getString("student_id"),
+                                    document.getString("student_name"),
+                                    document.getString("student_program"),
+                                    document.getString("student_contact"),
+                                    document.getString("student_year"),
+                                    document.getString("block"),
+                                    document.getString("remarks"),
+                                    violation, // Pass the violation
+                                    referrerName // Pass the referrer name
+                            );
 
-                            // Start the ReporterView activity with the fetched details
-                            startActivity(intent);
+                            // Replace the current fragment with ReporterView fragment
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.fragment_container, reporterViewFragment) // Make sure to use the correct container ID
+                                    .addToBackStack(null) // Optionally add to back stack
+                                    .commit();
+
+                            detailDialog.dismiss();
                         } else {
                             // Handle case where no student details were found
+                            Toast.makeText(getContext(), "No student details found.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

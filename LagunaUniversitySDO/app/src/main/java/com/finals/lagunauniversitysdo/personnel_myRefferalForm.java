@@ -1,6 +1,7 @@
 package com.finals.lagunauniversitysdo;
 
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,8 +55,10 @@ public class personnel_myRefferalForm extends Fragment {
     }
 
     private void fetchReferralData() {
-        // Clear any existing rows to avoid duplicates
-        tableLayout.removeAllViews();
+        // Remove all rows except the first one (header)
+        if (tableLayout.getChildCount() > 1) {
+            tableLayout.removeViews(1, tableLayout.getChildCount() - 1); // Keep the first row (header)
+        }
 
         // Ensure personnelName is not null
         if (personnelName == null || personnelName.isEmpty()) {
@@ -64,8 +67,9 @@ public class personnel_myRefferalForm extends Fragment {
         }
 
         // Fetch data from Firestore 'personnel_refferal_history' collection for the logged-in personnel
-        db.collection("personnel_refferal_history")
-                .whereEqualTo("personnel_referrer", personnelName) // Filter by the logged-in personnel's full name
+        db.collection("personnel")
+                .document(personnelId)
+                .collection("personnel_refferal_history")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<com.google.firebase.firestore.QuerySnapshot>() {
                     @Override
@@ -108,6 +112,7 @@ public class personnel_myRefferalForm extends Fragment {
         TextView personnelNoTextView = new TextView(getContext());
         personnelNoTextView.setText(personnelNo);
         personnelNoTextView.setPadding(8, 8, 8, 8);
+        personnelNoTextView.setGravity(Gravity.CENTER);
 
         TextView nameTextView = new TextView(getContext());
         nameTextView.setText(name);
@@ -116,6 +121,7 @@ public class personnel_myRefferalForm extends Fragment {
         TextView statusTextView = new TextView(getContext());
         statusTextView.setText(status);
         statusTextView.setPadding(8, 8, 8, 8);
+        statusTextView.setGravity(Gravity.CENTER);
 
         // Add the TextViews to the TableRow
         tableRow.addView(dateReportedTextView);
