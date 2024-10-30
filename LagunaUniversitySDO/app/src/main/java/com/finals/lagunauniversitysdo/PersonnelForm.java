@@ -40,6 +40,7 @@ public class PersonnelForm extends AppCompatActivity {
     private String scannedStudentNo;
     private String scannedProgram;
     private String personnelReferrer, personnelID; // Change the variable name here
+    private ArrayList<Map<String, String>> scannedStudentDataList = new ArrayList<>();
 
 
     // Keys for intent extras
@@ -167,6 +168,14 @@ public class PersonnelForm extends AppCompatActivity {
             this.scannedName = scannedName; // Store scanned name for later use
             this.scannedContact = UserSession.getContactNum() != null ? String.valueOf(PersonnelSession.getContactNum()) : ""; // Store scanned contact
             this.scannedStudentNo = studentNo; // Store student number
+
+            // Store the scanned data in a list for later use
+            Map<String, String> studentData = new HashMap<>();
+            studentData.put("student_no", studentNo);
+            studentData.put("student_name", scannedName);
+            studentData.put("student_program", block);
+            this.scannedStudentDataList.add(studentData); // Maintain the list of scanned data
+
         } else {
             Toast.makeText(this, "Invalid QR code format", Toast.LENGTH_LONG).show();
         }
@@ -292,7 +301,7 @@ public class PersonnelForm extends AppCompatActivity {
             userConcern = "Behavioral Concerns";
         } else if (learningCheckbox.isChecked()) {
             userConcern = "Learning Difficulty";
-        }// Validate that at least one concern has been selected
+        }
 
         // Validate inputs
         if (!validateInputs(name, email, contactString, program, remarks, userConcern)) {
@@ -310,7 +319,7 @@ public class PersonnelForm extends AppCompatActivity {
 
         // Retrieve personnel name for referrer
         personnelReferrer = getIntent().getStringExtra("PERSONNEL_NAME_KEY");
-        personnelID = getIntent().getStringExtra("PERSONNEL_ID");
+        personnelID = "0001";
 
         Log.d("PersonnelReferrer", "Personnel ID: " + personnelID);
 
@@ -323,8 +332,6 @@ public class PersonnelForm extends AppCompatActivity {
         ArrayList<String> addedUserContacts = getIntent().getStringArrayListExtra("ADDED_USER_CONTACTS");
         ArrayList<String> addedUserPrograms = getIntent().getStringArrayListExtra("ADDED_USER_PROGRAMS");
         ArrayList<String> addedUserStudentIds = getIntent().getStringArrayListExtra("ADDED_USER_STUDENT_IDS");
-
-
 
         // Check if there are added students and add them to Firestore
         if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudentIds != null) {
@@ -353,7 +360,6 @@ public class PersonnelForm extends AppCompatActivity {
                             .set(studentData)
                             .addOnSuccessListener(documentReference -> {
                                 Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
-                                finish();
                             })
                             .addOnFailureListener(e -> {
                                 Toast.makeText(this, "Failed to submit data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -364,64 +370,6 @@ public class PersonnelForm extends AppCompatActivity {
         }
 
         // Extract displayed students from the table and save them to Firestore
-        saveDisplayedStudentsToFirestore(term, violation, date, status, remarks, personnelReferrer);
-
-        // Add the scanned data to Firestore as well
-        if (scannedName != null && scannedStudentNo != null && scannedProgram != null) {
-            checkAndSaveScannedStudent(scannedName, scannedProgram, scannedStudentNo, term, violation, date, status, remarks, personnelReferrer);
-        }
-    }
-
-    private void checkAndSaveScannedStudent(String scannedName, String scannedProgram, String scannedStudentNo, String term, String violation, String date, String status, String remarks, String personnelReferrer) {
-        // Query Firestore to check if the student already exists
-        firestore.collection("personnel_refferal_history")
-                .whereEqualTo("student_id", scannedStudentNo) // Check by student ID
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        if (task.getResult().isEmpty()) {
-                            // Student does not exist, proceed to save
-                            Map<String, Object> scannedStudentData = new HashMap<>();
-                            scannedStudentData.put("student_name", scannedName);
-                            scannedStudentData.put("student_program", scannedProgram);
-                            scannedStudentData.put("student_id", scannedStudentNo); // Use scanned student number
-                            scannedStudentData.put("term", term);
-                            scannedStudentData.put("violation", violation);
-                            scannedStudentData.put("date", date);
-                            scannedStudentData.put("status", status);
-                            scannedStudentData.put("remarks", remarks); // Add remarks to the scanned student data
-                            scannedStudentData.put("personnel_referrer", personnelReferrer); // Add personnel referrer
-
-                            // Get current date and time to use as the document ID for the referral
-                            String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date());
-
-                            // Add each student's data directly to the Firestore collection
-                            firestore.collection("personnel")
-                                    .document(personnelID) // Use personnel number as document ID
-                                    .collection("personnel_refferal_history") // Subcollection for the personnel's referrals
-                                    .document(dateTimeId) // Document ID based on date and time
-                                    .set(scannedStudentData)
-                                    .addOnSuccessListener(documentReference -> {
-                                        Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
-                                        finish();
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        Toast.makeText(this, "Failed to submit data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                        Log.e("Firestore", "Error adding document", e);
-                                    });
-                        } else {
-                            // Student already exists
-                            Toast.makeText(this, "This student has already been submitted.", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        Toast.makeText(this, "Error checking student existence: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.e("Firestore", "Error checking existence", task.getException());
-                    }
-                });
-    }
-
-    private void saveDisplayedStudentsToFirestore(String term, String violation, String date, String status, String remarks, String personnelReferrer) {
-        // Iterate over the rows in the detailsTable
         for (int i = 0; i < detailsTable.getChildCount(); i++) {
             TableRow row = (TableRow) detailsTable.getChildAt(i);
             if (row.getChildCount() == 4) { // Ensure there are 4 children (name, program, studId, contact)
@@ -461,10 +409,49 @@ public class PersonnelForm extends AppCompatActivity {
                         });
             }
         }
+
+        // Process scanned data for each scanned student
+        for (Map<String, String> scannedData : scannedStudentDataList) {
+            String scannedName = scannedData.get("student_name");
+            String scannedStudentNo = scannedData.get("student_no");
+            String scannedProgram = scannedData.get("student_program");
+
+            // Generate a unique dateTimeId for each scanned student
+            String scannedDateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + scannedStudentNo;
+
+            // Create a map for the scanned student's data
+            Map<String, Object> scannedStudentData = new HashMap<>();
+            scannedStudentData.put("student_name", scannedName);
+            scannedStudentData.put("student_program", scannedProgram);
+            scannedStudentData.put("student_id", scannedStudentNo); // Use scanned student number
+            scannedStudentData.put("term", term);
+            scannedStudentData.put("violation", violation);
+            scannedStudentData.put("date", date);
+            scannedStudentData.put("status", status);
+            scannedStudentData.put("user_concern", userConcern); // Add user concern to scanned student data
+            scannedStudentData.put("remarks", remarks); // Add remarks to scanned student data
+            scannedStudentData.put("personnel_referrer", personnelReferrer); // Add personnel referrer name to Firestore data
+
+            // Add scanned student data under personnel's referral history in Firestore
+            firestore.collection("personnel")
+                    .document(personnelID) // Use personnel's ID as the document ID (without quotes)
+                    .collection("personnel_refferal_history") // Subcollection for the personnel's referrals
+                    .document(scannedDateTimeId) // Document ID based on unique dateTimeId
+                    .set(scannedStudentData)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "Scanned student data submitted successfully", Toast.LENGTH_SHORT).show();
+                        // Optionally finish or navigate to another activity here if needed
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "Failed to submit scanned student data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.e("Firestore", "Error adding scanned student document", e);
+                    });
+        }
+
     }
 
 
-    private boolean validateInputs(String name, String email, String contact, String program, String remarks, String userConcern) {
+        private boolean validateInputs(String name, String email, String contact, String program, String remarks, String userConcern) {
         if (TextUtils.isEmpty(name)) {
             nameField.setError("Name is required");
             return false;

@@ -13,6 +13,10 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -52,6 +56,8 @@ public class form extends AppCompatActivity {
     private static final String CONTACT_NUM_KEY = "CONTACT_NUM";
     private static final String PROGRAM_KEY = "PROGRAM";
     private static final String STUDENT_ID_KEY = "STUDENT_ID";
+    private ArrayList<Map<String, String>> scannedStudentDataList = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +134,9 @@ public class form extends AppCompatActivity {
         contactField.setText(studentContact != 0L ? String.valueOf(studentContact) : "");
         programField.setText(studentProgram != null ? studentProgram : "");
 
+        this.studentReferrer = UserSession.getStudentName();
+        Log.d("FormActivity", "Student Referrer: " + this.studentReferrer);
+
         // Retrieve and process multiple scanned data if available
         ArrayList<String> scannedDataList = intent.getStringArrayListExtra("scannedDataList");
         if (scannedDataList != null && !scannedDataList.isEmpty()) {
@@ -157,7 +166,14 @@ public class form extends AppCompatActivity {
                 // Display the student details in the table without the contact info
                 displayStudentDetails(scannedName, block, studentNo, ""); // Pass an empty string for contact
 
-                // Store block for later use
+                // Store the scanned data in a list for later use
+                Map<String, String> studentData = new HashMap<>();
+                studentData.put("student_no", studentNo);
+                studentData.put("student_name", scannedName);
+                studentData.put("student_program", block);
+                this.scannedStudentDataList.add(studentData); // Maintain the list of scanned data
+
+                // Optional: Display the latest scanned data in the input fields
                 this.scannedProgram = block; // Store block instead of program
 
                 // Retrieve student data from UserSession
@@ -222,6 +238,15 @@ public class form extends AppCompatActivity {
             this.scannedName = scannedName; // Store scanned name for later use
             this.scannedContact = studentContact != null ? String.valueOf(studentContact) : ""; // Store scanned contact
             this.scannedStudentNo = studentNo; // Store student number
+
+            // Create a map to hold the current scanned student's data
+            Map<String, String> studentData = new HashMap<>();
+            studentData.put("student_no", studentNo);
+            studentData.put("student_name", scannedName);
+            studentData.put("student_program", block);
+
+            // Add the current student's data to the list
+            scannedStudentDataList.add(studentData); // Maintain the list of scanned data
 
         } else {
             Toast.makeText(this, "Invalid QR code format", Toast.LENGTH_LONG).show();
@@ -312,7 +337,7 @@ public class form extends AppCompatActivity {
         String term = termSpinner.getSelectedItem().toString();
         String violation = violationSpinner.getSelectedItem().toString();
         String date = dateField.getText().toString().trim();
-        String studId = studentId;
+        String studId = studentId; // Assuming this is the student's ID being referred
         String status = "pending"; // Default status
 
         // Retrieve remarks from remarks_field
@@ -331,7 +356,7 @@ public class form extends AppCompatActivity {
             userConcern = "Behavioral Concerns";
         } else if (learningCheckbox.isChecked()) {
             userConcern = "Learning Difficulty";
-        }// Validate that at least one concern has been selected
+        }
 
         // Validate inputs
         if (!validateInputs(name, email, contactString, program, remarks, userConcern)) {
@@ -347,21 +372,25 @@ public class form extends AppCompatActivity {
             return;
         }
 
+        // Generate dateTimeId for the main student data here
+
         // Retrieve previously added students for submission
         ArrayList<String> addedUserNames = getIntent().getStringArrayListExtra("ADDED_USER_NAMES");
         ArrayList<String> addedUserContacts = getIntent().getStringArrayListExtra("ADDED_USER_CONTACTS");
         ArrayList<String> addedUserPrograms = getIntent().getStringArrayListExtra("ADDED_USER_PROGRAMS");
         ArrayList<String> addedUserStudentIds = getIntent().getStringArrayListExtra("ADDED_USER_STUDENT_IDS");
 
-
-
         // Check if there are added students and add them to Firestore
         if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudentIds != null) {
             for (int i = 0; i < addedUserNames.size(); i++) {
+                // Concatenate added student ID to dateTimeId
+                String addedStudentId = addedUserStudentIds.get(i);
+                String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + addedStudentId;
+
                 Map<String, Object> studentData = new HashMap<>();
                 studentData.put("student_name", addedUserNames.get(i));
                 studentData.put("student_program", addedUserPrograms.get(i));
-                studentData.put("student_id", addedUserStudentIds.get(i)); // Added Student ID
+                studentData.put("student_id", addedStudentId); // Use added student ID
                 studentData.put("term", term);
                 studentData.put("violation", violation);
                 studentData.put("date", date);
@@ -370,21 +399,16 @@ public class form extends AppCompatActivity {
                 studentData.put("remarks", remarks); // Add remarks to the student data
                 studentData.put("student_referrer", studentReferrer); // Add student_referrer to Firestore data
 
-                // Get current date and time to use as the document ID for the referral
-                String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date());
-
-                Log.d("Firestore", "Student ID: " + studId);
+                Log.d("Firestore", "Student ID: " + addedStudentId);
 
                 firestore.collection("students")
-                        .document(studId) // Use student number as document ID
+                        .document(studId) // Use the main student number as document ID
                         .collection("student_refferal_history") // Subcollection for the student's referrals
-                        .document(dateTimeId) // Document ID based on date and time
+                        .document(dateTimeId) // Document ID based on date, time, and added student ID
                         .set(studentData)
                         .addOnSuccessListener(documentReference -> {
                             Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
-                            // Just finish the current activity to return to the previous one
-                            finish();
-                            clearFields();
+                          finish();
                         })
                         .addOnFailureListener(e -> {
                             Toast.makeText(this, "Failed to submit data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -394,8 +418,15 @@ public class form extends AppCompatActivity {
             }
         }
 
-        // Add the scanned data to Firestore as well without contact info
-        if (scannedName != null && scannedStudentNo != null && scannedProgram != null) {
+        // Add the scanned data to Firestore as well using the scanned student ID
+        for (Map<String, String> scannedData : scannedStudentDataList) { // Loop through all scanned students
+            String scannedName = scannedData.get("student_name");
+            String scannedStudentNo = scannedData.get("student_no");
+            String scannedProgram = scannedData.get("student_program");
+
+            // Generate a unique dateTimeId for each scanned student
+            String scannedDateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + scannedStudentNo;
+
             Map<String, Object> scannedStudentData = new HashMap<>();
             scannedStudentData.put("student_name", scannedName);
             scannedStudentData.put("student_program", scannedProgram);
@@ -408,14 +439,19 @@ public class form extends AppCompatActivity {
             scannedStudentData.put("remarks", remarks); // Add remarks to scanned student data
             scannedStudentData.put("student_referrer", studentReferrer); // Add student_referrer to Firestore data
 
-            // Add scanned student's data directly to the Firestore collection
-            firestore.collection("student_refferal_history")
-                    .add(scannedStudentData)
-                    .addOnSuccessListener(documentReference -> {
+            // Save each scanned student's data into their respective sub-collection
+            firestore.collection("students")
+                    .document(studId) // Use the main student ID as document ID
+                    .collection("student_refferal_history") // Subcollection for the scanned students' referrals
+                    .document(scannedDateTimeId) // Use a unique dateTimeId for each scanned student
+                    .set(scannedStudentData)
+                    .addOnSuccessListener(aVoid -> {
+                        // Notify success for each scanned student
                         Toast.makeText(this, "Scanned student data submitted successfully", Toast.LENGTH_SHORT).show();
-                        // Just finish the current activity to return to the previous one
-                        finish();
-                        clearFields();
+                        // After successful submission, navigate to ReferralFormActivity
+                      finish();
+
+
                     })
                     .addOnFailureListener(e -> {
                         Toast.makeText(this, "Failed to submit scanned student data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -466,3 +502,4 @@ public class form extends AppCompatActivity {
         setCurrentDateTime();
     }
 }
+
