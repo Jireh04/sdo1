@@ -101,7 +101,7 @@ public class dashboard_prefect extends Fragment {
             graphLayout.setVisibility(View.GONE);  // Hide the graph layout
         }
 
-        // Clear previous results before starting new search
+        // Clear previous results before starting a new search
         searchResultsContainer.removeAllViews();
 
         if (!queryText.isEmpty()) {
@@ -132,8 +132,9 @@ public class dashboard_prefect extends Fragment {
                                     String year = document.getString("year");
                                     String block = document.getString("block");
 
-                                    // Check if the name contains the search query (case-insensitive)
-                                    if (name != null && name.toLowerCase().contains(queryText)) {
+                                    // Check if the name or student ID contains the search query (case-insensitive)
+                                    if ((name != null && name.toLowerCase().contains(queryText)) ||
+                                            (studentId != null && studentId.toLowerCase().contains(queryText))) {
                                         foundResults = true;
 
                                         // Create a LinearLayout to contain the student's name and button
@@ -212,7 +213,6 @@ public class dashboard_prefect extends Fragment {
             searchResultsContainer.addView(emptySearchTextView);
         }
     }
-
     // Add this method to manage button visibility and listeners
     private void updatePaginationButtons() {
         if (currentPage > 1) {

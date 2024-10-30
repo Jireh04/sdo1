@@ -238,7 +238,7 @@ public class PrefectReferralDashboard extends Fragment {
 
         // Check if the search term is empty
         if (searchTerm.isEmpty()) {
-            Toast.makeText(getActivity(), "Please enter a name", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Please enter a name or student ID", Toast.LENGTH_SHORT).show();
             paginationControls.setVisibility(View.GONE);
             return;
         }
@@ -260,8 +260,9 @@ public class PrefectReferralDashboard extends Fragment {
                         String studId = document.getString("student_id");
                         String contact = document.getString("contact");
 
-                        // Ensure the name is not null and contains the search term (case insensitive)
-                        if (name != null && name.toLowerCase().contains(searchTerm)) {
+                        // Check if the search term is in either the name or student ID (case insensitive)
+                        if ((name != null && name.toLowerCase().contains(searchTerm)) ||
+                                (studId != null && studId.toLowerCase().contains(searchTerm))) {
                             allDocuments.add(document); // Add matching documents to the list
                             Log.d("SearchResults", "Found Student: " + name + " with ID: " + studId + " and Contact: " + contact);
                         }

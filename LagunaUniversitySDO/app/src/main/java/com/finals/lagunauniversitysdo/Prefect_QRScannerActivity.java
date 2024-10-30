@@ -4,10 +4,13 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.widget.EditText;
 import android.widget.Toast;
+import android.text.InputFilter;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -18,9 +21,13 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import java.util.ArrayList;
 
 public class Prefect_QRScannerActivity extends AppCompatActivity {
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
+    private boolean isMultipleScan = false; // Flag for multiple scan mode
+    private ArrayList<String> scannedDataList; // List to store scanned QR codes
+    private int remainingScans; // Number of scans left to perform
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,24 +47,74 @@ public class Prefect_QRScannerActivity extends AppCompatActivity {
         Long prefectContact = PrefectSession.getPrefectContactNum();
         String prefectDepartment = PrefectSession.getPrefectDepartment();
         String prefectId = PrefectSession.getPrefectId();
-        String prefectUsername = PrefectSession.getPrefectUsername(); // You need to add a getter for username in PrefectSession
-        String prefectPassword = PrefectSession.getPrefectPassword(); // You need to add a getter for password in PrefectSession
+        String prefectUsername = PrefectSession.getPrefectUsername();
+        String prefectPassword = PrefectSession.getPrefectPassword();
 
         // Display welcome message
         Toast.makeText(this, "Welcome Prefect " + prefectName, Toast.LENGTH_SHORT).show();
 
-        // Check camera permission and start the scanner
-        checkCameraPermissionAndStartScanner();
+        scannedDataList = new ArrayList<>(); // Initialize the list for storing scanned QR codes
+        showScanModeDialog(); // Show dialog for selecting scan mode
+    }
+
+    private void showScanModeDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Select Scan Mode")
+                .setMessage("Do you want to scan a single QR code or multiple codes?")
+                .setPositiveButton("Single Scan", (dialog, which) -> {
+                    isMultipleScan = false;
+                    checkCameraPermissionAndStartScanner();
+                })
+                .setNegativeButton("Multiple Scans", (dialog, which) -> {
+                    isMultipleScan = true;
+                    askForNumberOfScans(); // Ask user how many scans they want to perform
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    private void askForNumberOfScans() {
+        final EditText input = new EditText(this);
+        input.setFilters(new InputFilter[]{
+                (source, start, end, dest, dstart, dend) -> {
+                    String inputText = dest.toString() + source.toString();
+                    if (!inputText.matches("\\d*")) return ""; // Reject non-numeric input
+                    if (inputText.length() > 2 || (inputText.length() == 2 && Integer.parseInt(inputText) > 50)) {
+                        return ""; // Reject input exceeding 50
+                    }
+                    return null; // Accept input
+                }
+        });
+
+        new AlertDialog.Builder(this)
+                .setTitle("Number of Scans")
+                .setMessage("How many QR codes do you want to scan? (Max: 50)")
+                .setView(input)
+                .setPositiveButton("OK", (dialog, which) -> {
+                    String inputText = input.getText().toString();
+                    try {
+                        int numberOfScans = Integer.parseInt(inputText);
+                        if (numberOfScans > 0) {
+                            remainingScans = numberOfScans; // Set remaining scans
+                            scannedDataList.clear(); // Clear previous scans
+                            checkCameraPermissionAndStartScanner(); // Check permission and start scanning
+                        } else {
+                            Toast.makeText(Prefect_QRScannerActivity.this, "Please enter a valid number.", Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(Prefect_QRScannerActivity.this, "Invalid input. Please enter a number.", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private void checkCameraPermissionAndStartScanner() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
-            // Request camera permission if not granted
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
         } else {
-            // Permission already granted, start the QR scanner
             startQRCodeScanner();
         }
     }
@@ -66,7 +123,7 @@ public class Prefect_QRScannerActivity extends AppCompatActivity {
         IntentIntegrator integrator = new IntentIntegrator(this);
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE);
         integrator.setPrompt("Scan a QR code");
-        integrator.setCaptureActivity(CustomScannerActivity.class); // Custom activity for square overlay
+        integrator.setCaptureActivity(CustomScannerActivity.class);
         integrator.setOrientationLocked(true);
         integrator.setBeepEnabled(true);
         integrator.setBarcodeImageEnabled(true);
@@ -78,10 +135,8 @@ public class Prefect_QRScannerActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Camera permission was granted
                 startQRCodeScanner();
             } else {
-                // Camera permission was denied
                 Toast.makeText(this, "Camera permission is required to scan QR codes", Toast.LENGTH_LONG).show();
             }
         }
@@ -94,31 +149,55 @@ public class Prefect_QRScannerActivity extends AppCompatActivity {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (result != null) {
             if (result.getContents() == null) {
-                // Handle cancellation
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
-                finish(); // Close the QRScannerActivity and go back to the referral screen
+                finish();
             } else {
-                // Handle the scanned result
-                String scannedData = result.getContents();
-
-                // Start the form activity and pass the scanned data along with prefect details
-                Intent formIntent = new Intent(this, PrefectForm.class);
-                formIntent.putExtra("scannedData", scannedData); // Pass scanned data to the form
-
-                // You can now get prefect details directly from PrefectSession
-                formIntent.putExtra("PREFECT_NAME_KEY", PrefectSession.getPrefectName());
-                formIntent.putExtra("PREFECT_EMAIL_KEY", PrefectSession.getPrefectEmail());
-                formIntent.putExtra("PREFECT_CONTACT_NUM_KEY", PrefectSession.getPrefectContactNum());
-                formIntent.putExtra("PREFECT_DEPARTMENT_KEY", PrefectSession.getPrefectDepartment());
-                formIntent.putExtra("PREFECT_ID_KEY", PrefectSession.getPrefectId());
-                formIntent.putExtra("PREFECT_USERNAME_KEY", PrefectSession.getPrefectUsername());
-                formIntent.putExtra("PREFECT_PASSWORD_KEY", PrefectSession.getPrefectPassword());
-                formIntent.putExtra("scannedData", scannedData);
-                startActivity(formIntent); // Start PrefectForm activity
-                finish(); // Close the QRScannerActivity
+                handleScanResult(result.getContents());
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void handleScanResult(String scannedText) {
+        scannedDataList.add(scannedText); // Add scanned text to the list
+        remainingScans--; // Decrease the count of remaining scans
+
+        if (!isMultipleScan) {
+            startPrefectFormActivity(scannedText); // Start the form with single scanned data
+        } else {
+            if (remainingScans > 0) {
+                Toast.makeText(this, "Scan another QR code", Toast.LENGTH_SHORT).show();
+                startQRCodeScanner(); // Start scanning again
+            } else {
+                startPrefectFormActivity(scannedDataList); // Start the form with all scanned data
+            }
+        }
+    }
+
+    private void startPrefectFormActivity(String scannedData) {
+        Intent formIntent = new Intent(this, PrefectForm.class);
+        formIntent.putExtra("scannedData", scannedData);
+        putPrefectData(formIntent);
+        startActivity(formIntent);
+        finish();
+    }
+
+    private void startPrefectFormActivity(ArrayList<String> scannedDataList) {
+        Intent formIntent = new Intent(this, PrefectForm.class);
+        formIntent.putStringArrayListExtra("scannedDataList", scannedDataList);
+        putPrefectData(formIntent);
+        startActivity(formIntent);
+        finish();
+    }
+
+    private void putPrefectData(Intent formIntent) {
+        formIntent.putExtra("PREFECT_NAME_KEY", PrefectSession.getPrefectName());
+        formIntent.putExtra("PREFECT_EMAIL_KEY", PrefectSession.getPrefectEmail());
+        formIntent.putExtra("PREFECT_CONTACT_NUM_KEY", PrefectSession.getPrefectContactNum());
+        formIntent.putExtra("PREFECT_DEPARTMENT_KEY", PrefectSession.getPrefectDepartment());
+        formIntent.putExtra("PREFECT_ID_KEY", PrefectSession.getPrefectId());
+        formIntent.putExtra("PREFECT_USERNAME_KEY", PrefectSession.getPrefectUsername());
+        formIntent.putExtra("PREFECT_PASSWORD_KEY", PrefectSession.getPrefectPassword());
     }
 }

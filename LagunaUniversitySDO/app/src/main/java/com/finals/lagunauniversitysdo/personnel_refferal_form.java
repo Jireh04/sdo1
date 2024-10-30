@@ -198,13 +198,12 @@ public class personnel_refferal_form extends Fragment {
 
 
 
-
     private void performSearch() {
         String searchTerm = searchBar.getText().toString().trim().toLowerCase();
 
         // Check if the search term is empty
         if (searchTerm.isEmpty()) {
-            Toast.makeText(getActivity(), "Please enter a name", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Please enter a name or student ID", Toast.LENGTH_SHORT).show();
             paginationControls.setVisibility(View.GONE);
             return;
         }
@@ -228,8 +227,9 @@ public class personnel_refferal_form extends Fragment {
                             String name = document.getString("name");
                             String studentId = document.getString("student_id");
 
-                            // Ensure the name is not null and contains the search term (case insensitive)
-                            if (name != null && name.toLowerCase().contains(searchTerm)) {
+                            // Check if the search term matches either the name or student_id (case insensitive)
+                            if ((name != null && name.toLowerCase().contains(searchTerm)) ||
+                                    (studentId != null && studentId.toLowerCase().contains(searchTerm))) {
                                 allDocuments.add(document); // Add matching documents to the list
                                 Log.d("SearchResults", "Found Student: " + name + " with ID: " + studentId);
                             }
