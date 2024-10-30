@@ -1,8 +1,5 @@
 package com.finals.lagunauniversitysdo;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class PersonnelSession {
     // Personnel fields
     private static String personnelId;  // Personnel ID
@@ -18,6 +15,10 @@ public class PersonnelSession {
     private static String scannedPersonnelNo; // For storing scanned personnel number
     private static String scannedName; // For storing scanned name
     private static String scannedPosition; // For storing scanned position
+
+    // New fields for first name and last name
+    private static String personnelFirstName; // New field for first name
+    private static String personnelLastName;  // New field for last name
 
     // Student fields
     private static String studentId; // Student ID
@@ -70,6 +71,15 @@ public class PersonnelSession {
 
     public static void setScannedPosition(String position) {
         scannedPosition = position;
+    }
+
+    // New setters for first name and last name
+    public static void setFirstName(String firstName) {
+        personnelFirstName = firstName; // Set first name
+    }
+
+    public static void setLastName(String lastName) {
+        personnelLastName = lastName; // Set last name
     }
 
     // Setters for Student
@@ -141,6 +151,15 @@ public class PersonnelSession {
         return scannedPosition;
     }
 
+    // New getters for first name and last name
+    public static String getFirstName() {
+        return personnelFirstName; // Get first name
+    }
+
+    public static String getLastName() {
+        return personnelLastName; // Get last name
+    }
+
     // Getters for Student
     public static String getStudentId() {
         return studentId;
@@ -177,6 +196,10 @@ public class PersonnelSession {
         scannedPersonnelNo = null;
         scannedName = null;
         scannedPosition = null;
+
+        // Clear first name and last name
+        personnelFirstName = null; // Clear first name
+        personnelLastName = null;  // Clear last name
 
         // Clear student data
         studentId = null;

@@ -319,6 +319,8 @@ public class form extends AppCompatActivity {
     }
 
 
+
+
     private void saveData() {
         // Initialize CheckBox for privacy consent
         CheckBox privacyConsentCheckbox = findViewById(R.id.privacy_consent);
@@ -408,7 +410,7 @@ public class form extends AppCompatActivity {
                         .set(studentData)
                         .addOnSuccessListener(documentReference -> {
                             Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
-                          finish();
+                            finish();
                         })
                         .addOnFailureListener(e -> {
                             Toast.makeText(this, "Failed to submit data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -449,7 +451,7 @@ public class form extends AppCompatActivity {
                         // Notify success for each scanned student
                         Toast.makeText(this, "Scanned student data submitted successfully", Toast.LENGTH_SHORT).show();
                         // After successful submission, navigate to ReferralFormActivity
-                      finish();
+                        finish();
 
 
                     })
@@ -459,7 +461,6 @@ public class form extends AppCompatActivity {
                     });
         }
     }
-
 
 
     private boolean validateInputs(String name, String email, String contact, String program, String remarks, String userConcern) {

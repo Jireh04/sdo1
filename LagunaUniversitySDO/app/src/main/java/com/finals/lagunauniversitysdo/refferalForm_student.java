@@ -166,7 +166,7 @@ public class refferalForm_student extends Fragment {
 
         // Create the TextView for displaying student info
         TextView userInfo = new TextView(getActivity());
-        userInfo.setText(studId + " | " + name);
+        userInfo.setText(studId + " | " + name + " | " + program);
         userInfo.setTextSize(name.length() > 18 ? 14 : 16); // Adjust text size if the name is long
         userInfo.setEllipsize(TextUtils.TruncateAt.END); // Truncate with "..." if text is too long
         userInfo.setSingleLine(true); // Keep text on a single line
@@ -233,12 +233,11 @@ public class refferalForm_student extends Fragment {
         }
         return null;
     }
-
     private void performSearch(View rootView) {
         String searchTerm = searchBar.getText().toString().trim().toLowerCase();
 
         if (searchTerm.isEmpty()) {
-            Toast.makeText(getActivity(), "Please enter a name", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Please enter a name or student ID", Toast.LENGTH_SHORT).show();
             paginationControls.setVisibility(View.GONE);
             return;
         }
@@ -260,10 +259,10 @@ public class refferalForm_student extends Fragment {
                             // Extract fields safely
                             String name = document.getString("name");
                             String studentId = document.getString("student_id");
-                            String program = document.getString("program");
 
-                            // Ensure the name is not null and contains the search term (case insensitive)
-                            if (name != null && name.toLowerCase().contains(searchTerm)) {
+                            // Ensure the name or studentId contains the search term (case insensitive)
+                            if ((name != null && name.toLowerCase().contains(searchTerm)) ||
+                                    (studentId != null && studentId.toLowerCase().contains(searchTerm))) {
                                 allDocuments.add(document); // Add matching documents to the list
                             }
                         }
@@ -289,7 +288,6 @@ public class refferalForm_student extends Fragment {
             }
         });
     }
-
 
     private void showPage(View rootView) {
         LinearLayout searchResultsContainer = rootView.findViewById(R.id.search_results_container);

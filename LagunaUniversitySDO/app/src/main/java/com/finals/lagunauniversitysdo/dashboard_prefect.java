@@ -1,12 +1,15 @@
 package com.finals.lagunauniversitysdo;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import android.content.Intent;
@@ -101,7 +104,7 @@ public class dashboard_prefect extends Fragment {
             graphLayout.setVisibility(View.GONE);  // Hide the graph layout
         }
 
-        // Clear previous results before starting new search
+        // Clear previous results before starting a new search
         searchResultsContainer.removeAllViews();
 
         if (!queryText.isEmpty()) {
@@ -131,43 +134,57 @@ public class dashboard_prefect extends Fragment {
                                     String program = document.getString("program");
                                     String year = document.getString("year");
                                     String block = document.getString("block");
+                                    String remarks = document.getString("remarks");
+                                    String contact = document.getString("student_contact");
 
-                                    // Check if the name contains the search query (case-insensitive)
-                                    if (name != null && name.toLowerCase().contains(queryText)) {
+                                    // Check if the name or student ID contains the search query (case-insensitive)
+                                    if ((name != null && name.toLowerCase().contains(queryText)) ||
+                                            (studentId != null && studentId.toLowerCase().contains(queryText))) {
                                         foundResults = true;
 
-                                        // Create a LinearLayout to contain the student's name and button
-                                        LinearLayout studentLayout = new LinearLayout(getContext());
-                                        studentLayout.setOrientation(LinearLayout.HORIZONTAL);
+                                        RelativeLayout userLayout = new RelativeLayout(getActivity());
+                                        userLayout.setPadding(10, 10, 10, 10);
 
-                                        // Apply top padding only for the first item
-                                        if (isFirstItem) {
-                                            studentLayout.setPadding(0, 180, 0, 8);  // Top padding for the first item
-                                            isFirstItem = false; // After the first item, set the flag to false
-                                        } else {
-                                            studentLayout.setPadding(0, 8, 0, 8);  // No top padding for subsequent items
-                                        }
+                                        // Create the TextView for displaying student info
+                                        TextView studentTextView = new TextView(getActivity());
+                                        studentTextView.setText(studentId + " | " + name + " | " + program);
+                                        studentTextView.setTextSize(name.length() > 18 ? 14 : 16); // Adjust text size if the name is long
+                                        studentTextView.setEllipsize(TextUtils.TruncateAt.END); // Truncate with "..." if text is too long
+                                        studentTextView.setSingleLine(true); // Keep text on a single line
+                                        studentTextView.setId(View.generateViewId());
 
-                                        studentLayout.setGravity(Gravity.CENTER_VERTICAL); // Align the content vertically in the center
+                                        RelativeLayout.LayoutParams userInfoParams = new RelativeLayout.LayoutParams(
+                                                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                                                RelativeLayout.LayoutParams.WRAP_CONTENT
+                                        );
+                                        userInfoParams.addRule(RelativeLayout.ALIGN_PARENT_START);
+                                        userInfoParams.addRule(RelativeLayout.CENTER_VERTICAL);
+                                        studentTextView.setLayoutParams(userInfoParams);
 
-                                        // Create a TextView for the student's ID and name
-                                        TextView studentTextView = new TextView(getContext());
-                                        studentTextView.setText(studentId + " |  " + name + " | " + program);
-                                        studentTextView.setTextSize(16);
-                                        studentTextView.setLayoutParams(new LinearLayout.LayoutParams(
-                                                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1)); // Make it take all the available space
+                                        // Create the Button for action
+                                        Button addButton = new Button(getActivity());
+                                        addButton.setText("+");
+                                        addButton.setBackgroundResource(R.drawable.round_button);
+                                        addButton.setTextColor(Color.WHITE);
+                                        addButton.setAllCaps(false);
+                                        addButton.setTextSize(24);
+                                        addButton.setPadding(20, 13, 20, 13);
+                                        addButton.setId(View.generateViewId());
+
+                                        RelativeLayout.LayoutParams buttonLayoutParams = new RelativeLayout.LayoutParams(
+                                                140,
+                                                140
+                                        );
+                                        buttonLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_END);
+                                        buttonLayoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
+                                        buttonLayoutParams.setMargins(0, 0, 35, 0); // Add right margin for spacing
+                                        addButton.setLayoutParams(buttonLayoutParams);
 
                                         // Make the TextView clickable
                                         studentTextView.setOnClickListener(v -> {
                                             // Fetch violations for the selected student
-                                            fetchViolations(studentId, name, program, year, block); // Use studentId here
+                                            fetchViolations(studentId, name, program, year, block, remarks, contact); // Use studentId here
                                         });
-
-                                        // Create a Button for the "Add" action
-                                        Button addButton = new Button(getContext());
-                                        addButton.setText("+"); // Text for the button (you can use an image as well)
-                                        addButton.setLayoutParams(new LinearLayout.LayoutParams(
-                                                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
                                         // Set the onClickListener for the button
                                         addButton.setOnClickListener(v -> {
@@ -176,11 +193,11 @@ public class dashboard_prefect extends Fragment {
                                         });
 
                                         // Add the TextView and Button to the LinearLayout
-                                        studentLayout.addView(studentTextView);
-                                        studentLayout.addView(addButton);
+                                        userLayout.addView(studentTextView);
+                                        userLayout.addView(addButton);
 
                                         // Add the studentLayout to the searchResultsContainer
-                                        searchResultsContainer.addView(studentLayout);
+                                        searchResultsContainer.addView(userLayout);
 
                                         // Store the last visible student ID for pagination
                                         lastVisibleStudentId = document.getString("student_id");
@@ -212,7 +229,6 @@ public class dashboard_prefect extends Fragment {
             searchResultsContainer.addView(emptySearchTextView);
         }
     }
-
     // Add this method to manage button visibility and listeners
     private void updatePaginationButtons() {
         if (currentPage > 1) {
@@ -245,7 +261,7 @@ public class dashboard_prefect extends Fragment {
 
 
 
-    private void fetchViolations(String studentId, String name, String program, String year, String block) {
+    private void fetchViolations(String studentId, String name, String program, String year, String block, String remarks, String contact) {
         // Reference to the Firestore collections
         CollectionReference studentReferrals = db.collection("student_refferal_history");
         CollectionReference prefectReferrals = db.collection("prefect_referral_history");
@@ -322,16 +338,16 @@ public class dashboard_prefect extends Fragment {
 
                     // Send the violations to PrefectView
                     String violations = violationsBuilder.toString().trim(); // Get final string
-                    navigateToPrefectView(studentId, name, program, year, block, violations); // Changed to studentId
+                    navigateToPrefectView(studentId, name, program, year, block, violations, remarks, contact); // Changed to studentId
                 });
             });
         });
     }
 
     // Method to navigate to PrefectView
-    private void navigateToPrefectView(String studentId, String name, String program, String year, String block, String violations) {
+    private void navigateToPrefectView(String studentId, String name, String program, String year, String block, String violations, String contact, String remarks) {
         // Create an instance of the PrefectView fragment
-        PrefectView prefectViewFragment = PrefectView.newInstance(studentId, name, program, null, year, block, violations);
+        PrefectView prefectViewFragment = PrefectView.newInstance(studentId, name, program, contact, remarks, year, block, violations);
 
         // Replace the current fragment with PrefectView
         getParentFragmentManager().beginTransaction()  // Use getParentFragmentManager() if inside a fragment

@@ -1,9 +1,9 @@
 package com.finals.lagunauniversitysdo;
 
-import static com.finals.lagunauniversitysdo.ReferralFormGenerator.generateReferralForm;
-
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -12,7 +12,6 @@ import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +36,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class PrefectView extends Fragment {
@@ -61,7 +62,7 @@ public class PrefectView extends Fragment {
     // New method to create an instance of the fragment with arguments
     public static PrefectView newInstance(String studentId, String studentName, String studentProgram,
                                           String studentContact, String studentYear, String studentBlock,
-                                          String violations) {
+                                          String violations, String contact) {
         PrefectView fragment = new PrefectView();
         Bundle args = new Bundle();
         args.putString("STUDENT_ID", studentId);
@@ -71,6 +72,7 @@ public class PrefectView extends Fragment {
         args.putString("STUDENT_YEAR", studentYear);
         args.putString("STUDENT_BLOCK", studentBlock);
         args.putString("VIOLATIONS", violations);
+        args.putString("STUDENT_CONTACT", contact);
         fragment.setArguments(args);
         return fragment;
     }
@@ -107,11 +109,10 @@ public class PrefectView extends Fragment {
             String studentYear = getArguments().getString("STUDENT_YEAR");
             String studentBlock = getArguments().getString("STUDENT_BLOCK");
             String violations = getArguments().getString("VIOLATIONS"); // Retrieve the violations string
-            String location = getArguments().getString("LOCATION");
 
             // Set student details to TextViews
             if (studentId != null && !studentId.isEmpty()) {
-                studentIdTextView.setText("ID: " + studentId);
+                studentIdTextView.setText("STUDENT ID: " + studentId);
             }
             if (studentName != null && !studentName.isEmpty()) {
                 studentNameTextView.setText("Name: " + studentName);
@@ -264,46 +265,146 @@ public class PrefectView extends Fragment {
         builder.show();
     }
 
+    // Modified exportPdf method to accept a boolean parameter
     private void exportPdf(boolean openPdf) {
-        // Check if student data is valid
-        String studentName = studentNameTextView.getText().toString();
-        String studentId = studentIdTextView.getText().toString();
-        String studentProgram = studentProgramTextView.getText().toString();
-        String studentContact = studentContactTextView.getText().toString();
-        String studentYear = studentYearTextView.getText().toString();
-        String studentBlock = studentBlockTextView.getText().toString();
-        String violations = logEntryTextView.getText().toString();
-        String reporter = getArguments().getString("REPORTER");
-        String date = getArguments().getString("DATE");
-        String remarks = getArguments().getString("REMARKS");
-
-        if (studentName.isEmpty() || studentId.isEmpty()) {
+        if (studentNameTextView.getText().toString().isEmpty() || studentIdTextView.getText().toString().isEmpty()) {
             Toast.makeText(getContext(), "Invalid data for PDF generation", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Call the ReferralFormGenerator to create the PDF with all necessary details
-        ReferralFormGenerator.generateReferralForm(getContext(), studentName, studentId,
-                studentProgram, studentContact, studentYear, studentBlock, violations, reporter, date, remarks);
+        PdfDocument pdfDocument = new PdfDocument();
+        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 1).create();
+        PdfDocument.Page page = pdfDocument.startPage(pageInfo);
+        Canvas canvas = page.getCanvas();
+        Paint paint = new Paint();
 
-        // Sanitize the student name to ensure it’s a valid file name
-        String sanitizedStudentName = studentName.replaceAll("[\\\\/:*?\"<>|]", "_"); // Replace invalid characters
+        // Set up paint styles
+        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
 
-        // Define the file path for the generated PDF using the student's name
-        String filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                + "/" + sanitizedStudentName + "_Referral_Form.pdf";
-        File file = new File(filePath);
+        // Load and scale logo
+        Bitmap logo = BitmapFactory.decodeResource(getResources(), R.drawable.lu_logo);
+        int logoWidth = 50;
+        int logoHeight = (int) (logo.getHeight() * (logoWidth / (float) logo.getWidth()));
+        logo = Bitmap.createScaledBitmap(logo, logoWidth, logoHeight, true);
 
+        // Margins and positions
+        int leftMargin = 50;
+        int topMargin = 100;
+        int yPosition = topMargin;
 
-        // Check if the PDF was generated successfully before attempting to open it
-        if (file.exists()) {
-            if (openPdf) {
-                openPdf(file); // Open the PDF if requested
-            } else {
-                Toast.makeText(getContext(), "PDF downloaded successfully.", Toast.LENGTH_SHORT).show();
-            }
+        // Draw logo
+        canvas.drawBitmap(logo, (canvas.getWidth() - logoWidth) / 2, yPosition, paint);
+        yPosition += logoHeight + 20;
+
+        // Header
+        paint.setTextSize(24);
+        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+        paint.setTextAlign(Paint.Align.CENTER);
+        canvas.drawText("Student Violation Details", canvas.getWidth() / 2, yPosition, paint);
+        yPosition += 40;
+
+        // Divider
+        paint.setStrokeWidth(2);
+        paint.setColor(Color.GRAY);
+        canvas.drawLine(leftMargin, yPosition, canvas.getWidth() - leftMargin, yPosition, paint);
+        yPosition += 30;
+
+        // Student details
+        paint.setTextSize(16);
+        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
+        paint.setTextAlign(Paint.Align.LEFT);
+
+        String[] studentDetails = {
+                studentNameTextView.getText().toString(),
+                studentIdTextView.getText().toString(),
+                studentProgramTextView.getText().toString(),
+                studentContactTextView.getText().toString(),
+                studentYearTextView.getText().toString(),
+                studentBlockTextView.getText().toString()
+        };
+
+        for (String detail : studentDetails) {
+            canvas.drawText(detail, leftMargin, yPosition, paint);
+            yPosition += 25;
         }
 
+        // Violations header
+        paint.setTextSize(18);
+        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+        canvas.drawText("Violations:", leftMargin, yPosition, paint);
+        yPosition += 25;
+
+        // Table header
+        paint.setTextSize(14);
+        paint.setColor(Color.WHITE);
+        float tableStartX = leftMargin;
+        float tableWidth = 495;
+        float rowHeight = 50;
+
+        // Table header background
+        paint.setColor(Color.DKGRAY);
+        canvas.drawRect(tableStartX, yPosition, tableStartX + tableWidth, yPosition + rowHeight, paint);
+        paint.setColor(Color.WHITE);
+        canvas.drawText("#", tableStartX + 10, yPosition + 30, paint);
+        canvas.drawText("Violation", tableStartX + 160, yPosition + 30, paint);
+        yPosition += rowHeight;
+
+        // Table content
+        paint.setColor(Color.BLACK);
+        for (int i = 0; i < violationTable.getChildCount(); i++) {
+            TableRow row = (TableRow) violationTable.getChildAt(i);
+            TextView violationNumberTextView = (TextView) row.getChildAt(0);
+            TextView violationDescriptionTextView = (TextView) row.getChildAt(1);
+
+            // Row background color
+            paint.setColor(i % 2 == 0 ? Color.LTGRAY : Color.WHITE);
+            canvas.drawRect(tableStartX, yPosition, tableStartX + tableWidth, yPosition + rowHeight, paint);
+
+            // Draw text content
+            paint.setColor(Color.BLACK);
+            canvas.drawText(violationNumberTextView.getText().toString(), tableStartX + 10, yPosition + 30, paint);
+            canvas.drawText(violationDescriptionTextView.getText().toString(), tableStartX + 160, yPosition + 30, paint);
+            yPosition += rowHeight;
+        }
+
+        // Final line for table
+        paint.setStrokeWidth(2);
+        paint.setColor(Color.GRAY);
+        canvas.drawLine(tableStartX, yPosition, tableStartX + tableWidth, yPosition, paint);
+        yPosition += 20;
+
+        // Footer with date
+        paint.setTextSize(12);
+        paint.setColor(Color.GRAY);
+        canvas.drawText("Generated on: " + new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date()),
+                leftMargin, yPosition, paint);
+
+        // Finish the page
+        pdfDocument.finishPage(page);
+
+        // Save the PDF
+        String filePath = openPdf ?
+                getContext().getFilesDir() + "/" + studentNameTextView.getText().toString() + "_violations.pdf" :
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + studentNameTextView.getText().toString() + "_violations.pdf";
+
+        File file = new File(filePath);
+        try {
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+            FileOutputStream outputStream = new FileOutputStream(file);
+            pdfDocument.writeTo(outputStream);
+            outputStream.close();
+            Toast.makeText(getContext(), openPdf ? "PDF generated and opened." : "PDF downloaded.", Toast.LENGTH_SHORT).show();
+            if (openPdf) {
+                openPdf(file);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(getContext(), "Error generating PDF: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        } finally {
+            pdfDocument.close();
+        }
     }
 
 
@@ -321,12 +422,8 @@ public class PrefectView extends Fragment {
         // Set MIME type to ensure it's recognized as a PDF file
         intent.setDataAndType(uri, "application/pdf");
 
-        // Check if there is an app that can handle the intent
-        if (intent.resolveActivity(getContext().getPackageManager()) != null) {
-            startActivity(intent);
-        } else {
-            Toast.makeText(getContext(), "No PDF viewer found", Toast.LENGTH_SHORT).show();
-        }
+        // Launch the intent to open the PDF
+        startActivity(intent);
     }
 
 
@@ -347,7 +444,6 @@ public class PrefectView extends Fragment {
             Toast.makeText(getContext(), "No PDF viewer found", Toast.LENGTH_SHORT).show();
         }
     }
-
 
 
 

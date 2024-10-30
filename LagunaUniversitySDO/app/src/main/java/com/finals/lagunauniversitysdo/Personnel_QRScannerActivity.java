@@ -9,7 +9,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.text.InputFilter;
 
-
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -183,10 +182,7 @@ public class Personnel_QRScannerActivity extends AppCompatActivity {
                 startQRCodeScanner(); // Start scanning again
             } else {
                 // When all scans are done, send data to the form activity
-                Intent formIntent = new Intent(this, PersonnelForm.class);
-                formIntent.putStringArrayListExtra("scannedDataList", scannedDataList); // Pass all scanned data
-                startActivity(formIntent);
-                finish(); // End activity after sending all data
+                startPersonnelFormActivity(scannedDataList); // Pass all scanned data to the form activity
             }
         }
     }
@@ -194,11 +190,23 @@ public class Personnel_QRScannerActivity extends AppCompatActivity {
     private void startPersonnelFormActivity(String scannedData) {
         Intent formIntent = new Intent(this, PersonnelForm.class);
         formIntent.putExtra("scannedData", scannedData); // Pass scanned data to the form
+        putPersonnelData(formIntent); // Include personnel data
+        startActivity(formIntent); // Start PersonnelForm activity
+        finish(); // Close the QRScannerActivity
+    }
+
+    private void startPersonnelFormActivity(ArrayList<String> scannedDataList) {
+        Intent formIntent = new Intent(this, PersonnelForm.class);
+        formIntent.putStringArrayListExtra("scannedDataList", scannedDataList); // Pass all scanned data
+        putPersonnelData(formIntent); // Include personnel data
+        startActivity(formIntent); // Start PersonnelForm activity
+        finish(); // Close the QRScannerActivity
+    }
+
+    private void putPersonnelData(Intent formIntent) {
         formIntent.putExtra("PERSONNEL_NAME_KEY", personnelName);          // Pass personnel name
         formIntent.putExtra("PERSONNEL_EMAIL_KEY", personnelEmail);        // Pass personnel email
         formIntent.putExtra("PERSONNEL_CONTACT_NUM_KEY", personnelContact); // Pass personnel contact
         formIntent.putExtra("PERSONNEL_DEPARTMENT_KEY", personnelProgram);  // Pass personnel program
-        startActivity(formIntent); // Start PersonnelForm activity
-        finish(); // Close the QRScannerActivity
     }
 }

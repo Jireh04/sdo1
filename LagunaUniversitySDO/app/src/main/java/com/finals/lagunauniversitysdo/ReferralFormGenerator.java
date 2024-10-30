@@ -33,7 +33,7 @@ public class ReferralFormGenerator {
         try {
             // Define the path where the PDF will be saved
             String filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                    + "/Referral_Form.pdf";
+                    + "/referral_Form.pdf";
             File file = new File(filePath);
             if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();

@@ -296,12 +296,11 @@ public class graphs {
         LineData lineData = new LineData(lightOffenseDataSet, seriousOffenseDataSet, majorOffenseDataSet);
         lineChart.setData(lineData);
 
-        // Set Y-axis value formatter
+    // Set Y-axis value formatter
         lineChart.getAxisLeft().setValueFormatter(new IntegerValueFormatter());
         lineChart.getAxisRight().setEnabled(false); // Disable the right Y-axis if not needed
 
-        // Customize the X-axis
-        // Customize the X-axis
+    // Customize the X-axis
         lineChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(months));
         lineChart.getXAxis().setGranularity(1f);
         lineChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -320,13 +319,21 @@ public class graphs {
     // Configure the legend
         Legend legend = lineChart.getLegend();
         legend.setTextColor(Color.parseColor("#333333"));
-        legend.setForm(Legend.LegendForm.LINE);
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
+        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+        legend.setDrawInside(false);
+        legend.setYEntrySpace(10f); // Adjust vertical spacing
+        legend.setYOffset(10f); // Add top margin for the legend
+
+    // Set up MarkerView to display data counts
+        MyMarkerView markerView = new MyMarkerView(lineChart.getContext(), R.layout.custom_marker_view);
+        lineChart.setMarker(markerView); // Set the marker to the chart
 
     // Refresh the chart with new data
         lineChart.invalidate();
+
     }
-
-
 
 
 
