@@ -11,6 +11,7 @@ import android.widget.ScrollView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -20,7 +21,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import android.content.Intent;
 import android.widget.Toast;
-
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,25 +49,37 @@ public class ReportersFragment extends Fragment {
         Map<String, String> referrerMap = new HashMap<>(); // Store unique referrer names with their types
 
         // Fetch data from each collection
-        fetchFromCollection("prefect_referral_history", "prefect_referrer", "Prefect", referrerMap);
-        fetchFromCollection("student_refferal_history", "student_referrer", "Student", referrerMap);
-        fetchFromCollection("personnel_refferal_history", "personnel_referrer", "Personnel", referrerMap);
+        fetchFromCollection("students", "student_refferal_history", "Student", referrerMap);
+        fetchFromCollection("personnel", "personnel_refferal_history", "Personnel", referrerMap);
+        fetchFromCollection("prefect", "prefect_referral_history", "Prefect", referrerMap);
     }
 
-    private void fetchFromCollection(String collectionName, String fieldName, String referrerType, Map<String, String> referrerMap) {
+    private void fetchFromCollection(String collectionName, String subCollectionName, String referrerType, Map<String, String> referrerMap) {
         db.collection(collectionName).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
                     for (QueryDocumentSnapshot document : task.getResult()) {
-                        String referrerName = document.getString(fieldName); // Fetch using the field name
-                        if (referrerName != null && !referrerMap.containsKey(referrerName)) {
-                            // Only add if the referrer name isn't already present
-                            referrerMap.put(referrerName, referrerType); // Store the type associated with the referrer name
-                        }
+                        String referrerId = document.getId(); // Use the document ID as referrer name
+
+                        // Fetch from the subcollection within each document
+                        db.collection(collectionName)
+                                .document(referrerId)
+                                .collection(subCollectionName)
+                                .get()
+                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                                            // Add the referrer if not already present in the map
+                                            if (!referrerMap.containsKey(referrerId)) {
+                                                referrerMap.put(referrerId, referrerType); // Store the type with the referrer ID
+                                            }
+                                            updateUI(referrerMap); // Update the UI with fetched data
+                                        }
+                                    }
+                                });
                     }
-                    // After fetching from all collections, update the UI
-                    updateUI(referrerMap);
                 } else {
                     showNoDataMessage(); // Handle the error case
                 }
@@ -102,10 +114,8 @@ public class ReportersFragment extends Fragment {
     }
 
     private void displayReferrerNames(Map<String, String> referrerMap) {
-
-
         for (Map.Entry<String, String> entry : referrerMap.entrySet()) {
-            String referrerName = entry.getKey();
+            String referrerId = entry.getKey();
             String referrerType = entry.getValue();
 
             // Inflate the layout for each referrer item (referrer_item.xml)
@@ -117,14 +127,13 @@ public class ReportersFragment extends Fragment {
             Button viewLogsButton = referrerItemView.findViewById(R.id.viewLogsButton);
 
             // Set the text for the referrer name
-            referrerTextView.setText(referrerType + ": " + referrerName);
+            referrerTextView.setText(referrerType + ": " + referrerId);
 
             // Set an OnClickListener for the "View Logs" button
             viewLogsButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // Pass the referrer type and name to viewLogs
-                    viewLogs(referrerType, referrerName);
+                    viewLogs(referrerType, referrerId);
                 }
             });
 
@@ -133,201 +142,139 @@ public class ReportersFragment extends Fragment {
         }
     }
 
-
-    private void viewLogs(String referrerType, String referrerName) {
+    private void viewLogs(String referrerType, String referrerId) {
         String collectionName;
+        String subCollectionName;
 
-        // Determine which collection to query based on the referrer type
+        // Determine which collection and subcollection to query based on referrer type
         switch (referrerType) {
-            case "Prefect":
-                collectionName = "prefect_referral_history";
-                break;
             case "Student":
-                collectionName = "student_refferal_history";
+                collectionName = "students";
+                subCollectionName = "student_refferal_history";
                 break;
             case "Personnel":
-                collectionName = "personnel_refferal_history";
+                collectionName = "personnel";
+                subCollectionName = "personnel_refferal_history";
+                break;
+            case "Prefect":
+                collectionName = "prefect";
+                subCollectionName = "prefect_referral_history";
                 break;
             default:
-                collectionName = "";
-                break;
+                return;
         }
 
-        if (!collectionName.isEmpty()) {
-            // Query Firestore to fetch the details for the given referrer name
-            db.collection(collectionName)
-                    .whereEqualTo(referrerType.toLowerCase() + "_referrer", referrerName)
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                                String logDetails = ""; // For concatenating log details
-                                String violations = "";  // For accumulating violations
-
-                                // Create the Intent here to pass data to the ReporterView
-                                Intent intent = new Intent(getActivity(), ReporterView.class);
-
-                                // Add referrer name to the intent
-                                intent.putExtra("REFERRER_NAME", referrerName);
-
-                                for (DocumentSnapshot document : task.getResult()) {
-                                    // Extract student details from the document
-                                    String studentId = document.getString("student_id");
-                                    String studentName = document.getString("student_name");
-                                    String studentProgram = document.getString("student_program");
-                                    String studentContact = document.getString("student_contact");
-                                    String studentYear = document.getString("student_year");
-                                    String studentBlock = document.getString("block");
-                                    String remarks = document.getString("remarks");
-                                    String status = document.getString("status");
-                                    String userConcern = document.getString("user_concern");
-                                    String violation = document.getString("violation");
-
-                                    // Accumulate student details into the intent
-                                    intent.putExtra("STUDENT_ID", studentId);
-                                    intent.putExtra("STUDENT_NAME", studentName);
-                                    intent.putExtra("STUDENT_PROGRAM", studentProgram);
-                                    intent.putExtra("STUDENT_CONTACT", studentContact);
-                                    intent.putExtra("STUDENT_YEAR", studentYear);
-                                    intent.putExtra("STUDENT_BLOCK", studentBlock);
-
-                                    // Create a string for the current log entry's details
-                                    logDetails += "Student Name: " + studentName + "\n" +
-                                            "Remarks: " + (remarks != null ? remarks : "N/A") + "\n" +
-                                            "Status: " + status + "\n" +
-                                            "User Concern: " + (userConcern != null ? userConcern : "N/A") + "\n" +
-                                            "Violation: " + (violation != null ? violation : "None") + "\n\n";
-
-                                    // Accumulate violations if available
-                                    if (violation != null && !violation.isEmpty()) {
-                                        violations += violation + "\n";
-                                    }
-                                }
-
-                                // Store the accumulated violations in the intent
-                                intent.putExtra("VIOLATIONS", violations); // Pass all violations as a single string
-
-                                // Show the logs in a dialog
-                                showLogDetailsDialog(referrerName, logDetails, intent);
-                            } else {
-                                // Handle the case where no logs are found
-                                TextView noLogsTextView = new TextView(getActivity());
-                                noLogsTextView.setText("No logs found for this referrer.");
-                                noLogsTextView.setPadding(16, 16, 16, 16);
-                                noLogsTextView.setTextSize(16);
-                                showLogsDialog(referrerName, noLogsTextView);
-                            }
-                        }
-                    });
-        }
-    }
-
-    private void showLogDetailsDialog(String referrerName, String logDetails, Intent intent) {
-        // Create an AlertDialog to show detailed log information
-        AlertDialog.Builder detailDialogBuilder = new AlertDialog.Builder(getContext());
-        detailDialogBuilder.setTitle("Log Details for " + referrerName);
-
-        // Create a ScrollView to hold the log details
-        ScrollView scrollView = new ScrollView(getContext());
-
-        // Create a LinearLayout to hold the log details and buttons
-        LinearLayout dialogLayout = new LinearLayout(getContext());
-        dialogLayout.setOrientation(LinearLayout.VERTICAL);
-        dialogLayout.setPadding(16, 16, 16, 16);
-
-        // Split the log details into individual lines
-        String[] logEntries = logDetails.split("\n\n");
-        for (String logEntry : logEntries) {
-            // Create a TextView for each log entry
-            TextView logEntryTextView = new TextView(getContext());
-            logEntryTextView.setText(logEntry);
-            logEntryTextView.setPadding(0, 0, 0, 10); // Optional spacing between entries
-            dialogLayout.addView(logEntryTextView);
-
-            // Extract the student's name from the log entry (assuming it's the first line)
-            String studentName = logEntry.split("\n")[0].replace("Student Name: ", "");
-
-            // Extract the violation for this entry (assuming it's the last line)
-            String violation = logEntry.split("\n")[logEntry.split("\n").length - 1].replace("Violation: ", "");
-
-            // Create a Button for each log entry
-            Button viewEntryButton = new Button(getContext());
-            viewEntryButton.setText("View");
-            viewEntryButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // Fetch student details from Firestore based on the student name and the violation
-                    fetchStudentDetails(studentName, violation,referrerName);
-                }
-            });
-            dialogLayout.addView(viewEntryButton);
-        }
-
-        // Add the LinearLayout to the ScrollView
-        scrollView.addView(dialogLayout);
-
-        // Set the ScrollView to the dialog
-        detailDialogBuilder.setView(scrollView);
-        detailDialogBuilder.setPositiveButton("Close", null);
-
-        // Create and show the detail dialog
-        detailDialog = detailDialogBuilder.create();
-        detailDialog.show();
-    }
-
-    private void fetchStudentDetails(String studentName, String violation, String referrerName) {
-        db.collection("student_refferal_history") // Adjust this collection name as necessary
-                .whereEqualTo("student_name", studentName)
+        // Query Firestore to fetch the details for the given referrer
+        db.collection(collectionName)
+                .document(referrerId)
+                .collection(subCollectionName)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                            // Get the first document found
-                            DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                            AlertDialog.Builder detailDialogBuilder = new AlertDialog.Builder(getContext());
+                            detailDialogBuilder.setTitle("Log Details for " + referrerId);
 
-                            // Create a new instance of ReporterView fragment with arguments
-                            ReporterView reporterViewFragment = ReporterView.newInstance(
-                                    document.getString("student_id"),
-                                    document.getString("student_name"),
-                                    document.getString("student_program"),
-                                    document.getString("student_contact"),
-                                    document.getString("student_year"),
-                                    document.getString("block"),
-                                    document.getString("remarks"),
-                                    violation, // Pass the violation
-                                    referrerName // Pass the referrer name
-                            );
+                            LinearLayout logContainer = new LinearLayout(getContext());
+                            logContainer.setOrientation(LinearLayout.VERTICAL);
+                            ScrollView scrollView = new ScrollView(getContext());
+                            scrollView.addView(logContainer);
 
-                            // Replace the current fragment with ReporterView fragment
-                            getActivity().getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.fragment_container, reporterViewFragment) // Make sure to use the correct container ID
-                                    .addToBackStack(null) // Optionally add to back stack
-                                    .commit();
+                            for (DocumentSnapshot document : task.getResult()) {
+                                // Extract student details from the document
+                                String studentName = document.getString("student_name");
+                                String studentId = document.getString("student_id");
+                                String studentProgram = document.getString("student_program");
+                                String studentContact = document.getString("student_contact");
+                                String studentYear = document.getString("student_year");
+                                String block = document.getString("block");
+                                String violation = document.getString("violation");
+                                String status = document.getString("status");
+                                String remarks = document.getString("remarks");
+                                String date = document.getString("date");
+                                String reffer = document.getString("student_reffer");
 
-                            detailDialog.dismiss();
+                                // Create a TextView for each violation summary
+                                TextView logSummaryTextView = new TextView(getContext());
+                                logSummaryTextView.setText("Student: " + studentName + "\nViolation: " + violation + "\nStatus: " + status + "\n");
+                                logContainer.addView(logSummaryTextView);
+
+                                // Create a button for each violation
+                                Button viewViolationButton = new Button(getContext());
+                                viewViolationButton.setText("View");
+                                viewViolationButton.setPadding(16, 8, 16, 8);
+
+                                // Set up button click listener to open ReporterView fragment with violation details
+                                // Set up button click listener to open ReporterView fragment with detailed information
+                                viewViolationButton.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        // Create a new instance of the ReporterView fragment
+                                        ReporterView reporterViewFragment = new ReporterView();
+
+                                        // Create a bundle to pass the details to the fragment
+                                        Bundle args = new Bundle();
+                                        args.putString("STUDENT_ID", studentId);
+                                        args.putString("STUDENT_NAME", studentName);
+                                        args.putString("STUDENT_PROGRAM", studentProgram);
+                                        args.putString("STUDENT_CONTACT", studentContact);
+                                        args.putString("STUDENT_YEAR", studentYear);
+                                        args.putString("BLOCK", block);
+                                        args.putString("VIOLATION", violation);
+                                        args.putString("REMARKS", remarks);
+                                        args.putString("DATE", date);
+                                        args.putString("STUDENT_REFERRER", reffer);
+
+                                        // Set the arguments for the fragment
+                                        reporterViewFragment.setArguments(args);
+
+                                        // Replace the current fragment with ReporterView fragment
+                                        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+                                        transaction.replace(R.id.fragment_container, reporterViewFragment);
+                                        transaction.addToBackStack(null); // Optional: adds to back stack
+                                        transaction.commit();
+
+                                        detailDialog.dismiss();// Close the detail dialog
+                                    }
+                                });
+
+                                logContainer.addView(viewViolationButton);
+                            }
+
+                            detailDialogBuilder.setView(scrollView);
+                            detailDialogBuilder.setPositiveButton("Close", null);
+                            detailDialog = detailDialogBuilder.create();
+                            detailDialog.show();
                         } else {
-                            // Handle case where no student details were found
-                            Toast.makeText(getContext(), "No student details found.", Toast.LENGTH_SHORT).show();
+                            showLogsDialog(referrerId, "No logs found for this referrer.");
                         }
                     }
                 });
     }
 
 
+    private void showLogDetailsDialog(String referrerId, String logDetails) {
+        AlertDialog.Builder detailDialogBuilder = new AlertDialog.Builder(getContext());
+        detailDialogBuilder.setTitle("Log Details for " + referrerId);
 
-    private void showLogsDialog(String referrerName, TextView noLogsTextView) {
-        // Create an AlertDialog to show the message
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
-        dialogBuilder.setTitle("Report Logs for " + referrerName);
-        dialogBuilder.setView(noLogsTextView);
-        dialogBuilder.setPositiveButton("Close", null);
+        ScrollView scrollView = new ScrollView(getContext());
+        TextView logDetailsTextView = new TextView(getContext());
+        logDetailsTextView.setText(logDetails);
+        scrollView.addView(logDetailsTextView);
 
-        // Create and show the AlertDialog
-        AlertDialog alertDialog = dialogBuilder.create();
-        alertDialog.show();
+        detailDialogBuilder.setView(scrollView);
+        detailDialogBuilder.setPositiveButton("Close", null);
+
+        detailDialog = detailDialogBuilder.create();
+        detailDialog.show();
     }
 
-
+    private void showLogsDialog(String referrerId, String message) {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
+        dialogBuilder.setTitle("Report Logs for " + referrerId);
+        dialogBuilder.setMessage(message);
+        dialogBuilder.setPositiveButton("Close", null);
+        dialogBuilder.create().show();
+    }
 }

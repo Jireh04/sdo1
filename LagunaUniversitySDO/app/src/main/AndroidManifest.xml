@@ -37,7 +37,7 @@
     <activity android:name=".Prefect_MainActivity"/>
     <activity android:name=".PersonnelForm"/>
     <activity android:name=".PrefectForm"/>
-    <activity android:name=".ReporterView"/>
+
 
     <activity
         android:name=".LoginActivity"

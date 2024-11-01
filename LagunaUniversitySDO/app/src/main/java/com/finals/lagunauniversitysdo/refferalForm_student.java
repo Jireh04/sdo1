@@ -166,7 +166,7 @@ public class refferalForm_student extends Fragment {
 
         // Create the TextView for displaying student info
         TextView userInfo = new TextView(getActivity());
-        userInfo.setText(studId + " | " + name);
+        userInfo.setText(studId + " | " + name + " | " + program);
         userInfo.setTextSize(name.length() > 18 ? 14 : 16); // Adjust text size if the name is long
         userInfo.setEllipsize(TextUtils.TruncateAt.END); // Truncate with "..." if text is too long
         userInfo.setSingleLine(true); // Keep text on a single line

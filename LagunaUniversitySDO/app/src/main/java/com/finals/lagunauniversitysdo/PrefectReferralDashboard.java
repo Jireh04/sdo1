@@ -3,6 +3,7 @@ package com.finals.lagunauniversitysdo;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -181,29 +183,43 @@ public class PrefectReferralDashboard extends Fragment {
     }
 
     private void addSearchResultToLayout(String name, String studId, String contact, LinearLayout searchResultsContainer, String program) {
-        LinearLayout userLayout = new LinearLayout(getActivity());
-        userLayout.setOrientation(LinearLayout.HORIZONTAL);
+        RelativeLayout userLayout = new RelativeLayout(getActivity());
         userLayout.setPadding(10, 10, 10, 10);
 
+        // Create the TextView for displaying student info
         TextView userInfo = new TextView(getActivity());
-        userInfo.setText(studId + ", " + name);
-        userInfo.setTextSize(18);
+        userInfo.setText(studId + " | " + name + " | " + program);
+        userInfo.setTextSize(name.length() > 18 ? 14 : 16); // Adjust text size if the name is long
+        userInfo.setEllipsize(TextUtils.TruncateAt.END); // Truncate with "..." if text is too long
+        userInfo.setSingleLine(true); // Keep text on a single line
+        userInfo.setId(View.generateViewId());
 
+        RelativeLayout.LayoutParams userInfoParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+        );
+        userInfoParams.addRule(RelativeLayout.ALIGN_PARENT_START);
+        userInfoParams.addRule(RelativeLayout.CENTER_VERTICAL);
+        userInfo.setLayoutParams(userInfoParams);
+
+        // Create the Button for action
         Button actionButton = new Button(getActivity());
         actionButton.setText("+");
         actionButton.setBackgroundResource(R.drawable.round_button);
         actionButton.setTextColor(Color.WHITE);
         actionButton.setAllCaps(false);
-
-        LinearLayout.LayoutParams buttonLayoutParams = new LinearLayout.LayoutParams(
-                150,
-                150
-        );
-        buttonLayoutParams.setMargins(16, 0, 0, 0);
-        actionButton.setLayoutParams(buttonLayoutParams);
-
         actionButton.setTextSize(24);
-        actionButton.setPadding(24, 16, 24, 16);
+        actionButton.setPadding(20, 13, 20, 13);
+        actionButton.setId(View.generateViewId());
+
+        RelativeLayout.LayoutParams buttonLayoutParams = new RelativeLayout.LayoutParams(
+                140,
+                140
+        );
+        buttonLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_END);
+        buttonLayoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
+        buttonLayoutParams.setMargins(0, 0, 35, 0); // Add right margin for spacing
+        actionButton.setLayoutParams(buttonLayoutParams);
 
         actionButton.setOnClickListener(v -> handleAddButtonClick(studId, name, contact, program));
 

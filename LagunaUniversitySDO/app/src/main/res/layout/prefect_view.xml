@@ -171,6 +171,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:id="@+id/number_field"
                     android:text="#"
                     android:textStyle="bold"
                     android:padding="8dp"
@@ -179,6 +180,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:id="@+id/remarks_field"
                     android:text="Violation"
                     android:textStyle="bold"
                     android:padding="8dp"
@@ -188,6 +190,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Type of Offense"
+                    android:id="@+id/offenseEditTextView"
                     android:textStyle="bold"
                     android:padding="8dp"
                     android:textColor="#FFF" />
@@ -195,6 +198,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:id="@+id/dateEditTextView"
                     android:text="Date of Incident"
                     android:textStyle="bold"
                     android:padding="8dp"

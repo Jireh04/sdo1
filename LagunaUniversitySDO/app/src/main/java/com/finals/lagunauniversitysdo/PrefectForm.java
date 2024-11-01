@@ -14,6 +14,10 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.util.HashSet; // For HashSet implementation
+import java.util.Set; // For Set interface
+import java.util.Date; // Import Date class
+
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -44,6 +48,8 @@ public class PrefectForm extends AppCompatActivity {
     private static final String CONTACT_NUM_KEY = "CONTACT_NUM";
     private static final String PROGRAM_KEY = "PROGRAM";
     private static final String STUDENT_ID_KEY = "STUDENT_ID";
+    private ArrayList<Map<String, String>> scannedStudentDataList = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +109,9 @@ public class PrefectForm extends AppCompatActivity {
         contactField.setText(prefectContact != 0L ? String.valueOf(prefectContact) : "0");
         programField.setText(prefectDepartment != null ? prefectDepartment : "");
 
+        // Display prefect details on the UI
+        displayPrefectDetails(prefectName, prefectEmail, String.valueOf(prefectContact), prefectDepartment);
+
         // Retrieve student data from the intent
         ArrayList<String> userNames = intent.getStringArrayListExtra("ADDED_STUDENT_NAMES");
         ArrayList<String> userEmails = intent.getStringArrayListExtra("ADDED_STUDENT_EMAILS");
@@ -136,7 +145,16 @@ public class PrefectForm extends AppCompatActivity {
         } else {
             Toast.makeText(this, "No scanned data found", Toast.LENGTH_SHORT).show();
         }
+
+        // Retrieve multiple scanned data
+        ArrayList<String> scannedDataList = intent.getStringArrayListExtra("SCANNED_DATA_LIST_KEY");
+        if (scannedDataList != null && !scannedDataList.isEmpty()) {
+            processMultipleScannedData(scannedDataList);
+        } else {
+            Toast.makeText(this, "No scanned data list found", Toast.LENGTH_SHORT).show();
+        }
     }
+
 
 
     private void processScannedData(String scannedData) {
@@ -174,6 +192,42 @@ public class PrefectForm extends AppCompatActivity {
             displayPrefectDetails(prefectName, prefectEmail, prefectContact, prefectDepartment);
         } else {
             Toast.makeText(this, "Invalid QR code format", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    // New method to process multiple scanned data
+    private void processMultipleScannedData(ArrayList<String> scannedDataList) {
+        for (String scannedData : scannedDataList) {
+            // Process each scanned data string
+            String[] scannedFields = scannedData.split("\n");
+
+            // Validate scanned fields
+            if (scannedFields.length >= 3) {
+                String studentNo = scannedFields[0];  // Assuming the first line is the student number
+                String scannedName = scannedFields[1];  // Assuming the second line is the scanned name
+                String block = scannedFields[2];  // Assuming the third line is the block
+
+                // Display the student details in the table without the contact info
+                displayStudentDetails(scannedName, block, studentNo, ""); // Pass an empty string for contact
+
+                // Store block for later use
+                this.scannedProgram = block; // Store block instead of program
+
+                // Store scanned data in fields or temporary variables for submission
+                this.scannedName = scannedName; // Store scanned name for later use
+                this.scannedContact = UserSession.getContactNum() != null ? String.valueOf(PersonnelSession.getContactNum()) : ""; // Store scanned contact
+                this.scannedStudentNo = studentNo; // Store student number
+
+                // Store the scanned data in a list for later use
+                Map<String, String> studentData = new HashMap<>();
+                studentData.put("student_no", studentNo);
+                studentData.put("student_name", scannedName);
+                studentData.put("student_program", block);
+                this.scannedStudentDataList.add(studentData); // Maintain the list of scanned data
+
+            } else {
+                Toast.makeText(this, "Invalid QR code format for data: " + scannedData, Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -295,13 +349,28 @@ public class PrefectForm extends AppCompatActivity {
         String violation = violationSpinner.getSelectedItem().toString();
         String date = dateField.getText().toString().trim();
         String studId = violatorsStudID.getText().toString().trim();
-        String status = "pending"; // Default status
+        String status = "accepted"; // Default status
 
         // Retrieve remarks from remarks_field
         String remarks = ((EditText) findViewById(R.id.remarks_field)).getText().toString().trim();
 
+        // Retrieve checkbox states and create a single string for user concerns
+        String userConcern = "";
+        CheckBox disciplineCheckbox = findViewById(R.id.discipline_concerns);
+        CheckBox behavioralCheckbox = findViewById(R.id.behavioral_concerns);
+        CheckBox learningCheckbox = findViewById(R.id.learning_difficulty);
+
+        // Build the user concern string based on checked checkboxes
+        if (disciplineCheckbox.isChecked()) {
+            userConcern = "Discipline Concerns";
+        } else if (behavioralCheckbox.isChecked()) {
+            userConcern = "Behavioral Concerns";
+        } else if (learningCheckbox.isChecked()) {
+            userConcern = "Learning Difficulty";
+        }
+
         // Validate inputs
-        if (!validateInputs(name, email, contactString, program)) {
+        if (!validateInputs(name, email, contactString, program, remarks, userConcern)) {
             return; // Exit the method if validation fails
         }
 
@@ -314,8 +383,12 @@ public class PrefectForm extends AppCompatActivity {
             return;
         }
 
-        // Retrieve prefect name for referrer
-        String prefectReferrer = getIntent().getStringExtra("PREFECT_NAME_KEY");
+        // Retrieve prefect name and ID for referrer
+        String prefectReferrer =  PrefectSession.getPrefectName();
+        String prefectID = PrefectSession.getPrefectId(); // Assuming you have a prefect ID passed as well
+
+        Log.d("PrefectReferrer", "Prefect ID: " + prefectID);
+
         if (prefectReferrer == null) {
             prefectReferrer = ""; // Default to empty if not found
         }
@@ -326,26 +399,89 @@ public class PrefectForm extends AppCompatActivity {
         ArrayList<String> addedUserPrograms = getIntent().getStringArrayListExtra("ADDED_USER_PROGRAMS");
         ArrayList<String> addedUserStudentIds = getIntent().getStringArrayListExtra("ADDED_USER_STUDENT_IDS");
 
+        // Track already added student IDs to prevent duplicates
+        Set<String> addedStudentIdsSet = new HashSet<>();
+
         // Check if there are added students and add them to Firestore
         if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudentIds != null) {
             for (int i = 0; i < addedUserNames.size(); i++) {
                 if (i < addedUserContacts.size() && i < addedUserPrograms.size() && i < addedUserStudentIds.size()) {
+                    String studentId = addedUserStudentIds.get(i);
+                    // Check if the student ID has already been added
+                    if (!addedStudentIdsSet.contains(studentId)) {
+                        addedStudentIdsSet.add(studentId); // Mark this ID as added
+                        Map<String, Object> studentData = new HashMap<>();
+                        studentData.put("student_name", addedUserNames.get(i));
+                        studentData.put("student_program", addedUserPrograms.get(i));
+                        studentData.put("student_id", studentId);
+                        studentData.put("term", term);
+                        studentData.put("violation", violation);
+                        studentData.put("date", date);
+                        studentData.put("status", status);
+                        studentData.put("user_concern", userConcern); // Add user concern to the student data
+                        studentData.put("remarks", remarks);
+                        studentData.put("prefect_referrer", prefectReferrer); // Add prefect referrer
+
+                        // Get current date and time to use as the document ID for the referral
+                        String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + studentId; // Append studentId
+
+                        // Add each student's data directly to the Firestore collection
+                        firestore.collection("prefect")
+                                .document(prefectID) // Use prefect ID as document ID
+                                .collection("prefect_referral_history") // Subcollection for the prefect's referrals
+                                .document(dateTimeId) // Document ID based on date, time, and student ID
+                                .set(studentData)
+                                .addOnSuccessListener(documentReference -> {
+                                    Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, "Failed to submit data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    Log.e("Firestore", "Error adding document", e);
+                                });
+                    }
+                }
+            }
+        }
+
+        // Extract displayed students from the table and save them to Firestore
+        for (int i = 0; i < detailsTable.getChildCount(); i++) {
+            TableRow row = (TableRow) detailsTable.getChildAt(i);
+            if (row.getChildCount() == 4) { // Ensure there are 4 children (name, program, studId, contact)
+                TextView nameCell = (TextView) row.getChildAt(0);
+                TextView programCell = (TextView) row.getChildAt(1);
+                TextView studIdCell = (TextView) row.getChildAt(2);
+                TextView contactCell = (TextView) row.getChildAt(3);
+
+                String studentId = studIdCell.getText().toString();
+                // Check if the student ID has already been added
+                if (!addedStudentIdsSet.contains(studentId)) {
+                    addedStudentIdsSet.add(studentId); // Mark this ID as added
+
+                    // Create a map for the student data
                     Map<String, Object> studentData = new HashMap<>();
-                    studentData.put("student_name", addedUserNames.get(i));
-                    studentData.put("student_program", addedUserPrograms.get(i));
-                    studentData.put("student_id", addedUserStudentIds.get(i));
+                    studentData.put("student_name", nameCell.getText().toString());
+                    studentData.put("student_program", programCell.getText().toString());
+                    studentData.put("student_id", studentId);
                     studentData.put("term", term);
                     studentData.put("violation", violation);
                     studentData.put("date", date);
                     studentData.put("status", status);
-                    studentData.put("remarks", remarks);
-                    studentData.put("prefect_referrer", prefectReferrer); // Changed to prefect_referrer
+                    studentData.put("remarks", remarks); // Add remarks if needed
+                    studentData.put("prefect_referrer", prefectReferrer); // Add prefect referrer
+
+
+                    // Get current date and time to use as the document ID for the referral
+                    String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + studentId; // Append studentId
 
                     // Add each student's data directly to the Firestore collection
-                    firestore.collection("prefect_referral_history")
-                            .add(studentData)
+                    firestore.collection("prefect")
+                            .document(prefectID) // Use prefect ID as the document ID
+                            .collection("prefect_referral_history") // Subcollection for the prefect's referrals
+                            .document(dateTimeId) // Document ID based on date, time, and student ID
+                            .set(studentData)
                             .addOnSuccessListener(documentReference -> {
                                 Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
+                                finish();
                             })
                             .addOnFailureListener(e -> {
                                 Toast.makeText(this, "Failed to submit data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -355,96 +491,53 @@ public class PrefectForm extends AppCompatActivity {
             }
         }
 
-        // Extract displayed students from the table and save them to Firestore
-        saveDisplayedStudentsToFirestore(term, violation, date, status, remarks, prefectReferrer); // Changed to prefect_referrer
+        // Process scanned data for each scanned student
+        for (Map<String, String> scannedData : scannedStudentDataList) {
+            String scannedName = scannedData.get("student_name");
+            String scannedStudentNo = scannedData.get("student_no");
+            String scannedProgram = scannedData.get("student_program");
 
-        // Add the scanned data to Firestore as well
-        if (scannedName != null && scannedStudentNo != null && scannedProgram != null) {
-            checkAndSaveScannedStudent(scannedName, scannedProgram, scannedStudentNo, term, violation, date, status, remarks, prefectReferrer); // Changed to prefect_referrer
-        }
-    }
+            // Check if the scanned student ID has already been added
+            if (!addedStudentIdsSet.contains(scannedStudentNo)) {
+                // Generate a unique dateTimeId for each scanned student
+                String scannedDateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + scannedStudentNo; // Append scanned student ID
 
-    private void checkAndSaveScannedStudent(String scannedName, String scannedProgram, String scannedStudentNo, String term, String violation, String date, String status, String remarks, String prefectReferrer) {
-        // Query Firestore to check if the student already exists
-        firestore.collection("prefect_referral_history")
-                .whereEqualTo("student_id", scannedStudentNo) // Check by student ID
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        if (task.getResult().isEmpty()) {
-                            // Student does not exist, proceed to save
-                            Map<String, Object> scannedStudentData = new HashMap<>();
-                            scannedStudentData.put("student_name", scannedName);
-                            scannedStudentData.put("student_program", scannedProgram);
-                            scannedStudentData.put("student_id", scannedStudentNo); // Use scanned student number
-                            scannedStudentData.put("term", term);
-                            scannedStudentData.put("violation", violation);
-                            scannedStudentData.put("date", date);
-                            scannedStudentData.put("status", status);
-                            scannedStudentData.put("remarks", remarks); // Add remarks to the scanned student data
-                            scannedStudentData.put("prefect_referrer", prefectReferrer); // Changed to prefect_referrer
+                // Prepare student data to be saved in Firestore
+                Map<String, Object> scannedStudentData = new HashMap<>();
+                scannedStudentData.put("student_name", scannedName);
+                scannedStudentData.put("student_program", scannedProgram);
+                scannedStudentData.put("student_id", scannedStudentNo);
+                scannedStudentData.put("term", term);
+                scannedStudentData.put("violation", violation);
+                scannedStudentData.put("date", date);
+                scannedStudentData.put("status", status);
+                scannedStudentData.put("remarks", remarks); // Add remarks if needed
+                scannedStudentData.put("prefect_referrer", prefectReferrer); // Add prefect referrer
+                scannedStudentData.put("prefect_id", prefectID); // Add prefect ID to the student data
 
-                            // Add scanned student's data directly to the Firestore collection
-                            firestore.collection("prefect_referral_history")
-                                    .add(scannedStudentData)
-                                    .addOnSuccessListener(documentReference -> {
-                                        Toast.makeText(this, "Scanned student data submitted successfully", Toast.LENGTH_SHORT).show();
-                                        finish(); // Finish the current activity to return to the previous one
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        Toast.makeText(this, "Failed to submit scanned student data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                        Log.e("Firestore", "Error adding scanned student document", e);
-                                    });
-                        } else {
-                            // Student already exists
-                            Toast.makeText(this, "This student has already been submitted.", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        Toast.makeText(this, "Error checking student existence: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.e("Firestore", "Error checking existence", task.getException());
-                    }
-                });
-    }
-
-    private void saveDisplayedStudentsToFirestore(String term, String violation, String date, String status, String remarks, String prefectReferrer) {
-        // Iterate over the rows in the detailsTable
-        for (int i = 0; i < detailsTable.getChildCount(); i++) {
-            TableRow row = (TableRow) detailsTable.getChildAt(i);
-            if (row.getChildCount() == 4) { // Ensure there are 4 children (name, program, studId, contact)
-                TextView nameCell = (TextView) row.getChildAt(0);
-                TextView programCell = (TextView) row.getChildAt(1);
-                TextView studIdCell = (TextView) row.getChildAt(2);
-                TextView contactCell = (TextView) row.getChildAt(3);
-
-                // Create a map for the student data
-                Map<String, Object> studentData = new HashMap<>();
-                studentData.put("student_name", nameCell.getText().toString());
-                studentData.put("student_program", programCell.getText().toString());
-                studentData.put("student_id", studIdCell.getText().toString());
-                studentData.put("term", term);
-                studentData.put("violation", violation);
-                studentData.put("date", date);
-                studentData.put("status", status);
-                studentData.put("remarks", remarks); // Add remarks if needed
-                studentData.put("prefect_referrer", prefectReferrer); // Changed to prefect_referrer
-
-                // Add each student's data directly to the Firestore collection
-                firestore.collection("prefect_referral_history")
-                        .add(studentData)
+                // Add the scanned student's data directly to the Firestore collection
+                firestore.collection("prefect")
+                        .document(prefectID) // Use prefect ID as the document ID
+                        .collection("prefect_referral_history") // Subcollection for the prefect's referrals
+                        .document(scannedDateTimeId) // Document ID based on date, time, and scanned student ID
+                        .set(scannedStudentData)
                         .addOnSuccessListener(documentReference -> {
-                            Toast.makeText(this, "Displayed student data submitted successfully", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
                             finish();
                         })
                         .addOnFailureListener(e -> {
-                            Toast.makeText(this, "Failed to submit displayed student data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            Log.e("Firestore", "Error adding displayed student document", e);
+                            Toast.makeText(this, "Failed to submit data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Log.e("Firestore", "Error adding document", e);
                         });
             }
         }
     }
 
 
-    private boolean validateInputs(String name, String email, String contact, String program) {
+
+
+
+    private boolean validateInputs(String name, String email, String contact, String program, String remarks, String userConcern) {
         if (TextUtils.isEmpty(name)) {
             nameField.setError("Name is required");
             return false;
@@ -461,8 +554,16 @@ public class PrefectForm extends AppCompatActivity {
             programField.setError("Program is required");
             return false;
         }
+        if (TextUtils.isEmpty(remarks)) {
+
+        }
+        if (userConcern.isEmpty()) {
+            Toast.makeText(this, "Please select at least one concern.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
         return true;
     }
+
 
 
     // Method to clear input fields and the details table

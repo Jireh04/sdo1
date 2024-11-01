@@ -2,6 +2,8 @@ package com.finals.lagunauniversitysdo;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -34,7 +36,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class PrefectView extends Fragment {
@@ -58,7 +62,7 @@ public class PrefectView extends Fragment {
     // New method to create an instance of the fragment with arguments
     public static PrefectView newInstance(String studentId, String studentName, String studentProgram,
                                           String studentContact, String studentYear, String studentBlock,
-                                          String violations) {
+                                          String violations, String contact) {
         PrefectView fragment = new PrefectView();
         Bundle args = new Bundle();
         args.putString("STUDENT_ID", studentId);
@@ -68,6 +72,7 @@ public class PrefectView extends Fragment {
         args.putString("STUDENT_YEAR", studentYear);
         args.putString("STUDENT_BLOCK", studentBlock);
         args.putString("VIOLATIONS", violations);
+        args.putString("STUDENT_CONTACT", contact);
         fragment.setArguments(args);
         return fragment;
     }
@@ -107,7 +112,7 @@ public class PrefectView extends Fragment {
 
             // Set student details to TextViews
             if (studentId != null && !studentId.isEmpty()) {
-                studentIdTextView.setText("ID: " + studentId);
+                studentIdTextView.setText("STUDENT ID: " + studentId);
             }
             if (studentName != null && !studentName.isEmpty()) {
                 studentNameTextView.setText("Name: " + studentName);
@@ -262,129 +267,125 @@ public class PrefectView extends Fragment {
 
     // Modified exportPdf method to accept a boolean parameter
     private void exportPdf(boolean openPdf) {
-        // Check if student data is valid
         if (studentNameTextView.getText().toString().isEmpty() || studentIdTextView.getText().toString().isEmpty()) {
             Toast.makeText(getContext(), "Invalid data for PDF generation", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Create a new PdfDocument
         PdfDocument pdfDocument = new PdfDocument();
-
-        // Create a page description (A4 size - 595x842)
         PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 1).create();
         PdfDocument.Page page = pdfDocument.startPage(pageInfo);
-
-        // Get the Canvas object for drawing content
         Canvas canvas = page.getCanvas();
         Paint paint = new Paint();
-        paint.setColor(Color.BLACK);
-        paint.setTextSize(18);
-        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
 
-        // Start drawing text with proper margins
+        // Set up paint styles
+        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
+
+        // Load and scale logo
+        Bitmap logo = BitmapFactory.decodeResource(getResources(), R.drawable.lu_logo);
+        int logoWidth = 50;
+        int logoHeight = (int) (logo.getHeight() * (logoWidth / (float) logo.getWidth()));
+        logo = Bitmap.createScaledBitmap(logo, logoWidth, logoHeight, true);
+
+        // Margins and positions
         int leftMargin = 50;
         int topMargin = 100;
         int yPosition = topMargin;
 
-        // Draw header with bold font and center alignment
-        paint.setTextSize(22);
+        // Draw logo
+        canvas.drawBitmap(logo, (canvas.getWidth() - logoWidth) / 2, yPosition, paint);
+        yPosition += logoHeight + 20;
+
+        // Header
+        paint.setTextSize(24);
+        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
         paint.setTextAlign(Paint.Align.CENTER);
         canvas.drawText("Student Violation Details", canvas.getWidth() / 2, yPosition, paint);
         yPosition += 40;
 
-        // Draw a divider line below the header
+        // Divider
         paint.setStrokeWidth(2);
+        paint.setColor(Color.GRAY);
         canvas.drawLine(leftMargin, yPosition, canvas.getWidth() - leftMargin, yPosition, paint);
         yPosition += 30;
 
-        // Reset paint for student details (left-aligned)
+        // Student details
         paint.setTextSize(16);
-        paint.setTextAlign(Paint.Align.LEFT);
         paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
+        paint.setTextAlign(Paint.Align.LEFT);
 
-        // Draw student details with proper spacing
-        canvas.drawText("Student " + studentNameTextView.getText().toString(), leftMargin, yPosition, paint);
-        yPosition += 25;
-        canvas.drawText("Student " + studentIdTextView.getText().toString(), leftMargin, yPosition, paint);
-        yPosition += 25;
-        canvas.drawText(studentProgramTextView.getText().toString(), leftMargin, yPosition, paint);
-        yPosition += 25;
-        canvas.drawText(studentContactTextView.getText().toString(), leftMargin, yPosition, paint);
-        yPosition += 25;
-        canvas.drawText(studentYearTextView.getText().toString(), leftMargin, yPosition, paint);
-        yPosition += 25;
-        canvas.drawText(studentBlockTextView.getText().toString(), leftMargin, yPosition, paint);
-        yPosition += 40; // Extra space before violations section
+        String[] studentDetails = {
+                studentNameTextView.getText().toString(),
+                studentIdTextView.getText().toString(),
+                studentProgramTextView.getText().toString(),
+                studentContactTextView.getText().toString(),
+                studentYearTextView.getText().toString(),
+                studentBlockTextView.getText().toString()
+        };
 
-        // Draw violations header
+        for (String detail : studentDetails) {
+            canvas.drawText(detail, leftMargin, yPosition, paint);
+            yPosition += 25;
+        }
+
+        // Violations header
         paint.setTextSize(18);
         paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
         canvas.drawText("Violations:", leftMargin, yPosition, paint);
         yPosition += 25;
 
-        // Draw table header for violations
+        // Table header
         paint.setTextSize(14);
-        paint.setColor(Color.WHITE); // White text for the table header
+        paint.setColor(Color.WHITE);
         float tableStartX = leftMargin;
         float tableWidth = 495;
-        float rowHeight = 40;
-        float col1Width = 150;
-        float col2Width = 345;
+        float rowHeight = 50;
 
-        // Draw table header background
-        paint.setColor(Color.GRAY); // Gray background for the table header
+        // Table header background
+        paint.setColor(Color.DKGRAY);
         canvas.drawRect(tableStartX, yPosition, tableStartX + tableWidth, yPosition + rowHeight, paint);
-
-        // Draw table header text
-        paint.setColor(Color.WHITE); // White text for table header
-        canvas.drawText("Violation Number", tableStartX + 10, yPosition + 30, paint);
-        canvas.drawText("Description", tableStartX + col1Width + 10, yPosition + 30, paint);
+        paint.setColor(Color.WHITE);
+        canvas.drawText("#", tableStartX + 10, yPosition + 30, paint);
+        canvas.drawText("Violation", tableStartX + 160, yPosition + 30, paint);
         yPosition += rowHeight;
 
-        // Reset text color for table content
+        // Table content
         paint.setColor(Color.BLACK);
-        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
-
-        // Draw violation details in table rows
         for (int i = 0; i < violationTable.getChildCount(); i++) {
             TableRow row = (TableRow) violationTable.getChildAt(i);
             TextView violationNumberTextView = (TextView) row.getChildAt(0);
             TextView violationDescriptionTextView = (TextView) row.getChildAt(1);
 
-            // Alternate row background color for better readability
-            if (i % 2 == 0) {
-                paint.setColor(Color.LTGRAY); // Light gray background
-            } else {
-                paint.setColor(Color.WHITE);  // White background
-            }
+            // Row background color
+            paint.setColor(i % 2 == 0 ? Color.LTGRAY : Color.WHITE);
             canvas.drawRect(tableStartX, yPosition, tableStartX + tableWidth, yPosition + rowHeight, paint);
 
             // Draw text content
-            paint.setColor(Color.BLACK); // Reset color for text
+            paint.setColor(Color.BLACK);
             canvas.drawText(violationNumberTextView.getText().toString(), tableStartX + 10, yPosition + 30, paint);
-            canvas.drawText(violationDescriptionTextView.getText().toString(), tableStartX + col1Width + 10, yPosition + 30, paint);
-
-            // Move to the next row
+            canvas.drawText(violationDescriptionTextView.getText().toString(), tableStartX + 160, yPosition + 30, paint);
             yPosition += rowHeight;
         }
 
-        // Draw final bottom line of the table
+        // Final line for table
         paint.setStrokeWidth(2);
+        paint.setColor(Color.GRAY);
         canvas.drawLine(tableStartX, yPosition, tableStartX + tableWidth, yPosition, paint);
+        yPosition += 20;
+
+        // Footer with date
+        paint.setTextSize(12);
+        paint.setColor(Color.GRAY);
+        canvas.drawText("Generated on: " + new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date()),
+                leftMargin, yPosition, paint);
 
         // Finish the page
         pdfDocument.finishPage(page);
 
         // Save the PDF
-        String filePath;
-        if (openPdf) {
-            File directory = getContext().getFilesDir();
-            filePath = directory + "/" + studentNameTextView.getText().toString() + "_violations.pdf";
-        } else {
-            filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                    + "/" + studentNameTextView.getText().toString() + "_violations.pdf";
-        }
+        String filePath = openPdf ?
+                getContext().getFilesDir() + "/" + studentNameTextView.getText().toString() + "_violations.pdf" :
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + studentNameTextView.getText().toString() + "_violations.pdf";
 
         File file = new File(filePath);
         try {
@@ -405,6 +406,7 @@ public class PrefectView extends Fragment {
             pdfDocument.close();
         }
     }
+
 
 
     private void openPdf(File file) {

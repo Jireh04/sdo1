@@ -68,10 +68,10 @@ public class PrefectLoginDialogFragment extends DialogFragment {
     }
 
     private void authenticate(String username, String password) {
-        // Check Firestore for matching username and password in 'prefect' collection
+        // Check Firestore for matching username and hashed password in 'prefect' collection
         db.collection("prefect")
                 .whereEqualTo("username", username)
-                .whereEqualTo("password", password) // Ideally, passwords should be hashed
+                // Ideally, passwords should be hashed; for demonstration, we're using plain text here
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<com.google.firebase.firestore.QuerySnapshot>() {
                     @Override
@@ -82,28 +82,40 @@ public class PrefectLoginDialogFragment extends DialogFragment {
                             com.google.firebase.firestore.QuerySnapshot querySnapshot = task.getResult();
                             if (querySnapshot != null && !querySnapshot.isEmpty()) {
                                 DocumentSnapshot document = querySnapshot.getDocuments().get(0);
-                                String prefectId = document.getId();  // Get the document ID (prefect ID)
-                                String prefectName = document.getString("name");
-                                String prefectEmail = document.getString("email");
-                                Long prefectContactNum = document.getLong("contactNum");
-                                String prefectDepartment = document.getString("department");
 
-                                // Store Prefect ID and details in PrefectSession, now with username and password
-                                PrefectSession.setPrefectId(prefectId);
-                                PrefectSession.setPrefectDetails(prefectName, prefectEmail, prefectContactNum, prefectDepartment, username, password);
+                                // Assuming you are storing hashed passwords
+                                String storedPasswordHash = document.getString("password");
+                                // Hash the input password (you need to implement your hashing logic here)
+                                String inputPasswordHash = hashPassword(password);  // Hashing function should be implemented
 
-                                Log.d("Auth", "Login successful for prefect: " + prefectName);
-                                Toast.makeText(getActivity(), "Prefect logged in", Toast.LENGTH_SHORT).show();
+                                // Check if the hashed input password matches the stored password hash
+                                if (storedPasswordHash.equals(inputPasswordHash)) {
+                                    String prefectId = document.getId();  // Get the document ID (prefect ID)
+                                    String prefectName = document.getString("name");
+                                    String prefectEmail = document.getString("email");
+                                    Long prefectContactNum = document.getLong("contactNum");
+                                    String prefectDepartment = document.getString("department");
 
-                                // Proceed to the prefect main activity
-                                Intent intent = new Intent(getActivity(), Prefect_MainActivity.class);
-                                intent.putExtra("PREFECT_ID", prefectId);
-                                intent.putExtra("PREFECT_NAME", prefectName);
-                                intent.putExtra("PREFECT_EMAIL", prefectEmail);
-                                intent.putExtra("PREFECT_CONTACT_NUM", prefectContactNum);
-                                intent.putExtra("PREFECT_DEPARTMENT", prefectDepartment);
-                                startActivity(intent);
-                                dismiss();
+                                    // Store Prefect ID and details in PrefectSession, now with username and password
+                                    PrefectSession.setPrefectId(prefectId);
+                                    PrefectSession.setPrefectDetails(prefectName, prefectEmail, prefectContactNum, prefectDepartment, username, password);
+
+                                    Log.d("Auth", "Login successful for prefect: " + prefectName);
+                                    Toast.makeText(getActivity(), "Prefect logged in", Toast.LENGTH_SHORT).show();
+
+                                    // Proceed to the prefect main activity
+                                    Intent intent = new Intent(getActivity(), Prefect_MainActivity.class);
+                                    intent.putExtra("PREFECT_ID", prefectId);
+                                    intent.putExtra("PREFECT_NAME", prefectName);
+                                    intent.putExtra("PREFECT_EMAIL", prefectEmail);
+                                    intent.putExtra("PREFECT_CONTACT_NUM", prefectContactNum);
+                                    intent.putExtra("PREFECT_DEPARTMENT", prefectDepartment);
+                                    startActivity(intent);
+                                    dismiss();
+                                } else {
+                                    Log.d("Auth", "Invalid credentials: Passwords do not match.");
+                                    Toast.makeText(getActivity(), "Invalid credentials", Toast.LENGTH_SHORT).show();
+                                }
                             } else {
                                 Log.d("Auth", "Invalid credentials: No documents found.");
                                 Toast.makeText(getActivity(), "Invalid credentials", Toast.LENGTH_SHORT).show();
@@ -116,4 +128,8 @@ public class PrefectLoginDialogFragment extends DialogFragment {
                 });
     }
 
-}
+    // Example hashing function (replace with a real implementation)
+    private String hashPassword(String password) {
+        // Implement your hashing logic here (e.g., using BCrypt)
+        return password; // Placeholder: replace with actual hashed value
+    }}
