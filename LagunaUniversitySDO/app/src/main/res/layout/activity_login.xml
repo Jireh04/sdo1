@@ -12,57 +12,60 @@
     <!-- University logo image -->
     <ImageView
         android:id="@+id/logo_image"
-        android:layout_width="130dp"
-        android:layout_height="130dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="100dp"
         android:scaleType="centerCrop"
         android:src="@drawable/lu_img"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/title_text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_chainStyle="packed"
-        android:layout_marginTop="100dp" />
+        app:layout_constraintBottom_toTopOf="@+id/title_text" />
 
     <!-- Main title text -->
     <TextView
         android:id="@+id/title_text"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
         android:text="LAGUNA UNIVERSITY SDOMS"
-        android:textSize="26sp"
+        android:textSize="28sp"
         android:textStyle="bold"
         android:textColor="#4DDB1F"
         app:layout_constraintTop_toBottomOf="@id/logo_image"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="20dp" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Subtitle text -->
     <TextView
         android:id="@+id/subtitle_text"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
         android:text="Student Discipline Office Management System"
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:textColor="@color/white"
         app:layout_constraintTop_toBottomOf="@id/title_text"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Button container layout -->
     <LinearLayout
         android:id="@+id/button_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp"
-        app:layout_constraintTop_toBottomOf="@id/subtitle_text"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="40dp"
         android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp">
+        android:layout_marginEnd="32dp"
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/subtitle_text"
+        app:layout_constraintVertical_bias="0.419">
 
         <!-- "Are you..." TextView -->
         <TextView
@@ -71,7 +74,7 @@
             android:text="Are you a..."
             android:textAlignment="center"
             android:textColor="@color/white"
-            android:textSize="25sp"
+            android:textSize="22sp"
             android:textStyle="bold" />
 
         <!-- Student Login Button -->
@@ -79,33 +82,32 @@
             android:id="@+id/student_login_button"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="16dp"
             android:backgroundTint="@color/green3"
             android:text="Student"
-            android:textSize="18sp"
-            app:cornerRadius="20dp" />
+            android:textSize="16sp"
+            app:cornerRadius="16dp" />
 
         <!-- Personnel Login Button -->
         <Button
             android:id="@+id/personnel_login_button"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="16dp"
             android:backgroundTint="@color/blue2"
             android:text="LU Personnel"
-            android:textSize="18sp"
-            app:cornerRadius="20dp" />
+            android:textSize="16sp"
+            app:cornerRadius="16dp" />
 
         <!-- Prefect Discipline Login Button -->
         <Button
             android:id="@+id/dod_login_button"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="16dp"
             android:backgroundTint="@color/red2"
             android:text="Prefect Discipline"
-            android:textSize="18sp"
-            app:cornerRadius="20dp" />
+            android:textSize="16sp"
+            app:cornerRadius="16dp" />
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -46,9 +46,6 @@ public class Prefect_QRScannerActivity extends AppCompatActivity {
         String prefectEmail = PrefectSession.getPrefectEmail();
         Long prefectContact = PrefectSession.getPrefectContactNum();
         String prefectDepartment = PrefectSession.getPrefectDepartment();
-        String prefectId = PrefectSession.getPrefectId();
-        String prefectUsername = PrefectSession.getPrefectUsername();
-        String prefectPassword = PrefectSession.getPrefectPassword();
 
         // Display welcome message
         Toast.makeText(this, "Welcome Prefect " + prefectName, Toast.LENGTH_SHORT).show();
@@ -170,7 +167,8 @@ public class Prefect_QRScannerActivity extends AppCompatActivity {
                 Toast.makeText(this, "Scan another QR code", Toast.LENGTH_SHORT).show();
                 startQRCodeScanner(); // Start scanning again
             } else {
-                startPrefectFormActivity(scannedDataList); // Start the form with all scanned data
+                // Start the form with all scanned data
+                startPrefectFormActivity(scannedDataList);
             }
         }
     }
@@ -185,7 +183,7 @@ public class Prefect_QRScannerActivity extends AppCompatActivity {
 
     private void startPrefectFormActivity(ArrayList<String> scannedDataList) {
         Intent formIntent = new Intent(this, PrefectForm.class);
-        formIntent.putStringArrayListExtra("scannedDataList", scannedDataList);
+        formIntent.putStringArrayListExtra("SCANNED_DATA_LIST_KEY", scannedDataList); // Ensure key is consistent
         putPrefectData(formIntent);
         startActivity(formIntent);
         finish();
