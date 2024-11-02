@@ -399,6 +399,7 @@ public class PersonnelForm extends AppCompatActivity {
                         studentData.put("user_concern", userConcern); // Add user concern to the student data
                         studentData.put("remarks", remarks);
                         studentData.put("personnel_referrer", personnelReferrer); // Add personnel referrer
+                        studentData.put("referrer_id", personnelID); // Add referrer_id
 
                         // Get current date and time to use as the document ID for the referral
                         String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + studentId; // Append studentId
@@ -446,6 +447,7 @@ public class PersonnelForm extends AppCompatActivity {
                     studentData.put("status", status);
                     studentData.put("remarks", remarks); // Add remarks if needed
                     studentData.put("personnel_referrer", personnelReferrer); // Add personnel referrer
+                    studentData.put("referrer_id", personnelID); // Add referrer_id
 
                     // Get current date and time to use as the document ID for the referral
                     String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + studentId; // Append studentId
@@ -491,6 +493,7 @@ public class PersonnelForm extends AppCompatActivity {
                 scannedStudentData.put("user_concern", userConcern); // Add user concern to scanned student data
                 scannedStudentData.put("remarks", remarks); // Add remarks to scanned student data
                 scannedStudentData.put("personnel_referrer", personnelReferrer); // Add personnel referrer name to Firestore data
+                scannedStudentData.put("referrer_id", personnelID); // Add referrer_id to scanned student data
 
                 // Add scanned student data under personnel's referral history in Firestore
                 firestore.collection("personnel")

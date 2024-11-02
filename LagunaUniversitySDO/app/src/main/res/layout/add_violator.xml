@@ -24,6 +24,20 @@
         android:clickable="false"
         android:enabled="false"/>
 
+    <!-- Reporter ID -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reporter ID"
+        android:textStyle="bold"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/reporterIdEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter reporter's ID" />
+
     <!-- Reporter -->
     <TextView
         android:layout_width="wrap_content"

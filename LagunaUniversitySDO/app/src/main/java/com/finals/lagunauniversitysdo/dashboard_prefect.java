@@ -373,6 +373,7 @@ public class dashboard_prefect extends Fragment {
         EditText dateTimeEditText = dialogView.findViewById(R.id.dateTimeEditText);
         EditText reporterEditText = dialogView.findViewById(R.id.reporterEditText);
         EditText locationEditText = dialogView.findViewById(R.id.locationEditText);
+        EditText reporterIdEditText = dialogView.findViewById(R.id.reporterIdEditText); // New field for Reporter ID
         Spinner violationSpinner = dialogView.findViewById(R.id.violationSpinner);
         EditText remarksEditText = dialogView.findViewById(R.id.remarksEditText);
         Button submitButton = dialogView.findViewById(R.id.submitButton);
@@ -384,8 +385,13 @@ public class dashboard_prefect extends Fragment {
         String currentDateAndTime = sdf.format(calendar.getTime());
         dateTimeEditText.setText(currentDateAndTime);
 
+        // Fetch the prefect ID and set it in the reporterIdEditText
+        String reporterId = PrefectSession.getPrefectId(); // Replace this with your method to get the prefect ID
+        reporterIdEditText.setText(reporterId); // Populate the EditText with the fetched ID
+        reporterIdEditText.setEnabled(false); // Optionally, disable editing for this field
+
         // Create a list of violations
-        String[] violations = { "-select violation-", "Light Offense", "Serious Offense", "Major Offense"};
+        String[] violations = { "-select violation-", "Light Offense", "Serious Offense", "Major Offense" };
 
         // Set up an ArrayAdapter to populate the Spinner
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, violations);
@@ -410,7 +416,7 @@ public class dashboard_prefect extends Fragment {
             String remarks = remarksEditText.getText().toString().trim();
 
             // Simple validation: check if required fields are empty
-            if (dateTime.isEmpty() || reporter.isEmpty() || location.isEmpty() || violation.equals("-select violation-") || remarks.isEmpty()) {
+            if (dateTime.isEmpty() || reporter.isEmpty() || reporterId.isEmpty() || location.isEmpty() || violation.equals("-select violation-") || remarks.isEmpty()) {
                 Toast.makeText(getContext(), "Please fill in all required fields.", Toast.LENGTH_SHORT).show();
             } else {
                 // Prepare the data to be saved to Firestore
@@ -420,6 +426,7 @@ public class dashboard_prefect extends Fragment {
                 Map<String, Object> violatorData = new HashMap<>();
                 violatorData.put("date", dateTime);
                 violatorData.put("prefect_referrer", reporter);
+                violatorData.put("referrer_id", reporterId); // Use the fetched reporter ID
                 violatorData.put("location", location);
                 violatorData.put("violation", violation);
                 violatorData.put("remarks", remarks);
@@ -427,9 +434,16 @@ public class dashboard_prefect extends Fragment {
                 violatorData.put("student_name", name);  // Add the studentName
                 violatorData.put("status", status);  // Add the status
 
-                // Add the data to the 'prefect_referral_history' collection
-                db.collection("prefect_referral_history")  // Ensure this collection name is correct
-                        .add(violatorData)  // Auto-generate a document ID
+                // Format the document ID as yyyy-MM-dd_HH:mm:ss_studentId
+                String formattedDateTime = dateTime.replace(" ", "_"); // Replace space with underscore
+                String documentId = formattedDateTime + "_" + studId; // Construct the document ID using studentId
+
+                // Save to the prefect_referral_history subcollection
+                db.collection("prefect")
+                        .document(reporterId) // Use the reporterId for the main document
+                        .collection("prefect_referral_history")
+                        .document(documentId) // Use the formatted document ID for history
+                        .set(violatorData) // Set the violator data
                         .addOnSuccessListener(documentReference -> {
                             // Show a success message
                             Toast.makeText(getContext(), "Violator Added!", Toast.LENGTH_SHORT).show();
@@ -438,7 +452,7 @@ public class dashboard_prefect extends Fragment {
                         })
                         .addOnFailureListener(e -> {
                             // Show an error message if the operation fails
-                            Toast.makeText(getContext(), "Error adding violator: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Error adding to referral history: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         });
             }
         });
@@ -449,6 +463,7 @@ public class dashboard_prefect extends Fragment {
         // Show the dialog
         dialog.show();
     }
+
 
     private void openReferralDashboard() {
         // Create a new instance of the PrefectReferralDashboardFragment

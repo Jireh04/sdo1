@@ -161,7 +161,7 @@ public class personnel_refferal_form extends Fragment {
                 userNames.add(userDoc.getString("name"));
                 userDepartments.add(userDoc.getString("program"));
                 userEmails.add(userDoc.getString("email"));
-                userContacts.add(userDoc.getLong("contacts"));
+                userContacts.add(userDoc.getLong("contact"));
                 userIds.add(userDoc.getString("student_id"));
             }
         }
