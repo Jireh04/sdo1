@@ -400,6 +400,7 @@ public class form extends AppCompatActivity {
                 studentData.put("user_concern", userConcern); // Add user concern to the student data
                 studentData.put("remarks", remarks); // Add remarks to the student data
                 studentData.put("student_referrer", studentReferrer); // Add student_referrer to Firestore data
+                studentData.put("referrer_id", studId); // Add referrer_id to Firestore data
 
                 Log.d("Firestore", "Student ID: " + addedStudentId);
 
@@ -416,7 +417,6 @@ public class form extends AppCompatActivity {
                             Toast.makeText(this, "Failed to submit data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             Log.e("Firestore", "Error adding document", e);
                         });
-
             }
         }
 
@@ -440,6 +440,7 @@ public class form extends AppCompatActivity {
             scannedStudentData.put("user_concern", userConcern); // Add user concern to scanned student data
             scannedStudentData.put("remarks", remarks); // Add remarks to scanned student data
             scannedStudentData.put("student_referrer", studentReferrer); // Add student_referrer to Firestore data
+            scannedStudentData.put("referrer_id", studId); // Add referrer_id to scanned student data
 
             // Save each scanned student's data into their respective sub-collection
             firestore.collection("students")
@@ -452,8 +453,6 @@ public class form extends AppCompatActivity {
                         Toast.makeText(this, "Scanned student data submitted successfully", Toast.LENGTH_SHORT).show();
                         // After successful submission, navigate to ReferralFormActivity
                         finish();
-
-
                     })
                     .addOnFailureListener(e -> {
                         Toast.makeText(this, "Failed to submit scanned student data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -461,7 +460,6 @@ public class form extends AppCompatActivity {
                     });
         }
     }
-
 
     private boolean validateInputs(String name, String email, String contact, String program, String remarks, String userConcern) {
         if (TextUtils.isEmpty(name)) {

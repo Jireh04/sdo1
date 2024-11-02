@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/main"
     android:orientation="vertical"
+    android:padding="10dp"
     tools:context=".QRScannerActivity">
 
     <!-- Title Section -->

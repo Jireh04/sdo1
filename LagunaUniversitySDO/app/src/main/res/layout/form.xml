@@ -7,7 +7,7 @@
     tools:context=".form"
     android:id="@+id/form_layout"
     android:padding="16dp"
-    android:orientation="vertical"> <!-- Set orientation to vertical -->
+    android:orientation="vertical">
 
     <ScrollView
         android:layout_width="match_parent"

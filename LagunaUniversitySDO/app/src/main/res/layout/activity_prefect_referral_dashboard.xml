@@ -1,33 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/main"
-    android:orientation="vertical"
     tools:context=".QRScannerActivity">
 
     <!-- Title Section -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/title_section"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="15dp"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
+            android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SDOMS"
-            android:id="@+id/title"
             android:textColor="@color/green3"
             android:textSize="24sp"
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/sub_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/sub_title"
             android:text="REFERRAL"
             android:textColor="@android:color/darker_gray"
             android:textSize="16sp" />
@@ -35,14 +39,18 @@
 
     <!-- Scrollable Table Section -->
     <HorizontalScrollView
-        android:layout_width="match_parent"
+        android:id="@+id/horizontal_scroll_table"
+        android:layout_width="0dp"
         android:layout_height="150dp"
-        android:layout_marginTop="100dp"
-        android:fillViewport="true">
+        android:layout_marginTop="16dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/title_section"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
             <TableLayout
                 android:id="@+id/details_table"
@@ -77,6 +85,7 @@
                         android:text="ID NUMBER"
                         android:padding="8dp"
                         android:textColor="@android:color/white" />
+
                     <TextView
                         android:layout_width="150dp"
                         android:layout_height="wrap_content"
@@ -100,23 +109,29 @@
     <!-- Proceed Button -->
     <Button
         android:id="@+id/proceed_to_referral"
-
         android:layout_width="350dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="270dp"
+        android:layout_marginTop="16dp"
         android:background="@color/green3"
         android:text="Proceed to Referral Form"
         android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/horizontal_scroll_table"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Search Section -->
+
+    <!-- Pagination Controls -->
     <TableLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:padding="8dp"
-        android:layout_marginTop="350dp"
-        android:stretchColumns="1">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/proceed_to_referral">
 
         <!-- Search Row -->
         <TableRow
@@ -126,12 +141,12 @@
 
             <EditText
                 android:id="@+id/search_bar"
-                android:layout_width="400dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:hint="Search"
-                android:inputType="text"
-                android:imeOptions="actionSearch" />
+                android:imeOptions="actionSearch"
+                android:inputType="text" />
 
             <Button
                 android:id="@+id/search_button"
@@ -147,8 +162,6 @@
                 android:layout_height="53dp"
                 android:contentDescription="Scan QR Code"
                 android:src="@drawable/baseline_qr_code_scanner_24" />
-
-
         </TableRow>
 
         <!-- Scrollable Search Results Section -->
@@ -163,19 +176,19 @@
                 android:orientation="vertical"
                 android:padding="8dp" />
         </TableRow>
-
     </TableLayout>
 
-    <!-- Pagination Controls -->
     <LinearLayout
         android:id="@+id/pagination_controls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
         android:orientation="horizontal"
         android:gravity="center"
         android:padding="8dp"
-        android:visibility="gone">
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <Button
             android:id="@+id/prev_button"
@@ -200,7 +213,4 @@
             android:text="Next" />
     </LinearLayout>
 
-
-</FrameLayout>
-
-
+</androidx.constraintlayout.widget.ConstraintLayout>

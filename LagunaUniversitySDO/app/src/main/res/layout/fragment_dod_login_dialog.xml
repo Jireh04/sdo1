@@ -13,10 +13,10 @@
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         app:cardElevation="20dp"
-        android:layout_marginTop="100dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="MissingConstraints">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -30,7 +30,7 @@
                 android:id="@+id/close_button"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="15dp"
                 android:layout_gravity="end"
                 android:background="@android:color/transparent"
                 android:src="@drawable/baseline_close_24"/>
@@ -46,7 +46,7 @@
 
             <EditText
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="48dp"
                 android:id="@+id/login_username"
                 android:background="@drawable/red_border"
                 android:layout_marginTop="20dp"
@@ -58,7 +58,7 @@
 
             <EditText
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="48dp"
                 android:id="@+id/login_password"
                 android:background="@drawable/red_border"
                 android:layout_marginTop="20dp"

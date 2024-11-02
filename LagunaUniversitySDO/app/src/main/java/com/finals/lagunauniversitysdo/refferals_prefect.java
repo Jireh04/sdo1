@@ -136,18 +136,15 @@ public class refferals_prefect extends Fragment {
 
     // Fetch pending referrals from Firestore
     public void onPendingClick() {
-
-        // Get the LinearLayout and ScrollView for displaying pending referrals
         LinearLayout linearLayoutPending = getView().findViewById(R.id.linear_layout_pending);
         ScrollView scrollViewPending = getView().findViewById(R.id.scroll_view_pending);
 
-        // Get views for accepted and rejected
+        // Clear other sections
         LinearLayout linearLayoutAccepted = getView().findViewById(R.id.linear_layout_accepted);
         ScrollView scrollViewAccepted = getView().findViewById(R.id.scroll_view_accepted);
         LinearLayout linearLayoutRejected = getView().findViewById(R.id.linear_layout_rejected);
         ScrollView scrollViewRejected = getView().findViewById(R.id.scroll_view_rejected);
 
-        // Clear other sections
         linearLayoutAccepted.removeAllViews();
         scrollViewAccepted.setVisibility(View.GONE);
         linearLayoutRejected.removeAllViews();
@@ -157,14 +154,12 @@ public class refferals_prefect extends Fragment {
         scrollViewPending.setVisibility(View.VISIBLE);
         linearLayoutPending.removeAllViews();
 
-        // Create a HorizontalScrollView to make the TableLayout horizontally scrollable
         HorizontalScrollView horizontalScrollView = new HorizontalScrollView(getActivity());
         horizontalScrollView.setLayoutParams(new HorizontalScrollView.LayoutParams(
                 HorizontalScrollView.LayoutParams.MATCH_PARENT,
                 HorizontalScrollView.LayoutParams.WRAP_CONTENT
         ));
 
-        // Create a TableLayout for organizing referrals into a table
         TableLayout tableLayout = new TableLayout(getActivity());
         tableLayout.setLayoutParams(new TableLayout.LayoutParams(
                 TableLayout.LayoutParams.MATCH_PARENT,
@@ -230,9 +225,13 @@ public class refferals_prefect extends Fragment {
                                             // Get the data from Firestore (as a Map)
                                             Map<String, Object> referralData = referralDocument.getData();
                                             if (referralData != null) {
+                                                // Retrieve referrer_id and store it in referralData
+                                                String referrerId = referralDocument.getString("referrer_id");
+                                                referralData.put("referrer_id", referrerId); // Save it into referralData
+
                                                 String studentReferrer = (String) referralData.get("student_referrer");
                                                 String studentName = (String) referralData.get("student_name");
-                                                String studentId = (String) referralData.get("refferer_id");
+                                                String studentId = (String) referralData.get("student_id");
                                                 String studentProgram = (String) referralData.get("student_program");
                                                 String referralDate = (String) referralData.get("date");
 
@@ -287,7 +286,8 @@ public class refferals_prefect extends Fragment {
                                                     builder.setTitle("Confirmation")
                                                             .setMessage("Are you sure you want to accept this referral?")
                                                             .setPositiveButton("Yes", (dialog, which) -> {
-                                                                updateReferralStatusStudent(studentId, referralDocument.getId(), "accepted");
+                                                                // Use referrerId for the update
+                                                                updateReferralStatusStudent(referrerId, referralDocument.getId(), "accepted");
                                                                 Log.d("FirestoreSuccess", "Student referral status updated successfully");
                                                             })
                                                             .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
@@ -303,7 +303,8 @@ public class refferals_prefect extends Fragment {
                                                     builder.setTitle("Confirmation")
                                                             .setMessage("Are you sure you want to reject this referral?")
                                                             .setPositiveButton("Yes", (dialog, which) -> {
-                                                                updateReferralStatusStudent(studentId, referralDocument.getId(), "rejected");
+                                                                // Use referrerId for the update
+                                                                updateReferralStatusStudent(referrerId, referralDocument.getId(), "rejected");
                                                             })
                                                             .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
                                                             .show();
@@ -340,8 +341,13 @@ public class refferals_prefect extends Fragment {
                                     for (DocumentSnapshot referralDocument : subTask.getResult().getDocuments()) {
                                         // Check status in the document
                                         if ("pending".equals(referralDocument.getString("status"))) {
+                                            // Get the data from Firestore (as a Map)
                                             Map<String, Object> referralData = referralDocument.getData();
                                             if (referralData != null) {
+                                                // Retrieve referrer_id and store it in referralData
+                                                String referrerId = referralDocument.getString("referrer_id");
+                                                referralData.put("referrer_id", referrerId); // Save it into referralData
+
                                                 String personnelReferrer = (String) referralData.get("personnel_referrer");
                                                 String personnelID = (String) referralData.get("personnel_id");
                                                 String studentName = (String) referralData.get("student_name");
@@ -349,27 +355,32 @@ public class refferals_prefect extends Fragment {
                                                 String studentProgram = (String) referralData.get("student_program");
                                                 String referralDate = (String) referralData.get("date");
 
+                                                // Create a TableRow for each referral
                                                 TableRow tableRow = new TableRow(getActivity());
                                                 tableRow.setLayoutParams(new TableRow.LayoutParams(
                                                         TableRow.LayoutParams.MATCH_PARENT,
                                                         TableRow.LayoutParams.WRAP_CONTENT
                                                 ));
 
+                                                // Create a TextView for the referrer
                                                 TextView referrerTextView = new TextView(getActivity());
                                                 referrerTextView.setText(personnelReferrer);
                                                 referrerTextView.setPadding(16, 8, 16, 8);
                                                 referrerTextView.setTextSize(14);
                                                 tableRow.addView(referrerTextView);
 
+                                                // Create a TextView for the referral date
                                                 TextView dateTextView = new TextView(getActivity());
                                                 dateTextView.setText(referralDate);
                                                 dateTextView.setPadding(16, 8, 16, 8);
                                                 dateTextView.setTextSize(14);
                                                 tableRow.addView(dateTextView);
 
+                                                // Create a LinearLayout to hold buttons (View, Accept, Reject)
                                                 LinearLayout buttonLayout = new LinearLayout(getActivity());
                                                 buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
 
+                                                // Create View button
                                                 Button btnView = new Button(getActivity());
                                                 btnView.setText("View");
                                                 btnView.setOnClickListener(v -> {
@@ -387,6 +398,7 @@ public class refferals_prefect extends Fragment {
                                                 });
                                                 buttonLayout.addView(btnView);
 
+                                                // Create Accept button with confirmation dialog
                                                 Button btnAccept = new Button(getActivity());
                                                 btnAccept.setText("Accept");
                                                 btnAccept.setOnClickListener(v -> {
@@ -394,13 +406,15 @@ public class refferals_prefect extends Fragment {
                                                     builder.setTitle("Confirmation")
                                                             .setMessage("Are you sure you want to accept this referral?")
                                                             .setPositiveButton("Yes", (dialog, which) -> {
-                                                                updateReferralStatusPersonnel(referralDocument.getId(), personnelID, "accepted");
+                                                                // Use referrerId for the update
+                                                                updateReferralStatusPersonnel(referrerId, referralDocument.getId(), "accepted");
                                                             })
                                                             .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
                                                             .show();
                                                 });
                                                 buttonLayout.addView(btnAccept);
 
+                                                // Create Reject button with confirmation dialog
                                                 Button btnReject = new Button(getActivity());
                                                 btnReject.setText("Reject");
                                                 btnReject.setOnClickListener(v -> {
@@ -408,14 +422,18 @@ public class refferals_prefect extends Fragment {
                                                     builder.setTitle("Confirmation")
                                                             .setMessage("Are you sure you want to reject this referral?")
                                                             .setPositiveButton("Yes", (dialog, which) -> {
-                                                                updateReferralStatusPersonnel(referralDocument.getId(), personnelID, "rejected");
+                                                                // Use referrerId for the update
+                                                                updateReferralStatusPersonnel(referrerId, referralDocument.getId(), "rejected");
                                                             })
                                                             .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
                                                             .show();
                                                 });
                                                 buttonLayout.addView(btnReject);
 
+                                                // Add the button layout to the table row
                                                 tableRow.addView(buttonLayout);
+
+                                                // Add the table row to the table layout
                                                 tableLayout.addView(tableRow);
                                             }
                                         }
@@ -426,6 +444,7 @@ public class refferals_prefect extends Fragment {
             }
         });
     }
+
 
 
 
@@ -605,60 +624,58 @@ public class refferals_prefect extends Fragment {
     // Method to update referral status in Firestore
     // Make sure db is initialized at the top of the fragment or activity
 
-    private void updateReferralStatusPersonnel(String referralDocumentId, String personnelId, String newStatus) {
-        if (personnelId == null || referralDocumentId == null) {
-            Log.e("UpdateError", "Personnel ID or Referral Document ID is null. Cannot update status.");
+    private void updateReferralStatusPersonnel(String referrerId, String referralDocumentId, String newStatus) {
+        if (referrerId == null || referralDocumentId == null) {
+            Log.e("UpdateError", "Referrer ID or Referral Document ID is null. Cannot update status.");
             return; // Exit if IDs are invalid
         }
 
-        Log.d("UpdateStatus", "Updating personnel status. ID: " + personnelId + ", Referral ID: " + referralDocumentId + ", New Status: " + newStatus);
+        Log.d("UpdateStatus", "Updating personnel status. Referrer ID: " + referrerId + ", Referral ID: " + referralDocumentId + ", New Status: " + newStatus);
 
-        db.collection("personnel").document(personnelId)
+        // Update the referral status using the referrer_id
+        db.collection("personnel")
+                .document(referrerId) // Assuming you want to use referrerId to locate the document
                 .collection("personnel_refferal_history").document(referralDocumentId)
                 .update("status", newStatus)
                 .addOnSuccessListener(aVoid -> {
                     Log.d("FirestoreSuccess", "Personnel referral status updated successfully");
-                    triggerUIRefresh(); // Custom method to indicate UI needs updating
+                    refreshReferralData(); // Call to refresh data after status update
                 })
                 .addOnFailureListener(e -> {
                     Log.e("FirestoreError", "Error updating personnel referral status", e);
                 });
     }
 
-    private void updateReferralStatusStudent(String studentId, String referralDocumentId, String newStatus) {
-        if (studentId == null || referralDocumentId == null) {
-            Log.e("UpdateError", "Student ID or Referral Document ID is null. Cannot update status.");
+    private void updateReferralStatusStudent(String referrerId, String referralDocumentId, String newStatus) {
+        if (referrerId == null || referralDocumentId == null) {
+            Log.e("UpdateError", "Referrer ID or Referral Document ID is null. Cannot update status.");
             return; // Exit if IDs are invalid
         }
 
-        Log.d("UpdateStatus", "Updating student status. ID: " + studentId + ", Referral ID: " + referralDocumentId + ", New Status: " + newStatus);
+        Log.d("UpdateStatus", "Updating student status. Referrer ID: " + referrerId + ", Referral ID: " + referralDocumentId + ", New Status: " + newStatus);
 
-        db.collection("students").document(studentId)
+        // Update the referral status using the referrer_id
+        db.collection("students")
+                .document(referrerId) // Assuming you want to use referrerId to locate the document
                 .collection("student_refferal_history").document(referralDocumentId)
                 .update("status", newStatus)
                 .addOnSuccessListener(aVoid -> {
                     Log.d("FirestoreSuccess", "Student referral status updated successfully");
-                    triggerUIRefresh(); // Custom method to indicate UI needs updating
+                    refreshReferralData(); // Call to refresh data after status update
                 })
                 .addOnFailureListener(e -> {
                     Log.e("FirestoreError", "Error updating student referral status", e);
                 });
     }
 
-    // New method to refresh UI safely
-    private void triggerUIRefresh() {
-        if (getActivity() == null || getView() == null) {
+    // Method to refresh referral data
+    private void refreshReferralData() {
+        // Call the onPendingClick method to refresh UI and fetch the latest data
+        if (getActivity() != null && getView() != null) {
+            getActivity().runOnUiThread(this::onPendingClick);
+        } else {
             Log.e("UIError", "Activity or view is null, cannot refresh UI.");
-            return;
         }
-
-        getActivity().runOnUiThread(() -> {
-            try {
-                onPendingClick(); // Safely update UI within UI thread
-            } catch (Exception e) {
-                Log.e("UIError", "Error refreshing UI", e);
-            }
-        });
     }
 
 
