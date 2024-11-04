@@ -1,106 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="16dp">
 
-    <!-- Date and Time Picker -->
+    <!-- Date and Time Picker Label -->
     <TextView
         android:id="@+id/dateTimeLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Date | Time"
         android:textStyle="bold"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- Date and Time EditText -->
     <EditText
         android:id="@+id/dateTimeEditText"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="mm/dd/yyyy --:--"
         android:inputType="none"
         android:focusable="false"
         android:clickable="false"
-        android:enabled="false"/>
+        android:enabled="false"
+        app:layout_constraintTop_toBottomOf="@id/dateTimeLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp" />
 
-    <!-- Reporter ID -->
+    <!-- Reporter ID Label -->
     <TextView
+        android:id="@+id/reporterIdLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Reporter ID"
         android:textStyle="bold"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/dateTimeEditText"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp" />
 
+    <!-- Reporter ID EditText -->
     <EditText
         android:id="@+id/reporterIdEditText"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Enter reporter's ID" />
+        android:hint="Enter reporter ID"
+        android:enabled="true"
+        app:layout_constraintTop_toBottomOf="@id/reporterIdLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp" />
 
-    <!-- Reporter -->
+    <!-- Reporter Label -->
     <TextView
+        android:id="@+id/reporterLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Reporter"
+        android:text="Reporter Name"
         android:textStyle="bold"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/reporterIdEditText"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp" />
 
+    <!-- Reporter EditText -->
     <EditText
         android:id="@+id/reporterEditText"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Enter reporter's name" />
+        android:hint="Enter reporter's name"
+        app:layout_constraintTop_toBottomOf="@id/reporterLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp" />
 
-    <!-- Location -->
+    <!-- Location Label -->
     <TextView
+        android:id="@+id/locationLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Location"
         android:textStyle="bold"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/reporterEditText"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp" />
 
+    <!-- Location EditText -->
     <EditText
         android:id="@+id/locationEditText"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Enter location" />
+        android:hint="Enter location"
+        app:layout_constraintTop_toBottomOf="@id/locationLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp" />
 
-    <!-- Violation Spinner -->
+    <!-- Violation Label -->
     <TextView
+        android:id="@+id/violationLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Violation"
         android:textStyle="bold"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/locationEditText"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp" />
 
+    <!-- Violation Spinner -->
     <Spinner
         android:id="@+id/violationSpinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/violationLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp" />
 
-    <!-- Remarks (Optional) -->
+    <!-- Remarks Label -->
     <TextView
+        android:id="@+id/remarksLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Remarks (Optional)"
+        android:text="Remarks"
         android:textStyle="bold"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/violationSpinner"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp" />
 
+    <!-- Remarks EditText -->
     <EditText
         android:id="@+id/remarksEditText"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Enter remarks (Optional)" />
+        android:hint="Enter remarks"
+        app:layout_constraintTop_toBottomOf="@id/remarksLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp" />
 
     <!-- Submit Button -->
     <Button
         android:id="@+id/submitButton"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Submit"
         android:background="@android:color/holo_green_dark"
         android:textColor="@android:color/white"
         android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/remarksEditText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
-</LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

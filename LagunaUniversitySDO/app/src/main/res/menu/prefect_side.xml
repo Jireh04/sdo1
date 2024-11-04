@@ -3,11 +3,12 @@
         android:id="@+id/menu_user_name"
         android:title="User Name" />
 
-
+    <item
+        android:id="@+id/menu_settings"
+        android:title="Settings" />
 
     <item
         android:id="@+id/menu_logout"
         android:title="Logout" />
     <!-- New Settings item -->
 </menu>
-

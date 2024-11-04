@@ -26,7 +26,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.android.material.navigation.NavigationView;
-
 public class Prefect_MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private DrawerLayout drawerLayout;
     private ImageView userIcon;
@@ -93,7 +92,7 @@ public class Prefect_MainActivity extends AppCompatActivity implements Navigatio
                                     userName = documentSnapshot.getString("name");
 
                                     PopupMenu popup = new PopupMenu(Prefect_MainActivity.this, v);
-                                    popup.getMenuInflater().inflate(R.menu.user_menu, popup.getMenu());
+                                    popup.getMenuInflater().inflate(R.menu.prefect_side, popup.getMenu());
 
                                     MenuItem menuItem = popup.getMenu().findItem(R.id.menu_user_name);
                                     if (menuItem != null) {
@@ -124,6 +123,11 @@ public class Prefect_MainActivity extends AppCompatActivity implements Navigatio
                                                     finish(); // Close MainActivity
                                                 }, 1000); // 1 second delay for user feedback
 
+                                                return true;
+                                            } else if (id == R.id.menu_settings) {
+                                                // Open the Settings activity when Settings is clicked
+                                                Intent intent = new Intent(Prefect_MainActivity.this, SettingsActivity.class); // Replace with your settings activity
+                                                startActivity(intent);
                                                 return true;
                                             } else {
                                                 return false;

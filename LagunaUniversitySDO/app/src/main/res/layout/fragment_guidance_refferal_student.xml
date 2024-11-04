@@ -1,31 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".guidanceRefferal_student">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:padding="16dp">
 
         <!-- Title for Guidance Referral -->
         <TextView
+            android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:paddingBottom="16dp"
             android:text="Guidance Referral"
             android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/table_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Table Layout for Guidance Referral -->
         <TableLayout
+            android:id="@+id/table_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#E0E0E0">
+            android:background="#E0E0E0"
+            app:layout_constraintTop_toBottomOf="@id/title">
 
             <!-- Header Row -->
             <TableRow android:background="@color/green3">
@@ -61,7 +67,6 @@
                     android:textStyle="bold" />
             </TableRow>
 
-
             <!-- Row for No Records -->
             <TableRow>
 
@@ -92,6 +97,6 @@
 
         </TableLayout>
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>
