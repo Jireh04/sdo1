@@ -31,15 +31,39 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="8dp" />
 
-    <!-- Reporter Label -->
+    <!-- Reporter ID Label -->
     <TextView
+        android:id="@+id/reporterIdLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Reporter"
-        android:id="@+id/reporterIdEditText"
+        android:text="Reporter ID"
         android:textStyle="bold"
         android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@id/dateTimeEditText"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <!-- Reporter ID EditText -->
+    <EditText
+        android:id="@+id/reporterIdEditText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Enter reporter ID"
+        android:enabled="true"
+        app:layout_constraintTop_toBottomOf="@id/reporterIdLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp" />
+
+    <!-- Reporter Label -->
+    <TextView
+        android:id="@+id/reporterLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reporter Name"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/reporterIdEditText"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="16dp" />
 
@@ -49,17 +73,17 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="Enter reporter's name"
-        app:layout_constraintTop_toBottomOf="@+id/reporterIdEditText"
+        app:layout_constraintTop_toBottomOf="@id/reporterLabel"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="8dp" />
 
     <!-- Location Label -->
     <TextView
+        android:id="@+id/locationLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Location"
-        android:id="@+id/locationLabel"
         android:textStyle="bold"
         android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@id/reporterEditText"
@@ -72,17 +96,17 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="Enter location"
-        app:layout_constraintTop_toBottomOf="@+id/locationLabel"
+        app:layout_constraintTop_toBottomOf="@id/locationLabel"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="8dp" />
 
     <!-- Violation Label -->
     <TextView
+        android:id="@+id/violationLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Violation"
-        android:id="@+id/violationLabel"
         android:textStyle="bold"
         android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@id/locationEditText"
@@ -94,17 +118,17 @@
         android:id="@+id/violationSpinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/violationLabel"
+        app:layout_constraintTop_toBottomOf="@id/violationLabel"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="8dp" />
 
     <!-- Remarks Label -->
     <TextView
+        android:id="@+id/remarksLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Remarks"
-        android:id="@+id/remarksLabel"
         android:textStyle="bold"
         android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@id/violationSpinner"
@@ -117,7 +141,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="Enter remarks"
-        app:layout_constraintTop_toBottomOf="@+id/remarksLabel"
+        app:layout_constraintTop_toBottomOf="@id/remarksLabel"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="8dp" />

@@ -49,7 +49,7 @@ public class ReporterView extends Fragment {
     // Static method to create a new instance of the fragment and pass arguments
     public static ReporterView newInstance(String studentId, String studentName, String studentProgram,
                                            String studentContact, String studentYear, String block,
-                                           String violation, String referrerName, String remarks, String date) {
+                                           String violation, String referrerId, String remarks, String date) {
         ReporterView fragment = new ReporterView();
         Bundle args = new Bundle();
         args.putString("STUDENT_ID", studentId);
@@ -59,17 +59,17 @@ public class ReporterView extends Fragment {
         args.putString("STUDENT_YEAR", studentYear);
         args.putString("BLOCK", block);
         args.putString("VIOLATION", violation);
+        args.putString("REFERRER_ID", referrerId);  // Added referrer_id
         args.putString("REMARKS", remarks);
-        args.putString("REFERRER_NAME", referrerName);
         args.putString("DATE", date);
         fragment.setArguments(args);
         return fragment;
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.prefect_view, container, false);
 
         // Initialize the TextViews from the layout
@@ -79,17 +79,14 @@ public class ReporterView extends Fragment {
         studentContactTextView = view.findViewById(R.id.studentContactTextView);
         studentYearTextView = view.findViewById(R.id.studentYearTextView);
         studentBlockTextView = view.findViewById(R.id.studentBlockTextView);
-        logEntryTextView = view.findViewById(R.id.logsTextView);  // For log entry display
-
+        logEntryTextView = view.findViewById(R.id.logsTextView);
 
         // Initialize buttons
         addViolationButton = view.findViewById(R.id.addViolationButton);
         exportPdfButton = view.findViewById(R.id.exportPdfButton);
-
-        // Initialize the TableLayout for violations
         violationTable = view.findViewById(R.id.violationTable);
 
-        // Retrieve arguments passed to the fragment (if any)
+        // Retrieve arguments passed to the fragment
         Bundle arguments = getArguments();
         if (arguments != null) {
             String studentId = arguments.getString("STUDENT_ID");
@@ -97,80 +94,38 @@ public class ReporterView extends Fragment {
             String studentProgram = arguments.getString("STUDENT_PROGRAM");
             String studentContact = arguments.getString("STUDENT_CONTACT");
             String studentYear = arguments.getString("STUDENT_YEAR");
-            String studentBlock = arguments.getString("STUDENT_BLOCK");
+            String studentBlock = arguments.getString("BLOCK");
             String violation = arguments.getString("VIOLATION");
+            String referrerId = arguments.getString("REFERRER_ID"); // Retrieve referrer_id
             String remarks = arguments.getString("REMARKS");
             String date = arguments.getString("DATE");
 
-            // Use the retrieved data as needed, for example, set them to TextViews
-            TextView studentNameTextView = view.findViewById(R.id.studentNameTextView);
-            TextView studentIdTextView = view.findViewById(R.id.studentIDTextView);
-            TextView programTextView = view.findViewById(R.id.studentProgramTextView);
+            // Set the retrieved data to TextViews
+            studentNameTextView.setText("Name: " + studentName);
+            studentIdTextView.setText("ID: " + studentId);
+            studentProgramTextView.setText("Program: " + studentProgram);
+            studentContactTextView.setText("Contact No: " + studentContact);
+            studentYearTextView.setText("Year: " + studentYear);
+            studentBlockTextView.setText("Block: " + studentBlock);
 
-            // Set text to TextViews
-            studentNameTextView.setText(studentName);
-            studentIdTextView.setText(studentId);
-            programTextView.setText(studentProgram);
+            // Optionally, you can display referrerId as well, if you have a TextView for it
+            // For example:
+            // TextView referrerTextView = view.findViewById(R.id.referrerTextView);
+            // referrerTextView.setText("Referrer ID: " + referrerId);
 
-            // Set student details to TextViews
-            if (studentId != null && !studentId.isEmpty()) {
-                studentIdTextView.setText("ID: " + studentId);
-            }
-            if (studentName != null && !studentName.isEmpty()) {
-                studentNameTextView.setText("Name: " + studentName);
-            }
-            if (studentProgram != null && !studentProgram.isEmpty()) {
-                studentProgramTextView.setText("Program: " + studentProgram);
-            }
-            if (studentContact != null && !studentContact.isEmpty()) {
-                studentContactTextView.setText("Contact No: " + studentContact);
-            }
-            if (studentYear != null && !studentYear.isEmpty()) {
-                studentYearTextView.setText("Year: " + studentYear);
-            }
-            if (studentBlock != null && !studentBlock.isEmpty()) {
-                studentBlockTextView.setText("Block: " + studentBlock);
-            }
+            // Initialize violation arrays and populate the table
+            violationArray = violation != null ? violation.split("\n") : new String[0];
+            remarksArray = remarks != null ? remarks.split("\n") : new String[0];
+            dateArray = date != null ? date.split("\n") : new String[0];
 
-
-            // Safely initialize the arrays
-            if (violation != null && !violation.isEmpty()) {
-                violationArray = violation.split("\n");
-            } else {
-                violationArray = new String[0]; // Initialize to empty array if null
-            }
-
-            if (remarks != null && !remarks.isEmpty()) {
-                remarksArray = remarks.split("\n");
-            } else {
-                remarksArray = new String[0];
-            }
-
-            if (date != null && !date.isEmpty()) {
-                dateArray = date.split("\n"); // Corrected to split 'date' string
-            } else {
-                dateArray = new String[0];
-            }
-
-        // Populate the table safely
             populateViolationTable(violationArray, remarksArray, dateArray);
         }
 
-        // Handle the Add Violation button click
-        addViolationButton.setOnClickListener(v -> {
-            // Handle the action to add a new violation
-            // (You can start a new activity or open a dialog for adding a violation)
-        });
-
-        // Handle the Export as PDF button click
-        exportPdfButton.setOnClickListener(v -> {
-            // Handle PDF export functionality
-            // (You can implement PDF generation here)
-            showExportOptions();
-        });
+        // Button click listeners...
 
         return view;
     }
+
 
     // Method to show export options for PDF
     private void showExportOptions() {

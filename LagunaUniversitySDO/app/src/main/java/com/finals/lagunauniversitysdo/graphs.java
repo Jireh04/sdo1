@@ -217,7 +217,8 @@ public class graphs {
         // Set the chart description
         barChart.getDescription().setText("Number of Students with Violations per Program");
         barChart.getDescription().setTextSize(12f); // Adjust the size as needed
-        barChart.getDescription().setPosition(barChart.getWidth() * 0.5f, 20);
+        barChart.getDescription().setTextAlign(Paint.Align.CENTER);
+        barChart.getDescription().setPosition(barChart.getWidth() * 0.5f , 25);
         barChart.getDescription().setTextColor(Color.parseColor("#333333"));
 
 
@@ -313,7 +314,7 @@ public class graphs {
         lineChart.getDescription().setText("Monthly Violations by Type");
         lineChart.getDescription().setTextAlign(Paint.Align.CENTER);
         lineChart.getDescription().setTextSize(12f);
-        lineChart.getDescription().setPosition(lineChart.getWidth() * 0.5f, 20);
+        lineChart.getDescription().setPosition(lineChart.getWidth() * 0.5f, 25);
         lineChart.getDescription().setTextColor(Color.parseColor("#333333"));
 
     // Configure the legend

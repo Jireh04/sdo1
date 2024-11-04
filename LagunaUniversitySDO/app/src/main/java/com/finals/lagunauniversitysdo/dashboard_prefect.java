@@ -14,6 +14,10 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import android.content.Intent;
 import android.util.Log;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -390,18 +394,13 @@ public class dashboard_prefect extends Fragment {
         reporterIdEditText.setText(reporterId); // Populate the EditText with the fetched ID
         reporterIdEditText.setEnabled(false); // Optionally, disable editing for this field
 
-        // Create a list of violations
-        String[] violations = { "-select violation-", "Light Offense", "Serious Offense", "Major Offense" };
-
-        // Set up an ArrayAdapter to populate the Spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, violations);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        violationSpinner.setAdapter(adapter); // Set the adapter to the Spinner
+        // Fetch violation types from Firestore and set up the violation spinner
+        fetchViolationTypes(violationSpinner); // Pass the violationSpinner to the method
 
         // Build the AlertDialog using getActivity() to get the context
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(dialogView);
-        builder.setTitle("Add Violator");
+        builder.setTitle("Add Violation");
 
         // Create the dialog
         AlertDialog dialog = builder.create();
@@ -416,7 +415,7 @@ public class dashboard_prefect extends Fragment {
             String remarks = remarksEditText.getText().toString().trim();
 
             // Simple validation: check if required fields are empty
-            if (dateTime.isEmpty() || reporter.isEmpty() || reporterId.isEmpty() || location.isEmpty() || violation.equals("-select violation-") || remarks.isEmpty()) {
+            if (dateTime.isEmpty() || reporter.isEmpty() || reporterId.isEmpty() || location.isEmpty() || violation.equals("Select a Violation") || remarks.isEmpty()) {
                 Toast.makeText(getContext(), "Please fill in all required fields.", Toast.LENGTH_SHORT).show();
             } else {
                 // Prepare the data to be saved to Firestore
@@ -462,6 +461,63 @@ public class dashboard_prefect extends Fragment {
 
         // Show the dialog
         dialog.show();
+    }
+
+    // Method to fetch violation types from Firestore and populate the spinner
+    private void fetchViolationTypes(Spinner violationSpinner) {
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        CollectionReference violationTypesRef = firestore.collection("violation_type");
+
+        violationTypesRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                List<String> violationDisplayList = new ArrayList<>();
+                violationDisplayList.add("Select a Violation"); // Add a prompt as the first entry
+
+                Map<String, List<String>> violationMap = new HashMap<>(); // Map to group types under each violation
+
+                // Fetch violations and types from Firestore
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    String violationName = document.getString("violation");
+                    String type = document.getString("type");
+
+                    if (violationName != null && type != null) {
+                        // Add violation name to map if not already present
+                        if (!violationMap.containsKey(violationName)) {
+                            violationMap.put(violationName, new ArrayList<>());
+                            violationDisplayList.add(violationName); // Add violation as a header
+                        }
+                        // Add type under the violation name
+                        violationMap.get(violationName).add(type);
+                    }
+                }
+
+                // Populate the display list with violations and types
+                for (Map.Entry<String, List<String>> entry : violationMap.entrySet()) {
+                    String violationName = entry.getKey();
+                    List<String> types = entry.getValue();
+
+                    violationDisplayList.add(violationName); // Add violation (non-clickable)
+                    for (String type : types) {
+                        violationDisplayList.add(" " + type); // Indent types for clarity
+                    }
+                }
+
+                // Set up the spinner with the structured list and custom adapter
+                CheckboxSpinnerAdapter adapter = new CheckboxSpinnerAdapter(getContext(), violationDisplayList);
+                violationSpinner.setAdapter(adapter);
+            } else {
+                Log.w("FormActivity", "Error getting violation types.", task.getException());
+                Toast.makeText(getContext(), "Failed to load violation types", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    // Updated setupSpinner method
+    private void setupSpinner(Spinner spinner, List<String> items) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, items);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
     }
 
 

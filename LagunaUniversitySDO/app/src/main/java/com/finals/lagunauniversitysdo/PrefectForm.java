@@ -14,14 +14,19 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Arrays;
 import java.util.HashSet; // For HashSet implementation
+import java.util.List;
 import java.util.Set; // For Set interface
 import java.util.Date; // Import Date class
 
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -251,18 +256,59 @@ public class PrefectForm extends AppCompatActivity {
 
     // Set up spinner options
     private void setupSpinners() {
+        // Set up the term spinner with hardcoded values
         String[] terms = {"First Sem", "Second Sem", "Summer"};
-        String[] violations = {"Light Offense", "Serious Offense", "Major Offense"};
+        setupSpinner(termSpinner, Arrays.asList(terms)); // Convert String[] to List<String>
 
-        setupSpinner(termSpinner, terms);
-        setupSpinner(violationSpinner, violations);
+        // Fetch violation types from Firestore and set up the violation spinner
+        fetchViolationTypes();
     }
 
-    // Helper method to set up a spinner
-    private void setupSpinner(Spinner spinner, String[] items) {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, items);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    // Method to fetch violation types from Firestore
+    private void fetchViolationTypes() {
+        CollectionReference violationTypesRef = firestore.collection("violation_type");
+        violationTypesRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Map<String, List<String>> violationMap = new HashMap<>();
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    String violationName = document.getString("violation");
+                    String type = document.getString("type");
+                    if (violationName != null && type != null) {
+                        if (!violationMap.containsKey(violationName)) {
+                            violationMap.put(violationName, new ArrayList<>());
+                        }
+                        violationMap.get(violationName).add(type);
+                    }
+                }
+
+                // Prepare the list for the spinner
+                List<String> violationDisplayList = new ArrayList<>();
+                violationDisplayList.add("Select a Violation"); // Add a prompt as the first entry
+                for (Map.Entry<String, List<String>> entry : violationMap.entrySet()) {
+                    String violationName = entry.getKey();
+                    List<String> types = entry.getValue();
+
+                    // Add the violation name to the display list
+                    violationDisplayList.add(violationName);
+
+                    // Add each type underneath the violation name
+                    for (String type : types) {
+                        violationDisplayList.add(" " + type); // Indent types for better visibility
+                    }
+                }
+
+                // Set up the spinner with the combined list
+                setupSpinner(violationSpinner, violationDisplayList);
+            } else {
+                Log.w("FormActivity", "Error getting violation types.", task.getException());
+                Toast.makeText(this, "Failed to load violation types", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // Updated setupSpinner method
+    private void setupSpinner(Spinner spinner, List<String> items) {
+        CheckboxSpinnerAdapter adapter = new CheckboxSpinnerAdapter(this, items);
         spinner.setAdapter(adapter);
     }
 
