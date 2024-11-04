@@ -2,6 +2,7 @@ package com.finals.lagunauniversitysdo;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -159,7 +160,7 @@ public class SettingsFragment extends Fragment {
         // Create an Edit button
         Button editButton = new Button(getContext());
         editButton.setText("Edit");
-        editButton.setBackgroundTintList(getResources().getColorStateList(R.color.yellow)); // Use setBackgroundTintList for API level >= 21
+        editButton.setBackgroundTintList(getResources().getColorStateList(R.color.light_yellow)); // Use setBackgroundTintList for API level >= 21
         editButton.setTextColor(getResources().getColor(android.R.color.black));
 
         // Add views to the row
@@ -170,9 +171,106 @@ public class SettingsFragment extends Fragment {
         // Add the new row to the TableLayout
         violationsTable.addView(newRow);
 
+        // Set the click listener for the edit button
+        editButton.setOnClickListener(v -> showEditViolationDialog(violationTextView.getText().toString(), offenseTypeTextView.getText().toString(), newRow));
+
         // Sort the table after adding the new row
         sortTable();
     }
+
+    private void showEditViolationDialog(String offense, String offenseType, TableRow rowToEdit) {
+        // Inflate the custom dialog layout
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_violation_prefect, null);
+
+        // Build the dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setView(dialogView);
+
+        // Initialize dialog components
+        Spinner offenseTypeSpinner = dialogView.findViewById(R.id.spinner_offense_type);
+
+        // Create a list of offense types
+        List<String> offenseTypes = new ArrayList<>();
+        offenseTypes.add("Light Offense");
+        offenseTypes.add("Major Offense");
+        offenseTypes.add("Serious Offense");
+
+        // Set the adapter for the spinner with the offense types
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item, offenseTypes);
+        offenseTypeSpinner.setAdapter(spinnerAdapter);
+        offenseTypeSpinner.setSelection(spinnerAdapter.getPosition(offenseType)); // Set the spinner to the current offense type
+
+        // Set the EditText with the existing offense text
+        EditText offenseEditText = dialogView.findViewById(R.id.edit_violation);
+        offenseEditText.setText(offense); // Populate the EditText with the current offense
+
+        Button closeButton = dialogView.findViewById(R.id.button_close);
+        Button saveButton = dialogView.findViewById(R.id.button_save);
+
+        // Create and show the dialog
+        AlertDialog dialog = builder.create();
+
+        // Set button actions
+        closeButton.setOnClickListener(v -> dialog.dismiss());
+
+        saveButton.setOnClickListener(v -> {
+            String selectedOffenseType = offenseTypeSpinner.getSelectedItem().toString();
+            String updatedOffenseText = offenseEditText.getText().toString().trim();
+
+            if (!updatedOffenseText.isEmpty()) {
+                // Check if the updated offense already exists in the table before saving
+                if (!violationExistsInTable(updatedOffenseText, selectedOffenseType)) {
+                    // Update the row in the table
+                    TextView offenseTextView = (TextView) rowToEdit.getChildAt(0);
+                    TextView typeTextView = (TextView) rowToEdit.getChildAt(1);
+
+                    offenseTextView.setText(updatedOffenseText); // Update the offense text
+                    typeTextView.setText(selectedOffenseType); // Update the offense type
+
+                    // Save the updated offense to Firestore
+                    updateViolationInFirestore(offense, offenseType, updatedOffenseText, selectedOffenseType); // Use a method to update in Firestore
+                    Toast.makeText(getContext(), "Offense updated: " + updatedOffenseText, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), "Offense already exists.", Toast.LENGTH_SHORT).show();
+                }
+                dialog.dismiss();
+            } else {
+                Toast.makeText(getContext(), "Please enter an offense.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        dialog.show();
+    }
+
+
+    private void updateViolationInFirestore(String oldViolation, String oldOffenseType, String newViolation, String newOffenseType) {
+        // Reference to the Firestore collection
+        CollectionReference violationTypesRef = db.collection("violation_type");
+
+        // Find the document based on old values
+        violationTypesRef.whereEqualTo("violation", oldOffenseType) // Check by old violation
+                .whereEqualTo("type", oldViolation) // Check by old offense type
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            // Update the document with the new values
+                            violationTypesRef.document(document.getId()).update(
+                                            "violation", newOffenseType,
+                                            "type", newViolation
+                                    ).addOnSuccessListener(aVoid -> {
+                                        Log.d("SettingsFragment", "Violation updated successfully");
+                                        Toast.makeText(getContext(), "Violation updated successfully!", Toast.LENGTH_SHORT).show();
+                                    })
+                                    .addOnFailureListener(e -> Log.e("SettingsFragment", "Error updating violation: ", e));
+                        }
+                    } else {
+                        Toast.makeText(getContext(), "Violation not found.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
 
     private void sortTable() {
         List<TableRow> rows = new ArrayList<>();
@@ -216,12 +314,14 @@ public class SettingsFragment extends Fragment {
         typeHeader.setText("TYPE");
         typeHeader.setTextSize(16);
         typeHeader.setTypeface(null, Typeface.BOLD);
+        typeHeader.setGravity(Gravity.CENTER);
         typeHeader.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1));
 
         TextView actionHeader = new TextView(getContext());
         actionHeader.setText("ACTION");
         actionHeader.setTextSize(16);
         actionHeader.setTypeface(null, Typeface.BOLD);
+        actionHeader.setGravity(Gravity.CENTER);
         actionHeader.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1));
 
         headerRow.addView(violationHeader);

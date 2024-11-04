@@ -18,10 +18,11 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import android.widget.AdapterView;
 
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
-
+import android.view.MotionEvent;
 import android.view.Gravity;
 import android.widget.Toast;
 import android.app.AlertDialog;
@@ -35,6 +36,8 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 
 
 public class dashboard_prefect extends Fragment {
@@ -115,116 +118,109 @@ public class dashboard_prefect extends Fragment {
             // Reference to the Firestore "students" collection
             CollectionReference studentsRef = db.collection("students");
 
-            // Fetch students from Firestore
-            studentsRef.orderBy("student_id")  // Ensure there's a field to order by
-                    .startAfter(lastVisibleStudentId)  // Start after the last visible student ID
-                    .limit(pageSize)  // Limit to the number of results per page
-                    .get()
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            QuerySnapshot querySnapshot = task.getResult();
-                            totalPages = (int) Math.ceil((double) querySnapshot.size() / pageSize);
-                            updatePaginationButtons(); // Update button visibility
-                            boolean foundResults = false;
+            // Fetch students from Firestore without limiting the number of results
+            studentsRef.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    QuerySnapshot querySnapshot = task.getResult();
+                    boolean foundResults = false;
 
-                            if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                                // Iterate through the documents
-                                boolean isFirstItem = true; // Flag to track the first item
-                                lastVisibleStudentId = null; // Reset for new search
+                    if (querySnapshot != null && !querySnapshot.isEmpty()) {
+                        // Iterate through the documents
+                        for (QueryDocumentSnapshot document : querySnapshot) {
+                            String name = document.getString("name");
+                            String studentId = document.getString("student_id");
+                            String program = document.getString("program");
+                            String year = document.getString("year");
+                            String block = document.getString("block");
+                            String remarks = document.getString("remarks");
+                            String contact = document.getString("student_contact");
 
-                                for (QueryDocumentSnapshot document : querySnapshot) {
-                                    String name = document.getString("name");
-                                    String studentId = document.getString("student_id");
-                                    String program = document.getString("program");
-                                    String year = document.getString("year");
-                                    String block = document.getString("block");
-                                    String remarks = document.getString("remarks");
-                                    String contact = document.getString("student_contact");
+                            // Check if the name or student ID contains the search query (case-insensitive)
+                            if ((name != null && name.toLowerCase().contains(queryText)) ||
+                                    (studentId != null && studentId.toLowerCase().contains(queryText))) {
+                                foundResults = true;
 
-                                    // Check if the name or student ID contains the search query (case-insensitive)
-                                    if ((name != null && name.toLowerCase().contains(queryText)) ||
-                                            (studentId != null && studentId.toLowerCase().contains(queryText))) {
-                                        foundResults = true;
+                                RelativeLayout userLayout = new RelativeLayout(getActivity());
+                                userLayout.setPadding(10, 10, 10, 10);
 
-                                        RelativeLayout userLayout = new RelativeLayout(getActivity());
-                                        userLayout.setPadding(10, 10, 10, 10);
+                                // Create the TextView for displaying student info
+                                TextView studentTextView = new TextView(getActivity());
+                                studentTextView.setText(studentId + " | " + name + " | " + program);
+                                studentTextView.setTextSize(name.length() > 18 ? 14 : 16); // Adjust text size if the name is long
+                                studentTextView.setEllipsize(TextUtils.TruncateAt.END); // Truncate with "..." if text is too long
+                                studentTextView.setSingleLine(true); // Keep text on a single line
+                                studentTextView.setId(View.generateViewId());
 
-                                        // Create the TextView for displaying student info
-                                        TextView studentTextView = new TextView(getActivity());
-                                        studentTextView.setText(studentId + " | " + name + " | " + program);
-                                        studentTextView.setTextSize(name.length() > 18 ? 14 : 16); // Adjust text size if the name is long
-                                        studentTextView.setEllipsize(TextUtils.TruncateAt.END); // Truncate with "..." if text is too long
-                                        studentTextView.setSingleLine(true); // Keep text on a single line
-                                        studentTextView.setId(View.generateViewId());
+                                RelativeLayout.LayoutParams userInfoParams = new RelativeLayout.LayoutParams(
+                                        RelativeLayout.LayoutParams.WRAP_CONTENT,
+                                        RelativeLayout.LayoutParams.WRAP_CONTENT
+                                );
+                                userInfoParams.addRule(RelativeLayout.ALIGN_PARENT_START);
+                                userInfoParams.addRule(RelativeLayout.CENTER_VERTICAL);
+                                studentTextView.setLayoutParams(userInfoParams);
 
-                                        RelativeLayout.LayoutParams userInfoParams = new RelativeLayout.LayoutParams(
-                                                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                                                RelativeLayout.LayoutParams.WRAP_CONTENT
-                                        );
-                                        userInfoParams.addRule(RelativeLayout.ALIGN_PARENT_START);
-                                        userInfoParams.addRule(RelativeLayout.CENTER_VERTICAL);
-                                        studentTextView.setLayoutParams(userInfoParams);
+                                // Create the Button for action
+                                Button addButton = new Button(getActivity());
+                                addButton.setText("+");
+                                addButton.setBackgroundResource(R.drawable.round_button);
+                                addButton.setTextColor(Color.WHITE);
+                                addButton.setAllCaps(false);
+                                addButton.setTextSize(24);
+                                addButton.setPadding(20, 13, 20, 13);
+                                addButton.setId(View.generateViewId());
 
-                                        // Create the Button for action
-                                        Button addButton = new Button(getActivity());
-                                        addButton.setText("+");
-                                        addButton.setBackgroundResource(R.drawable.round_button);
-                                        addButton.setTextColor(Color.WHITE);
-                                        addButton.setAllCaps(false);
-                                        addButton.setTextSize(24);
-                                        addButton.setPadding(20, 13, 20, 13);
-                                        addButton.setId(View.generateViewId());
+                                RelativeLayout.LayoutParams buttonLayoutParams = new RelativeLayout.LayoutParams(
+                                        140,
+                                        140
+                                );
+                                buttonLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_END);
+                                buttonLayoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
+                                buttonLayoutParams.setMargins(0, 0, 35, 0); // Add right margin for spacing
+                                addButton.setLayoutParams(buttonLayoutParams);
 
-                                        RelativeLayout.LayoutParams buttonLayoutParams = new RelativeLayout.LayoutParams(
-                                                140,
-                                                140
-                                        );
-                                        buttonLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_END);
-                                        buttonLayoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
-                                        buttonLayoutParams.setMargins(0, 0, 35, 0); // Add right margin for spacing
-                                        addButton.setLayoutParams(buttonLayoutParams);
+                                // Make the TextView clickable
+                                studentTextView.setOnClickListener(v -> {
+                                    // Fetch violations for the selected student
+                                    fetchViolations(studentId, name, program, year, block, remarks, contact); // Use studentId here
+                                });
 
-                                        // Make the TextView clickable
-                                        studentTextView.setOnClickListener(v -> {
-                                            // Fetch violations for the selected student
-                                            fetchViolations(studentId, name, program, year, block, remarks, contact); // Use studentId here
-                                        });
+                                // Set the onClickListener for the button
+                                addButton.setOnClickListener(v -> {
+                                    // Show the Add Violator dialog when the button is clicked
+                                    showAddViolatorDialog(studentId, name);
+                                });
 
-                                        // Set the onClickListener for the button
-                                        addButton.setOnClickListener(v -> {
-                                            // Show the Add Violator dialog when the button is clicked
-                                            showAddViolatorDialog(studentId, name);
-                                        });
+                                // Add the TextView and Button to the LinearLayout
+                                userLayout.addView(studentTextView);
+                                userLayout.addView(addButton);
 
-                                        // Add the TextView and Button to the LinearLayout
-                                        userLayout.addView(studentTextView);
-                                        userLayout.addView(addButton);
-
-                                        // Add the studentLayout to the searchResultsContainer
-                                        searchResultsContainer.addView(userLayout);
-
-                                        // Store the last visible student ID for pagination
-                                        lastVisibleStudentId = document.getString("student_id");
-                                    }
-                                }
-
-                                // Check for pagination
-                                totalPages = (int) Math.ceil((double) querySnapshot.size() / pageSize);
-                            } else {
-                                // If no students matched, show a "No students found" message
-                                TextView noResultsTextView = new TextView(getContext());
-                                noResultsTextView.setText("No students found matching '" + queryText + "'");
-                                noResultsTextView.setPadding(0, 180, 0, 0); // Add top padding
-                                searchResultsContainer.addView(noResultsTextView);
+                                // Add the studentLayout to the searchResultsContainer
+                                searchResultsContainer.addView(userLayout);
                             }
-                        } else {
-                            // Handle the error if the query fails
-                            TextView errorTextView = new TextView(getContext());
-                            errorTextView.setText("Error: " + task.getException().getMessage());
-                            errorTextView.setPadding(0, 180, 0, 0); // Add top padding
-                            searchResultsContainer.addView(errorTextView);
                         }
-                    });
+
+                        // If no results are found, show a message
+                        if (!foundResults) {
+                            TextView noResultsTextView = new TextView(getContext());
+                            noResultsTextView.setText("No students found matching '" + queryText + "'");
+                            noResultsTextView.setPadding(0, 180, 0, 0); // Add top padding
+                            searchResultsContainer.addView(noResultsTextView);
+                        }
+                    } else {
+                        // If no students matched, show a "No students found" message
+                        TextView noResultsTextView = new TextView(getContext());
+                        noResultsTextView.setText("No students found matching '" + queryText + "'");
+                        noResultsTextView.setPadding(0, 180, 0, 0); // Add top padding
+                        searchResultsContainer.addView(noResultsTextView);
+                    }
+                } else {
+                    // Handle the error if the query fails
+                    TextView errorTextView = new TextView(getContext());
+                    errorTextView.setText("Error: " + task.getException().getMessage());
+                    errorTextView.setPadding(0, 180, 0, 0); // Add top padding
+                    searchResultsContainer.addView(errorTextView);
+                }
+            });
         } else {
             // If the search query is empty, show a message and clear previous results
             TextView emptySearchTextView = new TextView(getContext());
@@ -233,6 +229,7 @@ public class dashboard_prefect extends Fragment {
             searchResultsContainer.addView(emptySearchTextView);
         }
     }
+
     // Add this method to manage button visibility and listeners
     private void updatePaginationButtons() {
         if (currentPage > 1) {
@@ -414,8 +411,10 @@ public class dashboard_prefect extends Fragment {
             String violation = violationSpinner.getSelectedItem().toString();
             String remarks = remarksEditText.getText().toString().trim();
 
-            // Simple validation: check if required fields are empty
-            if (dateTime.isEmpty() || reporter.isEmpty() || reporterId.isEmpty() || location.isEmpty() || violation.equals("Select a Violation") || remarks.isEmpty()) {
+            // Validate input fields for special characters or excessive whitespace
+            if (!isValidInput(reporter) || !isValidInput(location) || !isValidInput(remarks)) {
+                Toast.makeText(getContext(), "Fields must contain meaningful text and cannot be only special characters or whitespace.", Toast.LENGTH_SHORT).show();
+            } else if (dateTime.isEmpty() || reporter.isEmpty() || reporterId.isEmpty() || location.isEmpty() || violation.equals("Select a Violation") || remarks.isEmpty()) {
                 Toast.makeText(getContext(), "Please fill in all required fields.", Toast.LENGTH_SHORT).show();
             } else {
                 // Prepare the data to be saved to Firestore
@@ -463,48 +462,75 @@ public class dashboard_prefect extends Fragment {
         dialog.show();
     }
 
-    // Method to fetch violation types from Firestore and populate the spinner
+    // Method to validate input fields for meaningful text and no special characters/whitespace only
+    private boolean isValidInput(String input) {
+        return input != null && input.matches(".*[a-zA-Z0-9].*");
+    }
     private void fetchViolationTypes(Spinner violationSpinner) {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         CollectionReference violationTypesRef = firestore.collection("violation_type");
 
         violationTypesRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
+                Map<String, List<String>> violationMap = new HashMap<>();
                 List<String> violationDisplayList = new ArrayList<>();
-                violationDisplayList.add("Select a Violation"); // Add a prompt as the first entry
-
-                Map<String, List<String>> violationMap = new HashMap<>(); // Map to group types under each violation
+                violationDisplayList.add("Select a Violation"); // Initial prompt
 
                 // Fetch violations and types from Firestore
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     String violationName = document.getString("violation");
                     String type = document.getString("type");
 
+                    Log.d("FirestoreData", "Retrieved data: " + document.getId() + " => " + document.getData());
+
                     if (violationName != null && type != null) {
-                        // Add violation name to map if not already present
-                        if (!violationMap.containsKey(violationName)) {
-                            violationMap.put(violationName, new ArrayList<>());
-                            violationDisplayList.add(violationName); // Add violation as a header
-                        }
-                        // Add type under the violation name
-                        violationMap.get(violationName).add(type);
+                        // Group types by violation name
+                        violationMap.computeIfAbsent(violationName, k -> new ArrayList<>()).add(type);
                     }
                 }
 
-                // Populate the display list with violations and types
+                // Populate the display list with violations and their types
                 for (Map.Entry<String, List<String>> entry : violationMap.entrySet()) {
                     String violationName = entry.getKey();
                     List<String> types = entry.getValue();
 
-                    violationDisplayList.add(violationName); // Add violation (non-clickable)
+                    // Add the violation name
+                    violationDisplayList.add(violationName);
+                    // Add each type below the violation name
                     for (String type : types) {
-                        violationDisplayList.add(" " + type); // Indent types for clarity
+                        violationDisplayList.add(" " + type); // Indent types for better visibility
                     }
                 }
 
-                // Set up the spinner with the structured list and custom adapter
+                Log.d("ViolationDisplayList", "Display List: " + violationDisplayList.toString());
+
+                // Create the adapter directly in this method
                 CheckboxSpinnerAdapter adapter = new CheckboxSpinnerAdapter(getContext(), violationDisplayList);
                 violationSpinner.setAdapter(adapter);
+
+                violationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        // Get the selected item text
+                        String selectedText = violationDisplayList.get(position);
+                        // Update the spinner prompt to show the selected item
+                        violationSpinner.setPrompt(selectedText);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                        // Handle case when no item is selected if needed
+                    }
+                });
+
+                // Show the dropdown when the spinner is clicked
+                violationSpinner.setOnTouchListener((v, event) -> {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        violationSpinner.performClick();
+                        return true;
+                    }
+                    return false;
+                });
             } else {
                 Log.w("FormActivity", "Error getting violation types.", task.getException());
                 Toast.makeText(getContext(), "Failed to load violation types", Toast.LENGTH_SHORT).show();
@@ -513,12 +539,9 @@ public class dashboard_prefect extends Fragment {
     }
 
 
-    // Updated setupSpinner method
-    private void setupSpinner(Spinner spinner, List<String> items) {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, items);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-    }
+
+
+
 
 
     private void openReferralDashboard() {

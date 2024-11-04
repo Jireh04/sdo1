@@ -1,0 +1,6 @@
+<!-- res/drawable/glass_input_background.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#80FFFFFF" /> <!-- White with 50% transparency -->
+    <corners android:radius="8dp" />    <!-- Rounded corners for a smoother look -->
+    <padding android:left="8dp" android:right="8dp" android:top="8dp" android:bottom="8dp"/>
+</shape>

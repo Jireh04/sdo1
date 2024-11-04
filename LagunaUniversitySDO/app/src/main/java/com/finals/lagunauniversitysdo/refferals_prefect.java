@@ -6,10 +6,13 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -98,8 +101,11 @@ public class refferals_prefect extends Fragment {
         ScrollView scrollViewRejected = view.findViewById(R.id.scroll_view_rejected);
 
         // Define the colors
-        int colorBlack = getResources().getColor(R.color.black);  // Assuming you have a green color in colors.xml
-        int colorWhite = getResources().getColor(R.color.white); // Assuming you have a gray color in colors.xml
+        int colorBlack = getResources().getColor(R.color.black);
+        int colorWhite = getResources().getColor(R.color.white);
+
+        // Clear any default tab selection
+        tabLayout.clearOnTabSelectedListeners();
 
         // Set tab selection listener
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -123,7 +129,9 @@ public class refferals_prefect extends Fragment {
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                tab.getCustomView().setSelected(false);
+                if (tab.getCustomView() != null) {
+                    tab.getCustomView().setSelected(false);
+                }
             }
 
             @Override
@@ -132,6 +140,7 @@ public class refferals_prefect extends Fragment {
 
         return view;
     }
+
 
 
     // Fetch pending referrals from Firestore
@@ -210,31 +219,24 @@ public class refferals_prefect extends Fragment {
         headerDivider.setBackgroundColor(Color.GRAY); // Color of the divider
         tableLayout.addView(headerDivider);
 
-        // Query both Firestore collections for "pending" status
+        // Query Firestore collections for "pending" status
         db.collection("students").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (DocumentSnapshot studentDocument : task.getResult().getDocuments()) {
-                    // Get all referral history documents
                     db.collection("students").document(studentDocument.getId())
                             .collection("student_refferal_history")
                             .get()
                             .addOnCompleteListener(subTask -> {
                                 if (subTask.isSuccessful()) {
                                     for (DocumentSnapshot referralDocument : subTask.getResult().getDocuments()) {
-                                        // Check status in the document
                                         if ("pending".equals(referralDocument.getString("status"))) {
-                                            // Get the data from Firestore (as a Map)
                                             Map<String, Object> referralData = referralDocument.getData();
                                             if (referralData != null) {
-                                                // Retrieve referrer_id and store it in referralData
-                                                String referrerId = referralDocument.getString("referrer_id");
-                                                referralData.put("referrer_id", referrerId); // Save it into referralData
-
                                                 String studentReferrer = (String) referralData.get("student_referrer");
+                                                String referralDate = (String) referralData.get("date");
+                                                String referrerId = (String) referralData.get("referrer_id");
                                                 String studentName = (String) referralData.get("student_name");
                                                 String studentId = (String) referralData.get("student_id");
-                                                String studentProgram = (String) referralData.get("student_program");
-                                                String referralDate = (String) referralData.get("date");
 
                                                 // Create a TableRow for each referral
                                                 TableRow tableRow = new TableRow(getActivity());
@@ -257,63 +259,66 @@ public class refferals_prefect extends Fragment {
                                                 dateTextView.setTextSize(14);
                                                 tableRow.addView(dateTextView);
 
-                                                // Create a LinearLayout to hold buttons (View, Accept, Reject)
-                                                LinearLayout buttonLayout = new LinearLayout(getActivity());
-                                                buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
+                                                // Create a Spinner (dropdown menu) for actions
+                                                Spinner actionsSpinner = new Spinner(getActivity());
+                                                ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
+                                                        android.R.layout.simple_spinner_item,
+                                                        new String[]{"Select Action", "View", "Accept", "Reject"});
+                                                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                                actionsSpinner.setAdapter(adapter);
 
-                                                // Create View button
-                                                Button btnView = new Button(getActivity());
-                                                btnView.setText("View");
-                                                btnView.setOnClickListener(v -> {
-                                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                                    builder.setTitle("Choose an option")
-                                                            .setMessage("Do you want to download or open the PDF?")
-                                                            .setPositiveButton("Download", (dialog, which) -> {
-                                                                downloadPdf(referralData, studentName, studentId, studentProgram, referralDate);
-                                                            })
-                                                            .setNegativeButton("Open", (dialog, which) -> {
-                                                                generatePdf(referralData, studentName, studentId, studentProgram, referralDate);
-                                                            })
-                                                            .setCancelable(true)
-                                                            .show();
+                                                // Set up listener for action selection
+                                                actionsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                                    @Override
+                                                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                                        String selectedAction = (String) parent.getItemAtPosition(position);
+                                                        switch (selectedAction) {
+                                                            case "View":
+                                                                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                                                builder.setTitle("Choose an option")
+                                                                        .setMessage("Do you want to download or open the PDF?")
+                                                                        .setPositiveButton("Download", (dialog, which) -> {
+                                                                            downloadPdf(referralData, studentReferrer, referralDate, studentId, studentName);
+                                                                        })
+                                                                        .setNegativeButton("Open", (dialog, which) -> {
+                                                                            generatePdf(referralData, studentReferrer, referralDate, studentId, studentName);
+                                                                        })
+                                                                        .setCancelable(true)
+                                                                        .show();
+                                                                break;
+                                                            case "Accept":
+                                                                new AlertDialog.Builder(getActivity())
+                                                                        .setTitle("Confirmation")
+                                                                        .setMessage("Are you sure you want to accept this referral?")
+                                                                        .setPositiveButton("Yes", (dialog, which) -> {
+                                                                            updateReferralStatusStudent(referrerId, referralDocument.getId(), "accepted");
+                                                                        })
+                                                                        .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                                                                        .show();
+                                                                break;
+                                                            case "Reject":
+                                                                new AlertDialog.Builder(getActivity())
+                                                                        .setTitle("Confirmation")
+                                                                        .setMessage("Are you sure you want to reject this referral?")
+                                                                        .setPositiveButton("Yes", (dialog, which) -> {
+                                                                            updateReferralStatusStudent(referrerId, referralDocument.getId(), "accepted");
+                                                                        })
+                                                                        .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                                                                        .show();
+                                                                break;
+                                                        }
+                                                        // Reset spinner to default after action
+                                                        actionsSpinner.setSelection(0);
+                                                    }
+
+                                                    @Override
+                                                    public void onNothingSelected(AdapterView<?> parent) {
+                                                        // No action needed
+                                                    }
                                                 });
-                                                buttonLayout.addView(btnView);
 
-                                                // Create Accept button with confirmation dialog
-                                                Button btnAccept = new Button(getActivity());
-                                                btnAccept.setText("Accept");
-                                                btnAccept.setOnClickListener(v -> {
-                                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                                    builder.setTitle("Confirmation")
-                                                            .setMessage("Are you sure you want to accept this referral?")
-                                                            .setPositiveButton("Yes", (dialog, which) -> {
-                                                                // Use referrerId for the update
-                                                                updateReferralStatusStudent(referrerId, referralDocument.getId(), "accepted");
-                                                                Log.d("FirestoreSuccess", "Student referral status updated successfully");
-                                                            })
-                                                            .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
-                                                            .show();
-                                                });
-                                                buttonLayout.addView(btnAccept);
-
-                                                // Create Reject button with confirmation dialog
-                                                Button btnReject = new Button(getActivity());
-                                                btnReject.setText("Reject");
-                                                btnReject.setOnClickListener(v -> {
-                                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                                    builder.setTitle("Confirmation")
-                                                            .setMessage("Are you sure you want to reject this referral?")
-                                                            .setPositiveButton("Yes", (dialog, which) -> {
-                                                                // Use referrerId for the update
-                                                                updateReferralStatusStudent(referrerId, referralDocument.getId(), "rejected");
-                                                            })
-                                                            .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
-                                                            .show();
-                                                });
-                                                buttonLayout.addView(btnReject);
-
-                                                // Add the button layout to the table row
-                                                tableRow.addView(buttonLayout);
+                                                // Add the Spinner to the table row
+                                                tableRow.addView(actionsSpinner);
 
                                                 // Add the table row to the table layout
                                                 tableLayout.addView(tableRow);
@@ -347,7 +352,7 @@ public class refferals_prefect extends Fragment {
                                             if (referralData != null) {
                                                 // Retrieve referrer_id and store it in referralData
                                                 String referrerId = referralDocument.getString("referrer_id");
-                                                referralData.put("referrer_id", referrerId); // Save it into referralData
+                                                referralData.put("referrer_id", referrerId);
 
                                                 String personnelReferrer = (String) referralData.get("personnel_referrer");
                                                 String personnelID = (String) referralData.get("personnel_id");
@@ -377,62 +382,73 @@ public class refferals_prefect extends Fragment {
                                                 dateTextView.setTextSize(14);
                                                 tableRow.addView(dateTextView);
 
-                                                // Create a LinearLayout to hold buttons (View, Accept, Reject)
-                                                LinearLayout buttonLayout = new LinearLayout(getActivity());
-                                                buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
+                                                // Create a Spinner for action selection
+                                                Spinner actionSpinner = new Spinner(getActivity());
+                                                ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
+                                                        android.R.layout.simple_spinner_item,
+                                                        new String[]{"Select Action", "View", "Accept", "Reject"});
+                                                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                                actionSpinner.setAdapter(adapter);
 
-                                                // Create View button
-                                                Button btnView = new Button(getActivity());
-                                                btnView.setText("View");
-                                                btnView.setOnClickListener(v -> {
-                                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                                    builder.setTitle("Choose an option")
-                                                            .setMessage("Do you want to download or open the PDF?")
-                                                            .setPositiveButton("Download", (dialog, which) -> {
-                                                                downloadPdf(referralData, studentName, studentId, studentProgram, referralDate);
-                                                            })
-                                                            .setNegativeButton("Open", (dialog, which) -> {
-                                                                generatePdf(referralData, studentName, studentId, studentProgram, referralDate);
-                                                            })
-                                                            .setCancelable(true)
-                                                            .show();
+                                                // Set up listener for the selected action
+                                                actionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                                    @Override
+                                                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                                        String selectedAction = (String) parent.getItemAtPosition(position);
+
+                                                        switch (selectedAction) {
+                                                            case "View":
+                                                                // Show dialog to choose between Download and Open
+                                                                new AlertDialog.Builder(getActivity())
+                                                                        .setTitle("Choose an option")
+                                                                        .setMessage("Do you want to download or open the PDF?")
+                                                                        .setPositiveButton("Download", (dialog, which) -> {
+                                                                            downloadPdf(referralData, studentName, studentId, studentProgram, referralDate);
+                                                                        })
+                                                                        .setNegativeButton("Open", (dialog, which) -> {
+                                                                            generatePdf(referralData, studentName, studentId, studentProgram, referralDate);
+                                                                        })
+                                                                        .setCancelable(true)
+                                                                        .show();
+                                                                break;
+
+                                                            case "Accept":
+                                                                // Confirmation dialog to accept
+                                                                new AlertDialog.Builder(getActivity())
+                                                                        .setTitle("Confirmation")
+                                                                        .setMessage("Are you sure you want to accept this referral?")
+                                                                        .setPositiveButton("Yes", (dialog, which) -> {
+                                                                            updateReferralStatusPersonnel(referrerId, referralDocument.getId(), "accepted");
+                                                                        })
+                                                                        .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                                                                        .show();
+                                                                break;
+
+                                                            case "Reject":
+                                                                // Confirmation dialog to reject
+                                                                new AlertDialog.Builder(getActivity())
+                                                                        .setTitle("Confirmation")
+                                                                        .setMessage("Are you sure you want to reject this referral?")
+                                                                        .setPositiveButton("Yes", (dialog, which) -> {
+                                                                            updateReferralStatusPersonnel(referrerId, referralDocument.getId(), "rejected");
+                                                                        })
+                                                                        .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                                                                        .show();
+                                                                break;
+                                                        }
+
+                                                        // Reset selection to "Select Action" after handling the action
+                                                        actionSpinner.setSelection(0);
+                                                    }
+
+                                                    @Override
+                                                    public void onNothingSelected(AdapterView<?> parent) {
+                                                        // Do nothing
+                                                    }
                                                 });
-                                                buttonLayout.addView(btnView);
 
-                                                // Create Accept button with confirmation dialog
-                                                Button btnAccept = new Button(getActivity());
-                                                btnAccept.setText("Accept");
-                                                btnAccept.setOnClickListener(v -> {
-                                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                                    builder.setTitle("Confirmation")
-                                                            .setMessage("Are you sure you want to accept this referral?")
-                                                            .setPositiveButton("Yes", (dialog, which) -> {
-                                                                // Use referrerId for the update
-                                                                updateReferralStatusPersonnel(referrerId, referralDocument.getId(), "accepted");
-                                                            })
-                                                            .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
-                                                            .show();
-                                                });
-                                                buttonLayout.addView(btnAccept);
-
-                                                // Create Reject button with confirmation dialog
-                                                Button btnReject = new Button(getActivity());
-                                                btnReject.setText("Reject");
-                                                btnReject.setOnClickListener(v -> {
-                                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                                    builder.setTitle("Confirmation")
-                                                            .setMessage("Are you sure you want to reject this referral?")
-                                                            .setPositiveButton("Yes", (dialog, which) -> {
-                                                                // Use referrerId for the update
-                                                                updateReferralStatusPersonnel(referrerId, referralDocument.getId(), "rejected");
-                                                            })
-                                                            .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
-                                                            .show();
-                                                });
-                                                buttonLayout.addView(btnReject);
-
-                                                // Add the button layout to the table row
-                                                tableRow.addView(buttonLayout);
+                                                // Add the spinner to the table row
+                                                tableRow.addView(actionSpinner);
 
                                                 // Add the table row to the table layout
                                                 tableLayout.addView(tableRow);
@@ -444,10 +460,8 @@ public class refferals_prefect extends Fragment {
                 }
             }
         });
+
     }
-
-
-
 
     // Define a request code for permission requests
     private static final int REQUEST_PERMISSION = 1;
@@ -956,7 +970,7 @@ public class refferals_prefect extends Fragment {
         // Create a TableRow for each rejected referral
         TableRow row = createTableRow(studentName, referralDate, status);
         tableLayout.addView(row);
-        addDivider(tableLayout); // Add a divider after each row
+
     }
 
     private TableRow createTableRow(String studentName, String referralDate, String status) {

@@ -5,31 +5,22 @@ import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.widget.ArrayAdapter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class CheckboxSpinnerAdapter extends ArrayAdapter<String> {
     private final Context context;
     private final List<String> values;
-    private final Map<Integer, Boolean> checkboxStates;
-    private Integer selectedViolationIndex = null;
 
     public CheckboxSpinnerAdapter(Context context, List<String> values) {
         super(context, R.layout.spinner_item_with_checkbox, values);
         this.context = context;
         this.values = values;
-        this.checkboxStates = new HashMap<>();
-        for (int i = 0; i < values.size(); i++) {
-            checkboxStates.put(i, false); // Initialize all checkboxes to unchecked
-        }
     }
 
     @NonNull
@@ -39,35 +30,31 @@ public class CheckboxSpinnerAdapter extends ArrayAdapter<String> {
         View rowView = inflater.inflate(R.layout.spinner_item_with_checkbox, parent, false);
 
         TextView textView = rowView.findViewById(R.id.violationText);
-        CheckBox checkBox = rowView.findViewById(R.id.violationCheckbox);
-
         textView.setText(values.get(position));
-        checkBox.setChecked(checkboxStates.get(position)); // Restore the checkbox state
 
+        // Determine if the item is a violation (header) or a type entry
         if (isViolation(position)) {
-            // Display the violation as a header without a checkbox
-            checkBox.setVisibility(View.GONE);
-            textView.setTypeface(Typeface.DEFAULT_BOLD); // Bold text for violation headers
-            textView.setOnClickListener(view -> {
-                // Set this as the selected violation index
-                selectedViolationIndex = position;
-                // Reset all checkboxes except those related to the selected violation
-                resetCheckboxStatesForSelectedViolation();
-                notifyDataSetChanged(); // Refresh the dropdown list to show/hide items
-            });
+            // Bold text for violation headers
+            textView.setTypeface(Typeface.DEFAULT_BOLD);
+            textView.setClickable(true); // Disable click for headers
+            rowView.setClickable(true); // Ensure the entire row is non-clickable for headers
         } else {
-            // Show only types related to the selected violation
-            boolean isVisible = isTypeOfSelectedViolation(position);
-            rowView.setVisibility(isVisible ? View.VISIBLE : View.GONE); // Hide types not related to selected violation
-            checkBox.setEnabled(isVisible);
+            // Regular text for type entries
+            textView.setTypeface(Typeface.DEFAULT);
 
-            // Avoid multiple listeners by clearing any existing listener first
-            checkBox.setOnCheckedChangeListener(null);
-            if (isVisible) {
-                checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    checkboxStates.put(position, isChecked); // Update checkbox state
-                });
-            }
+            // Set click listener for type entries
+            rowView.setOnClickListener(v -> {
+                // Show a toast with the selected type
+                String selectedType = values.get(position).trim(); // Trim to remove leading spaces
+                Toast.makeText(context, "Selected Type: " + selectedType, Toast.LENGTH_SHORT).show();
+
+                // Notify the listener about the selected type
+                if (context instanceof SpinnerSelectionListener) {
+                    ((SpinnerSelectionListener) context).onItemSelected(selectedType);
+                }
+            });
+            textView.setClickable(false);
+            rowView.setClickable(false); // Allow the row to be clickable for type entries
         }
 
         return rowView;
@@ -75,34 +62,28 @@ public class CheckboxSpinnerAdapter extends ArrayAdapter<String> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        return getDropDownView(position, convertView, parent); // Use the same layout for the main spinner view
+        // Use the first item view as the main spinner view
+        View rowView = LayoutInflater.from(context).inflate(R.layout.spinner_item_with_checkbox, parent, false);
+        TextView textView = rowView.findViewById(R.id.violationText);
+        textView.setText(values.get(position));
+
+        // Set the typeface based on whether it's a header or type entry
+        if (isViolation(position)) {
+            textView.setTypeface(Typeface.DEFAULT_BOLD);
+        } else {
+            textView.setTypeface(Typeface.DEFAULT);
+        }
+
+        return rowView;
     }
 
     private boolean isViolation(int position) {
-        return !values.get(position).startsWith(" "); // Assuming types are prefixed with " "
+        // Assuming violation headers are not prefixed with space
+        return !values.get(position).startsWith(" ");
     }
 
-    private boolean isTypeOfSelectedViolation(int position) {
-        // Check if the position belongs to the selected violation
-        return selectedViolationIndex != null && position > selectedViolationIndex && (isViolation(position) || position < values.size());
-    }
-
-    private void resetCheckboxStatesForSelectedViolation() {
-        // Uncheck all types, but keep the selected violation types checked if previously checked
-        for (int i = 0; i < values.size(); i++) {
-            if (!isViolation(i) && isTypeOfSelectedViolation(i)) {
-                checkboxStates.put(i, false); // Uncheck all types of other violations
-            }
-        }
-    }
-
-    public List<String> getSelectedItems() {
-        List<String> selectedItems = new ArrayList<>();
-        for (Map.Entry<Integer, Boolean> entry : checkboxStates.entrySet()) {
-            if (entry.getValue()) {
-                selectedItems.add(values.get(entry.getKey()));
-            }
-        }
-        return selectedItems;
+    // Interface for communication with the parent activity
+    public interface SpinnerSelectionListener {
+        void onItemSelected(String selectedItem);
     }
 }
