@@ -21,6 +21,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -125,9 +127,18 @@ public class Prefect_MainActivity extends AppCompatActivity implements Navigatio
 
                                                 return true;
                                             } else if (id == R.id.menu_settings) {
-                                                // Open the Settings activity when Settings is clicked
-                                                Intent intent = new Intent(Prefect_MainActivity.this, SettingsActivity.class); // Replace with your settings activity
-                                                startActivity(intent);
+                                                // Open the Settings fragment when Settings is clicked
+                                                SettingsFragment settingsFragment = new SettingsFragment(); // Create an instance of your SettingsFragment
+
+                                                // Get the FragmentManager and start a transaction
+                                                FragmentManager fragmentManager = getSupportFragmentManager();
+                                                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                                                // Replace the current fragment with the SettingsFragment
+                                                fragmentTransaction.replace(R.id.fragment_container, settingsFragment); // Replace 'fragment_container' with the ID of your container layout
+                                                fragmentTransaction.addToBackStack(null); // Optional: Add the transaction to the back stack
+                                                fragmentTransaction.commit(); // Commit the transaction
+
                                                 return true;
                                             } else {
                                                 return false;

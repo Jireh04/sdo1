@@ -184,6 +184,7 @@ public class refferals_prefect extends Fragment {
 
         TextView headerDate = new TextView(getActivity());
         headerDate.setText("Date");
+        headerDate.setGravity(Gravity.CENTER);
         headerDate.setTypeface(null, Typeface.BOLD);
         headerDate.setTextSize(16);
         headerDate.setPadding(16, 8, 16, 8);
@@ -867,8 +868,31 @@ public class refferals_prefect extends Fragment {
                 TableLayout.LayoutParams.WRAP_CONTENT));
         tableLayout.setStretchAllColumns(true);
 
-        // Add TableHeader
-        TableRow headerRow = createTableRow("Student Name", "Referral Date", "Status");
+        // Add headers for the TableLayout
+        TableRow headerRow = new TableRow(getContext());
+        headerRow.setPadding(16, 16, 16, 16);
+
+        TextView headerStudent = new TextView(getContext());
+        headerStudent.setText("Student Name");
+        headerStudent.setTextSize(18);
+        headerStudent.setTypeface(null, Typeface.BOLD);
+        headerStudent.setPadding(16, 8, 16, 8);
+
+        TextView headerDate = new TextView(getContext());
+        headerDate.setText("Referral Date");
+        headerDate.setTextSize(18);
+        headerDate.setTypeface(null, Typeface.BOLD);
+        headerDate.setPadding(14, 8, 12, 8);
+
+        TextView headerStatus = new TextView(getContext());
+        headerStatus.setText("Status");
+        headerStatus.setTextSize(18);
+        headerStatus.setTypeface(null, Typeface.BOLD);
+        headerStatus.setPadding(12, 8, 16, 8);
+
+        headerRow.addView(headerStudent);
+        headerRow.addView(headerDate);
+        headerRow.addView(headerStatus);
         tableLayout.addView(headerRow);
 
         // Add a divider after the header row
@@ -883,6 +907,7 @@ public class refferals_prefect extends Fragment {
         // Add the HorizontalScrollView to the LinearLayout for rejected referrals
         linearLayoutRejected.addView(horizontalScrollView);
     }
+
 
     private void fetchRejectedReferrals(TableLayout tableLayout) {
         // Fetch rejected referrals for students
