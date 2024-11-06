@@ -14,83 +14,86 @@
     <androidx.cardview.widget.CardView
     android:layout_width="300dp"
     android:layout_height="wrap_content"
-    app:cardElevation="16dp"
     app:cardCornerRadius="16dp"
-    app:cardBackgroundColor="#80FFFFFF"
+    app:cardBackgroundColor="#E6FFFFFF"
     app:layout_constraintTop_toTopOf="parent"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintEnd_toEndOf="parent">
 
-<LinearLayout
-android:layout_width="match_parent"
-android:layout_height="wrap_content"
-android:orientation="vertical"
-android:padding="24dp">
+    <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
 
-<!-- Close Button -->
-<ImageButton
-    android:id="@+id/close_button"
-    android:layout_width="24dp"
-    android:layout_height="24dp"
-    android:layout_marginBottom="15dp"
-    android:layout_gravity="end"
-    android:background="@android:color/transparent"
-    android:src="@drawable/baseline_close_24"/>
 
-<!-- Title with frosted glass effect -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:background="@color/light_blue"
-        android:padding="8dp"
-        android:text="Personnel Login"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="26sp" />
+    <!-- Close Button -->
+        <ImageButton
+            android:id="@+id/close_button"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="-5dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/baseline_close_24"
+            app:tint="@color/black" />
 
-    <!-- Username EditText with glass effect -->
-    <EditText
-        android:id="@+id/login_username"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/glass_input_background"
-        android:drawableLeft="@drawable/baseline_person_pin_24"
-        android:drawablePadding="10dp"
-        android:hint="Username"
-        android:padding="12dp"
-        android:textColor="@color/black"
-        android:textColorHint="@color/light_grey"/>
+    <!-- Title Text -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="PERSONNEL"
+            android:textSize="24sp"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:fontFamily="sans-serif-medium"
+            android:background="@drawable/header_personnel"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"/>
 
-    <!-- Password EditText with glass effect -->
-    <EditText
-        android:id="@+id/login_password"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/glass_input_background"
-        android:drawableLeft="@drawable/baseline_lock_24"
-        android:drawablePadding="10dp"
-        android:hint="Password"
-        android:inputType="textPassword"
-        android:padding="12dp"
-        android:textColor="@color/black"
-        android:textColorHint="@color/light_grey"/>
+        <!-- Username EditText with rounded corners -->
+        <EditText
+            android:id="@+id/login_username"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/rounded_edittext_background"
+            android:drawableLeft="@drawable/baseline_person_pin_24"
+            android:drawablePadding="10dp"
+            android:hint="Username"
+            android:padding="12dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/light_grey"/>
 
-    <!-- Login Button -->
-    <Button
-        android:id="@+id/login_button"
-        android:layout_width="260dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="24dp"
-        android:backgroundTint="@color/light_blue"
-        android:layout_gravity="center"
-        android:text="Login"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        app:cornerRadius="20dp"/>
+        <!-- Password EditText with rounded corners -->
+        <EditText
+            android:id="@+id/login_password"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/rounded_edittext_background"
+            android:drawableLeft="@drawable/baseline_lock_24"
+            android:drawablePadding="10dp"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:padding="12dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/light_grey"/>
+
+        <!-- Login Button with rounded corners -->
+        <Button
+            android:id="@+id/login_button"
+            android:layout_width="260dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="#5874DC"
+            android:layout_gravity="center"
+            android:text="Login"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            app:cornerRadius="25dp"/>
     </LinearLayout>
 
         </androidx.cardview.widget.CardView>

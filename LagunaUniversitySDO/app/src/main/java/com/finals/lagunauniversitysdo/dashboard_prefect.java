@@ -546,7 +546,7 @@ public class dashboard_prefect extends Fragment {
 
     private void openReferralDashboard() {
         // Create a new instance of the PrefectReferralDashboardFragment
-        PrefectReferralDashboard referralDashboardFragment = new PrefectReferralDashboard();
+        dashboard_prefect referralDashboardFragment = new dashboard_prefect();
 
         // Use FragmentTransaction to replace the current fragment with the referral dashboard fragment
         getActivity().getSupportFragmentManager().beginTransaction()
