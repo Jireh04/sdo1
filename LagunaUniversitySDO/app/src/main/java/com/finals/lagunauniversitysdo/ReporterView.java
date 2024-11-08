@@ -22,6 +22,10 @@ import android.widget.Toast;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -66,7 +70,6 @@ public class ReporterView extends Fragment {
         return fragment;
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,10 +98,6 @@ public class ReporterView extends Fragment {
             String studentContact = arguments.getString("STUDENT_CONTACT");
             String studentYear = arguments.getString("STUDENT_YEAR");
             String studentBlock = arguments.getString("BLOCK");
-            String violation = arguments.getString("VIOLATION");
-            String referrerId = arguments.getString("REFERRER_ID"); // Retrieve referrer_id
-            String remarks = arguments.getString("REMARKS");
-            String date = arguments.getString("DATE");
 
             // Set the retrieved data to TextViews
             studentNameTextView.setText("Name: " + studentName);
@@ -108,23 +107,13 @@ public class ReporterView extends Fragment {
             studentYearTextView.setText("Year: " + studentYear);
             studentBlockTextView.setText("Block: " + studentBlock);
 
-            // Optionally, you can display referrerId as well, if you have a TextView for it
-            // For example:
-            // TextView referrerTextView = view.findViewById(R.id.referrerTextView);
-            // referrerTextView.setText("Referrer ID: " + referrerId);
-
-            // Initialize violation arrays and populate the table
-            violationArray = violation != null ? violation.split("\n") : new String[0];
-            remarksArray = remarks != null ? remarks.split("\n") : new String[0];
-            dateArray = date != null ? date.split("\n") : new String[0];
-
-            populateViolationTable(violationArray, remarksArray, dateArray);
+            // Call method to populate the violation table
+            populateViolationTableFromFirestore(studentId);
         }
-
-        // Button click listeners...
 
         return view;
     }
+
 
 
     // Method to show export options for PDF
@@ -333,39 +322,52 @@ public class ReporterView extends Fragment {
     }
 
     // Method to populate the TableLayout with violation data
-    private void populateViolationTable(String[] violationArray, String[] remarksArray, String[] dateArray) {
+    private void populateViolationTableFromFirestore(String studentId) {
+        // Get a reference to the Firestore collection
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference violationsRef = db.collection("students")
+                .document(studentId)
+                .collection("accepted_status");
 
-        if (violationArray.length == 0 || remarksArray.length == 0 || dateArray.length == 0) {
-            Toast.makeText(getContext(), "No violations to display", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        violationsRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
 
-        for (int i = 0; i < violationArray.length; i++) {
-            TableRow row = new TableRow(getContext());
+                // Loop through the query results and add each violation to the table
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    String violationDesc = document.getString("violation"); // assuming "violation" field in subcollection
+                    String remarks = document.getString("remarks"); // assuming "remarks" field
+                    String date = document.getString("date"); // assuming "date" field
 
-            TextView numberTextView = new TextView(getContext());
-            numberTextView.setText(String.valueOf(i + 1));
-            numberTextView.setPadding(8, 8, 8, 8);
+                    // Create a new row for each violation
+                    TableRow row = new TableRow(getContext());
+                    row.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT));
 
-            TextView violationTextView = new TextView(getContext());
-            violationTextView.setText(violationArray[i]);
-            violationTextView.setPadding(8, 8, 8, 8);
+                    // Create TextViews for violation number, description, and remarks
+                    TextView violationTextView = new TextView(getContext());
+                    violationTextView.setText(violationDesc != null ? violationDesc : "N/A");
+                    violationTextView.setPadding(16, 16, 16, 16);
 
-            TextView remarksTextView = new TextView(getContext());
-            remarksTextView.setText(remarksArray[i]);
-            remarksTextView.setPadding(8, 8, 8, 8);
+                    TextView remarksTextView = new TextView(getContext());
+                    remarksTextView.setText(remarks != null ? remarks : "N/A");
+                    remarksTextView.setPadding(16, 16, 16, 16);
 
-            TextView dateTextView = new TextView(getContext());
-            dateTextView.setText(dateArray[i]);
-            dateTextView.setPadding(8, 8, 8, 8);
+                    TextView dateTextView = new TextView(getContext());
+                    dateTextView.setText(date != null ? date : "N/A");
+                    dateTextView.setPadding(16, 16, 16, 16);
 
-            row.addView(numberTextView);
-            row.addView(violationTextView);
-            row.addView(remarksTextView);
-            row.addView(dateTextView);
+                    // Add the TextViews to the row
+                    row.addView(violationTextView);
+                    row.addView(remarksTextView);
+                    row.addView(dateTextView);
 
-            violationTable.addView(row);
-        }
+                    // Add the row to the table
+                    violationTable.addView(row);
+                }
+            } else {
+                Toast.makeText(getContext(), "Error getting violations: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 }
+

@@ -22,6 +22,7 @@ import android.net.Uri;
 import androidx.core.content.FileProvider;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import java.util.HashMap;
 
 import android.widget.Toast;
 import android.widget.ImageView;
@@ -94,15 +95,6 @@ public class refferals_prefect extends Fragment {
                 tab.setCustomView(customTab);
             }
         }
-
-        // Initialize the referral views
-        ScrollView scrollViewPending = view.findViewById(R.id.scroll_view_pending);
-        ScrollView scrollViewAccepted = view.findViewById(R.id.scroll_view_accepted);
-        ScrollView scrollViewRejected = view.findViewById(R.id.scroll_view_rejected);
-
-        // Define the colors
-        int colorBlack = getResources().getColor(R.color.black);
-        int colorWhite = getResources().getColor(R.color.white);
 
         // Clear any default tab selection
         tabLayout.clearOnTabSelectedListeners();
@@ -291,11 +283,39 @@ public class refferals_prefect extends Fragment {
                                                                         .setTitle("Confirmation")
                                                                         .setMessage("Are you sure you want to accept this referral?")
                                                                         .setPositiveButton("Yes", (dialog, which) -> {
+                                                                            // Update status in the student's referral document
                                                                             updateReferralStatusStudent(referrerId, referralDocument.getId(), "accepted");
+
+                                                                            // Create a map to hold all referral details
+                                                                            Map<String, Object> acceptedData = new HashMap<>();
+                                                                            acceptedData.put("date", referralData.get("date")); // Example: "2024-11-02 13:12"
+                                                                            acceptedData.put("referrer_id", referralData.get("referrer_id")); // Example: "221-2424"
+                                                                            acceptedData.put("remarks", referralData.get("remarks")); // Example: "jaii"
+                                                                            acceptedData.put("status", "accepted"); // Update status to "accepted"
+                                                                            acceptedData.put("student_id", referralData.get("student_id")); // Example: "221-0896"
+                                                                            acceptedData.put("student_name", referralData.get("student_name")); // Example: "RANIELLE ANTHONY JARAPLASAN LUISTRO"
+                                                                            acceptedData.put("student_program", referralData.get("student_program")); // Example: "BSIT-SD"
+                                                                            acceptedData.put("student_referrer", referralData.get("student_referrer")); // Example: "ABANTO KATHLEEN LIZETH DORIA"
+                                                                            acceptedData.put("term", referralData.get("term")); // Example: "First Sem"
+                                                                            acceptedData.put("user_concern", referralData.get("user_concern")); // Example: "Discipline Concerns"
+                                                                            acceptedData.put("violation", referralData.get("violation")); // Example: "Major Offense"
+
+                                                                            // Save the accepted referral data in the `accepted_status` sub-collection
+                                                                            db.collection("students").document(studentId)
+                                                                                    .collection("accepted_status")
+                                                                                    .document(referralDocument.getId())  // Use the same document ID for consistency
+                                                                                    .set(acceptedData)  // Save all details in the acceptedData map
+                                                                                    .addOnSuccessListener(aVoid -> {
+                                                                                        Toast.makeText(getActivity(), "Referral accepted and saved.", Toast.LENGTH_SHORT).show();
+                                                                                    })
+                                                                                    .addOnFailureListener(e -> {
+                                                                                        Toast.makeText(getActivity(), "Failed to save accepted referral.", Toast.LENGTH_SHORT).show();
+                                                                                    });
                                                                         })
                                                                         .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
                                                                         .show();
                                                                 break;
+
                                                             case "Reject":
                                                                 new AlertDialog.Builder(getActivity())
                                                                         .setTitle("Confirmation")
@@ -413,16 +433,51 @@ public class refferals_prefect extends Fragment {
                                                                 break;
 
                                                             case "Accept":
-                                                                // Confirmation dialog to accept
+                                                                // Confirmation dialog to accept the referral
                                                                 new AlertDialog.Builder(getActivity())
                                                                         .setTitle("Confirmation")
                                                                         .setMessage("Are you sure you want to accept this referral?")
                                                                         .setPositiveButton("Yes", (dialog, which) -> {
+                                                                            // Update status in personnel and save accepted data in students collection
                                                                             updateReferralStatusPersonnel(referrerId, referralDocument.getId(), "accepted");
+
+                                                                            // Now save the accepted data in students/{studentId}/accepted_status
+                                                                            // Prepare a Map to save the data in the 'accepted_status' sub-collection
+                                                                            Map<String, Object> acceptedData = new HashMap<>();
+                                                                            acceptedData.put("date", referralData.get("date")); // Example: "2024-11-02 13:12"
+                                                                            acceptedData.put("referrer_id", referralData.get("referrer_id")); // Example: "221-2424"
+                                                                            acceptedData.put("remarks", referralData.get("remarks")); // Example: "jaii"
+                                                                            acceptedData.put("status", "accepted"); // Update status to "accepted"
+                                                                            acceptedData.put("student_id", referralData.get("student_id")); // Example: "221-0896"
+                                                                            acceptedData.put("student_name", referralData.get("student_name")); // Example: "RANIELLE ANTHONY JARAPLASAN LUISTRO"
+                                                                            acceptedData.put("student_program", referralData.get("student_program")); // Example: "BSIT-SD"
+                                                                            acceptedData.put("personnel_referrer", referralData.get("personnel_referrer")); // Example: "ABANTO KATHLEEN LIZETH DORIA"
+                                                                            acceptedData.put("term", referralData.get("term")); // Example: "First Sem"
+                                                                            acceptedData.put("user_concern", referralData.get("user_concern")); // Example: "Discipline Concerns"
+                                                                            acceptedData.put("violation", referralData.get("violation")); // Example: "Major Offense"
+
+                                                                            // Ensure that the student_id is a String when using it as a document ID
+                                                                            String studentId = (String) referralData.get("student_id");  // Ensure the student_id is treated as a String
+
+                                                                            // Save the accepted data in the 'accepted_status' sub-collection for the student
+                                                                            db.collection("students")  // Access the students collection
+                                                                                    .document(studentId)  // Use the student's ID (ensuring it's a String)
+                                                                                    .collection("accepted_status")  // Target the 'accepted_status' sub-collection
+                                                                                    .document(referralDocument.getId())  // Use the referral document ID for consistency
+                                                                                    .set(acceptedData)  // Save the details in the map
+                                                                                    .addOnSuccessListener(aVoid -> {
+                                                                                        // Show success message when data is successfully saved
+                                                                                        Toast.makeText(getActivity(), "Referral accepted and saved.", Toast.LENGTH_SHORT).show();
+                                                                                    })
+                                                                                    .addOnFailureListener(e -> {
+                                                                                        // Show failure message if saving fails
+                                                                                        Toast.makeText(getActivity(), "Failed to save accepted referral.", Toast.LENGTH_SHORT).show();
+                                                                                    });
                                                                         })
                                                                         .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
                                                                         .show();
                                                                 break;
+
 
                                                             case "Reject":
                                                                 // Confirmation dialog to reject

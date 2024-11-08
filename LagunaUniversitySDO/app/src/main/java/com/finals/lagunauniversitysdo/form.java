@@ -72,13 +72,6 @@ public class form extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.form);
 
-        EdgeToEdge.enable(this);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.form_layout), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
         // Initialize UI elements and Firestore
         initializeUIElements();
         firestore = FirebaseFirestore.getInstance();
@@ -323,7 +316,7 @@ public class form extends AppCompatActivity {
     // Set current date and time
     private void setCurrentDateTime() {
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String currentDateTime = dateFormat.format(calendar.getTime());
         dateField.setText(currentDateTime);
     }
@@ -395,6 +388,10 @@ public class form extends AppCompatActivity {
         // Retrieve remarks from remarks_field
         String remarks = ((EditText) findViewById(R.id.remarks_field)).getText().toString().trim();
 
+        if (violation.equals("Select a Violation")) {
+            Toast.makeText(this, "Please select a valid violation.", Toast.LENGTH_SHORT).show();
+            return; // Exit the method if no valid violation is selected
+        }
         // Retrieve checkbox states and create a single string for user concerns
         String userConcern = "";
         CheckBox disciplineCheckbox = findViewById(R.id.discipline_concerns);

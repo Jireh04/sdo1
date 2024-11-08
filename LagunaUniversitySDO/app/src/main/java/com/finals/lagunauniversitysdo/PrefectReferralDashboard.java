@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,15 +17,10 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.util.Log;
-
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -37,25 +33,31 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class personnel_refferal_form extends Fragment {
+
+public class PrefectReferralDashboard extends Fragment {
     private static final int REQUEST_CODE_QR_SCAN = 1;
     private static final int ITEMS_PER_PAGE = 5;
 
     private EditText searchBar;
-    private Button searchButton, prevButton, nextButton, proceedToReferral;
+    private Button searchButton;
     private FirebaseFirestore db;
     private Set<String> addedUserIds;
     private AtomicInteger currentPage;
     private List<DocumentSnapshot> allDocuments;
-    private Map<String, DocumentSnapshot> addedUserDetails; // Store added users
+    private Map<String, DocumentSnapshot> addedUserDetails;
 
+    private Button prevButton, nextButton, proceedToReferral;
     private LinearLayout paginationControls, pageNumberContainer;
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_personnel_refferal_form, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate the fragment layout
+        return inflater.inflate(R.layout.activity_prefect_referral_dashboard, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         // Initialize UI components
         initUI(view);
@@ -69,8 +71,6 @@ public class personnel_refferal_form extends Fragment {
 
         // Set button click listeners
         setButtonListeners(view);
-
-        return view; // Return the inflated view
     }
 
     private void initUI(View view) {
@@ -82,65 +82,50 @@ public class personnel_refferal_form extends Fragment {
         pageNumberContainer = view.findViewById(R.id.page_number_container);
         proceedToReferral = view.findViewById(R.id.proceedtoRefferal);
     }
-    private void setButtonListeners(View rootView) {
+
+    private void setButtonListeners(View view) {
         searchButton.setOnClickListener(v -> performSearch());
         prevButton.setOnClickListener(v -> showPreviousPage());
         nextButton.setOnClickListener(v -> showNextPage());
 
-        ImageButton pickQRCodeButton = rootView.findViewById(R.id.pick_qr_code_button);
+        ImageButton pickQRCodeButton = view.findViewById(R.id.pick_qr_code_button);
         pickQRCodeButton.setOnClickListener(v -> {
-            Intent intent = new Intent(getContext(), Personnel_QRScannerActivity.class);
-
-            // Pass personnel details
-            intent.putExtra("PERSONNEL_ID", PersonnelSession.getPersonnelId());
-            intent.putExtra("PERSONNEL_UNIQUE_ID", PersonnelSession.getPersonnelUniqueId());
-            intent.putExtra("PERSONNEL_NAME", PersonnelSession.getPersonnelName());
-            intent.putExtra("PERSONNEL_EMAIL", PersonnelSession.getEmail());
-            intent.putExtra("PERSONNEL_CONTACT", PersonnelSession.getContactNum());
-            intent.putExtra("PERSONNEL_PROGRAM", PersonnelSession.getDepartment());
-
+            Intent intent = new Intent(getActivity(), Prefect_QRScannerActivity.class);
             startActivityForResult(intent, REQUEST_CODE_QR_SCAN);
         });
 
         proceedToReferral.setOnClickListener(v -> proceedToReferral());
     }
 
-
-
     private void proceedToReferral() {
-        // Retrieve personnel ID and check login status
-        String personnelId = PersonnelSession.getPersonnelId();
-        if (personnelId == null || personnelId.isEmpty()) {
-            Toast.makeText(getActivity(), "Please log in as personnel before proceeding.", Toast.LENGTH_SHORT).show();
+        // Retrieve prefect ID and check login status
+        String prefectId = PrefectSession.getPrefectId();
+        if (prefectId == null || prefectId.isEmpty()) {
+            Toast.makeText(getActivity(), "Please log in as prefect before proceeding.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Retrieve personnel details
-        String uniqueId = PersonnelSession.getPersonnelUniqueId();
-        String personnelName = PersonnelSession.getPersonnelName();
-        String personnelEmail = PersonnelSession.getEmail();
-        Long personnelContactNum = PersonnelSession.getContactNum();
-        String personnelProgram = PersonnelSession.getDepartment();
+        // Retrieve prefect details
+        String prefectName = PrefectSession.getPrefectName();
+        String prefectEmail = PrefectSession.getPrefectEmail();
+        Long prefectContactNum = PrefectSession.getPrefectContactNum();
+        String prefectDepartment = PrefectSession.getPrefectDepartment();
 
-        Log.d("ContactNum", "Personnel contact number: " + personnelContactNum);
+        // Prepare the intent to pass prefect data
+        Intent intent = new Intent(getActivity(), PrefectForm.class);
+        intent.putExtra("PREFECT_ID", prefectId);
+        intent.putExtra("PREFECT_NAME_KEY", prefectName);
+        intent.putExtra("PREFECT_EMAIL_KEY", prefectEmail);
 
-
-        // Prepare the intent to pass personnel data
-        Intent intent = new Intent(getActivity(), PersonnelForm.class);
-        intent.putExtra("PERSONNEL_ID", personnelId);
-        intent.putExtra("PERSONNEL_UNIQUE_ID", uniqueId);
-        intent.putExtra("PERSONNEL_NAME_KEY", personnelName);
-        intent.putExtra("PERSONNEL_EMAIL_KEY", personnelEmail);
-
-        // Pass personnel contact number directly as a Long
-        if (personnelContactNum != null) {
-            intent.putExtra("PERSONNEL_CONTACT_NUM_KEY", personnelContactNum);
+        // Pass prefect contact number directly as a Long
+        if (prefectContactNum != null) {
+            intent.putExtra("PREFECT_CONTACT_NUM_KEY", prefectContactNum);
         } else {
-            intent.putExtra("PERSONNEL_CONTACT_NUM_KEY", 0L); // Default value if contact number is null
-            Log.d("PersonnelForm", "Retrieved contact: " + personnelContactNum);
+            intent.putExtra("PREFECT_CONTACT_NUM_KEY", 0L); // Default value if contact number is null
+            Log.d("PrefectForm", "Retrieved contact: " + prefectContactNum);
         }
 
-        intent.putExtra("PERSONNEL_DEPARTMENT_KEY", personnelProgram);
+        intent.putExtra("PREFECT_DEPARTMENT_KEY", prefectDepartment);
 
         // Check if at least one user is added
         if (addedUserIds.isEmpty()) {
@@ -161,7 +146,7 @@ public class personnel_refferal_form extends Fragment {
                 userNames.add(userDoc.getString("name"));
                 userDepartments.add(userDoc.getString("program"));
                 userEmails.add(userDoc.getString("email"));
-                userContacts.add(userDoc.getLong("contact"));
+                userContacts.add(userDoc.getLong("contacts"));
                 userIds.add(userDoc.getString("student_id"));
             }
         }
@@ -193,96 +178,11 @@ public class personnel_refferal_form extends Fragment {
         intent.putExtra("ADDED_STUDENT_CONTACTS", userContacts);
         intent.putExtra("ADDED_STUDENT_IDS", userIds);
 
-        // Start the PersonnelForm activity with all the data
+        // Start the PrefectForm activity with all the data
         startActivity(intent);
     }
 
-
-
-
-    private void performSearch() {
-
-        String searchTerm = searchBar.getText().toString().trim().toLowerCase();
-
-        // Check if the search term is empty
-        if (searchTerm.isEmpty()) {
-            Toast.makeText(getActivity(), "Please enter a name or student ID", Toast.LENGTH_SHORT).show();
-            paginationControls.setVisibility(View.GONE);
-            return;
-        }
-
-        // Get the root view
-        LinearLayout searchResultsContainer = getView().findViewById(R.id.search_results_container);
-        searchResultsContainer.removeAllViews();
-
-        // Query Firestore for the students collection
-        db.collection("students").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    QuerySnapshot querySnapshot = task.getResult();
-                    if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                        allDocuments.clear(); // Clear the list of previous results
-
-                        // Loop through each document in the result set
-                        for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                            // Extract fields safely
-                            String name = document.getString("name");
-                            String studentId = document.getString("student_id");
-
-                            // Check if the search term matches either the name or student_id (case insensitive)
-                            if ((name != null && name.toLowerCase().contains(searchTerm)) ||
-                                    (studentId != null && studentId.toLowerCase().contains(searchTerm))) {
-                                allDocuments.add(document); // Add matching documents to the list
-                                Log.d("SearchResults", "Found Student: " + name + " with ID: " + studentId);
-                            }
-                        }
-
-                        if (allDocuments.isEmpty()) {
-                            Toast.makeText(getActivity(), "No matching results", Toast.LENGTH_SHORT).show();
-                            paginationControls.setVisibility(View.GONE);
-                        } else {
-                            // Reset to first page and show results
-                            currentPage.set(0);
-                            showPage(); // No need for rootView, as it's using getView()
-                            updatePaginationControls();
-                            paginationControls.setVisibility(View.VISIBLE);
-                        }
-                    } else {
-                        Toast.makeText(getActivity(), "No data available", Toast.LENGTH_SHORT).show();
-                        paginationControls.setVisibility(View.GONE);
-                    }
-                } else {
-                    Toast.makeText(getActivity(), "Error fetching data", Toast.LENGTH_SHORT).show();
-                    Log.e("FirestoreError", "Error getting documents: ", task.getException());
-                }
-            }
-        });
-    }
-
-
-    private void showPage() {
-        LinearLayout searchResultsContainer = getView().findViewById(R.id.search_results_container);
-        searchResultsContainer.removeAllViews();
-
-        int startIndex = currentPage.get() * ITEMS_PER_PAGE;
-        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, allDocuments.size());
-
-        for (int i = startIndex; i < endIndex; i++) {
-            DocumentSnapshot document = allDocuments.get(i);
-            String name = document.getString("name");
-            String program = document.getString("program");
-            String studId = document.getString("student_id");
-            String contact = document.getString("contact");
-
-            addSearchResultToLayout(name, studId, contact, searchResultsContainer, program);
-        }
-
-        updatePaginationControls();
-    }
-
     private void addSearchResultToLayout(String name, String studId, String contact, LinearLayout searchResultsContainer, String program) {
-
         // Create a RelativeLayout for fixed button positioning
         RelativeLayout userLayout = new RelativeLayout(getActivity());
         userLayout.setPadding(10, 10, 10, 10);
@@ -334,17 +234,11 @@ public class personnel_refferal_form extends Fragment {
             Toast.makeText(getActivity(), "User already added", Toast.LENGTH_SHORT).show();
         } else {
             addedUserIds.add(studId);
-            DocumentSnapshot userDoc = findUserDocumentById(studId);
-            if (userDoc != null) {
-                addedUserDetails.put(studId, userDoc);
-                Log.d("AddedUser", "User added: " + name + " with ID: " + studId); // Add logging here
-                displayStudentDetails(name, program, studId, contact);
-            } else {
-                Log.e("UserAddition", "Document not found for ID: " + studId); // Log document not found
-            }
+            addedUserDetails.put(studId, findUserDocumentById(studId));
+
+            displayStudentDetails(name, program, studId, contact);
         }
     }
-
 
     private DocumentSnapshot findUserDocumentById(String userId) {
         for (DocumentSnapshot doc : allDocuments) {
@@ -355,6 +249,92 @@ public class personnel_refferal_form extends Fragment {
         return null;
     }
 
+
+    private void performSearch() {
+        String searchTerm = searchBar.getText().toString().trim().toLowerCase();
+
+        // Check if the search term is empty
+        if (searchTerm.isEmpty()) {
+            Toast.makeText(getActivity(), "Please enter a name", Toast.LENGTH_SHORT).show();
+            paginationControls.setVisibility(View.GONE);
+            return;
+        }
+
+        // Get the root view's search results container and clear it
+        LinearLayout searchResultsContainer = getView().findViewById(R.id.search_results_container);
+        searchResultsContainer.removeAllViews();
+
+        // Query Firestore for the students collection
+        db.collection("students").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                QuerySnapshot querySnapshot = task.getResult();
+                if (querySnapshot != null && !querySnapshot.isEmpty()) {
+                    allDocuments.clear(); // Clear previous results
+
+                    // Loop through each document in the result set
+                    for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                        String name = document.getString("name");
+                        String studId = document.getString("student_id");
+                        String contact = document.getString("contact");
+
+                        // Ensure the name is not null and contains the search term (case insensitive)
+                        if (name != null && name.toLowerCase().contains(searchTerm)) {
+                            allDocuments.add(document); // Add matching documents to the list
+                            Log.d("SearchResults", "Found Student: " + name + " with ID: " + studId + " and Contact: " + contact);
+                        }
+                    }
+
+                    // Handle case where no matching documents were found
+                    if (allDocuments.isEmpty()) {
+                        Toast.makeText(getActivity(), "No matching results", Toast.LENGTH_SHORT).show();
+                        paginationControls.setVisibility(View.GONE);
+                    } else {
+                        // Reset to the first page and show results
+                        currentPage.set(0);
+                        showPage(); // No need for rootView, using getView()
+                        updatePaginationControls();
+                        paginationControls.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    // No data available case
+                    Toast.makeText(getActivity(), "No data available", Toast.LENGTH_SHORT).show();
+                    paginationControls.setVisibility(View.GONE);
+                }
+            } else {
+                // Error while fetching data
+                Toast.makeText(getActivity(), "Error fetching data", Toast.LENGTH_SHORT).show();
+                Log.e("FirestoreError", "Error getting documents: ", task.getException());
+            }
+        });
+    }
+
+
+    private void showPage() {
+        LinearLayout searchResultsContainer = getView().findViewById(R.id.search_results_container);
+        searchResultsContainer.removeAllViews();
+
+        int startIndex = currentPage.get() * ITEMS_PER_PAGE;
+        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, allDocuments.size());
+
+        for (int i = startIndex; i < endIndex; i++) {
+            DocumentSnapshot document = allDocuments.get(i);
+            String name = document.getString("name");
+            String studId = document.getString("student_id");
+            String contact = document.getString("contact");
+            String program = document.getString("program");
+
+            addSearchResultToLayout(name, studId, contact, searchResultsContainer, program);
+        }
+
+        updatePaginationControls();
+    }
+
+    private void updatePaginationControls() {
+        int totalPages = (int) Math.ceil(allDocuments.size() / (double) ITEMS_PER_PAGE);
+        prevButton.setEnabled(currentPage.get() > 0);
+        nextButton.setEnabled(currentPage.get() < totalPages - 1);
+    }
+
     private void showPreviousPage() {
         if (currentPage.get() > 0) {
             currentPage.decrementAndGet();
@@ -363,27 +343,10 @@ public class personnel_refferal_form extends Fragment {
     }
 
     private void showNextPage() {
-        if ((currentPage.get() + 1) * ITEMS_PER_PAGE < allDocuments.size()) {
+        int totalPages = (int) Math.ceil(allDocuments.size() / (double) ITEMS_PER_PAGE);
+        if (currentPage.get() < totalPages - 1) {
             currentPage.incrementAndGet();
             showPage();
-        }
-    }
-
-    private void updatePaginationControls() {
-        if (prevButton != null && nextButton != null && pageNumberContainer != null) {
-            prevButton.setEnabled(currentPage.get() > 0);
-            nextButton.setEnabled((currentPage.get() + 1) * ITEMS_PER_PAGE < allDocuments.size());
-
-            pageNumberContainer.removeAllViews();
-            int totalPages = (int) Math.ceil((double) allDocuments.size() / ITEMS_PER_PAGE);
-
-            for (int i = 0; i < totalPages; i++) {
-                TextView pageNumberTextView = new TextView(getActivity());
-                pageNumberTextView.setText(String.valueOf(i + 1));
-                pageNumberTextView.setPadding(8, 8, 8, 8);
-                pageNumberTextView.setTextColor(i == currentPage.get() ? Color.BLUE : Color.BLACK);
-                pageNumberContainer.addView(pageNumberTextView);
-            }
         }
     }
 
@@ -396,46 +359,34 @@ public class personnel_refferal_form extends Fragment {
             detailsTable.removeView(defaultRow);
         }
 
+        TableRow row = new TableRow(getActivity());
+        row.setPadding(16, 16, 16, 16);
 
-        // Create a new table row
-        TableRow newRow = new TableRow(getActivity());
-        newRow.setLayoutParams(new TableRow.LayoutParams(
-                TableRow.LayoutParams.MATCH_PARENT,
-                TableRow.LayoutParams.WRAP_CONTENT
-        ));
-
-        // Add TextViews for student details
-        addTextViewToRow(newRow, name);      // Name
-        addTextViewToRow(newRow, program);   // Program
-        addTextViewToRow(newRow, studId);    // Student ID
-        addTextViewToRow(newRow, contact);   // Contact
+        addTextViewToRow(row, name);
+        addTextViewToRow(row, program);
+        addTextViewToRow(row, studId);
+        addTextViewToRow(row, contact);
 
         // Create delete button
         ImageButton deleteButton = new ImageButton(getActivity());
         deleteButton.setImageResource(R.drawable.baseline_delete_outline_24);
         deleteButton.setBackgroundResource(android.R.color.transparent); // Make button background transparent
         deleteButton.setOnClickListener(v -> {
-            detailsTable.removeView(newRow); // Remove the row when button is clicked
+            detailsTable.removeView(row); // Remove the row when button is clicked
             addedUserIds.remove(studId);
             addedUserDetails.remove(studId);
             Toast.makeText(getActivity(), name + " removed", Toast.LENGTH_SHORT).show(); // Show confirmation
         });
 
-        // Add the delete button to the row
-        newRow.addView(deleteButton);
-        // Add the row to the table
-        detailsTable.addView(newRow);
+        row.addView(deleteButton);
+        detailsTable.addView(row);
     }
 
-    // Helper method to add TextViews to the row
     private void addTextViewToRow(TableRow row, String text) {
         TextView textView = new TextView(getActivity());
         textView.setText(text);
-        textView.setPadding(8, 8, 8, 8);
         textView.setTextSize(16);
+        textView.setPadding(8, 8, 8, 8);
         row.addView(textView);
     }
-
-
-
 }

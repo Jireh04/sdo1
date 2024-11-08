@@ -1,7 +1,6 @@
 package com.finals.lagunauniversitysdo;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -19,9 +18,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import android.text.InputFilter;
 import android.text.Spanned;
+import android.util.Log;
 
-import com.finals.lagunauniversitysdo.CustomScannerActivity;
-import com.finals.lagunauniversitysdo.form;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -33,19 +31,27 @@ public class QRScannerActivity extends AppCompatActivity {
     private ArrayList<String> scannedDataList; // List to store scanned QR codes
     private int remainingScans; // Number of scans left to perform
 
-    private String userName;
-    private String userEmail;
-    private Long userContact;
-    private String userProgram;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.qr_scanner_overlay);  // Ensure this layout contains 'scanner_frame'
+        setContentView(R.layout.qr_scanner_overlay);
 
+        // Enable immersive edge-to-edge experience
         EdgeToEdge.enable(this);
-        View scannerFrame = findViewById(R.id.scanner_frame);
+        setupEdgeToEdgePadding();
 
+        // Log and display user data
+        displayUserWelcomeMessage();
+
+        // Initialize the scanned data list
+        scannedDataList = new ArrayList<>();
+
+        // Show dialog to select scan mode
+        showScanModeDialog();
+    }
+
+    private void setupEdgeToEdgePadding() {
+        View scannerFrame = findViewById(R.id.scanner_frame);
         if (scannerFrame != null) {
             ViewCompat.setOnApplyWindowInsetsListener(scannerFrame, (v, insets) -> {
                 Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -55,17 +61,21 @@ public class QRScannerActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Scanner frame view not found", Toast.LENGTH_SHORT).show();
         }
+    }
 
-        Intent intent = getIntent();
-        userName = intent.getStringExtra("NAME");
-        userEmail = intent.getStringExtra("EMAIL");
-        userContact = intent.getLongExtra("CONTACT", 0);
-        userProgram = intent.getStringExtra("PROGRAM");
+    private void displayUserWelcomeMessage() {
+        String userName = getUserFullName();
+        if (userName != null && !userName.isEmpty()) {
+            Toast.makeText(this, "Welcome " + userName, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Welcome User", Toast.LENGTH_SHORT).show();
+        }
+    }
 
-        Toast.makeText(this, "Welcome " + userName, Toast.LENGTH_SHORT).show();
-
-        scannedDataList = new ArrayList<>(); // Initialize the list for storing scanned QR codes
-        showScanModeDialog(); // Show dialog for selecting scan mode
+    private String getUserFullName() {
+        String firstName = UserSession.getFirstName();
+        String lastName = UserSession.getLastName();
+        return (firstName != null ? firstName : "") + " " + (lastName != null ? lastName : "");
     }
 
     private void showScanModeDialog() {
@@ -78,32 +88,16 @@ public class QRScannerActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("Multiple Scans", (dialog, which) -> {
                     isMultipleScan = true;
-                    askForNumberOfScans(); // Ask user how many scans they want to perform
+                    askForNumberOfScans();
                 })
                 .setCancelable(false)
+                .setNeutralButton("Cancel", (dialog, which) -> handleCancellation())
                 .show();
     }
 
     private void askForNumberOfScans() {
         final EditText input = new EditText(this);
-        // Create an InputFilter to restrict input to numbers and maximum value of 50
-        input.setFilters(new InputFilter[] {
-                new InputFilter() {
-                    @Override
-                    public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-                        String inputText = dest.toString() + source.toString();
-                        // Check if input contains only digits
-                        if (!inputText.matches("\\d*")) {
-                            return ""; // Reject non-numeric input
-                        }
-                        // Check if input exceeds maximum value of 50
-                        if (inputText.length() > 2 || (inputText.length() == 2 && Integer.parseInt(inputText) > 50)) {
-                            return ""; // Reject input exceeding 50
-                        }
-                        return null; // Accept input
-                    }
-                }
-        });
+        input.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2)});
 
         new AlertDialog.Builder(this)
                 .setTitle("Number of Scans")
@@ -111,29 +105,23 @@ public class QRScannerActivity extends AppCompatActivity {
                 .setView(input)
                 .setPositiveButton("OK", (dialog, which) -> {
                     String inputText = input.getText().toString();
-                    try {
-                        int numberOfScans = Integer.parseInt(inputText);
-                        if (numberOfScans > 0) {
-                            remainingScans = numberOfScans; // Set remaining scans
-                            scannedDataList.clear(); // Clear previous scans
-                            checkCameraPermissionAndStartScanner(); // Check permission and start scanning
-                        } else {
-                            Toast.makeText(QRScannerActivity.this, "Please enter a valid number.", Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (NumberFormatException e) {
-                        Toast.makeText(QRScannerActivity.this, "Invalid input. Please enter a number.", Toast.LENGTH_SHORT).show();
+                    if (!inputText.isEmpty()) {
+                        remainingScans = Integer.parseInt(inputText);
+                        scannedDataList.clear(); // Clear any previous scans
+                        checkCameraPermissionAndStartScanner();
+                    } else {
+                        Toast.makeText(this, "Enter a valid number", Toast.LENGTH_SHORT).show();
                     }
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton("Cancel", (dialog, which) -> handleCancellation())
                 .show();
     }
-
 
     private void checkCameraPermissionAndStartScanner() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
         } else {
-            startQRCodeScanner(); // Start QR code scanner if permission granted
+            startQRCodeScanner();
         }
     }
 
@@ -145,7 +133,7 @@ public class QRScannerActivity extends AppCompatActivity {
         integrator.setOrientationLocked(true);
         integrator.setBeepEnabled(true);
         integrator.setBarcodeImageEnabled(true);
-        integrator.initiateScan(); // Start the QR code scanner
+        integrator.initiateScan();
     }
 
     @Override
@@ -153,7 +141,7 @@ public class QRScannerActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startQRCodeScanner(); // Start scanning if permission is granted
+                startQRCodeScanner();
             } else {
                 Toast.makeText(this, "Camera permission is required to scan QR codes", Toast.LENGTH_LONG).show();
             }
@@ -167,40 +155,54 @@ public class QRScannerActivity extends AppCompatActivity {
 
         if (result != null) {
             if (result.getContents() == null) {
-                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
-                finish(); // Finish the activity if cancelled
+                Toast.makeText(this, "Scan cancelled", Toast.LENGTH_SHORT).show();
+                handleCancellation();
             } else {
                 handleScanResult(result.getContents());
             }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
+    private void handleCancellation() {
+        startReferralFormActivity();
+        finish();
+    }
+
+    private void startReferralFormActivity() {
+        Intent referralFormIntent = new Intent(QRScannerActivity.this, refferalForm_student.class);
+        passUserData(referralFormIntent);
+        referralFormIntent.putStringArrayListExtra("scannedDataList", scannedDataList);
+        startActivity(referralFormIntent);
+    }
+
     private void handleScanResult(String scannedText) {
-        scannedDataList.add(scannedText); // Add scanned text to the list
-        remainingScans--; // Decrease the count of remaining scans
+        scannedDataList.add(scannedText);
+        remainingScans--;
 
         if (!isMultipleScan) {
-            // If in single scan mode
             Intent formIntent = new Intent(this, form.class);
             formIntent.putExtra("scannedData", scannedText);
+            passUserData(formIntent);
             startActivity(formIntent);
-            finish(); // End activity after single scan
+            finish();
         } else {
-            // If in multiple scan mode
             if (remainingScans > 0) {
                 Toast.makeText(this, "Scan another QR code", Toast.LENGTH_SHORT).show();
-                startQRCodeScanner(); // Start scanning again
+                startQRCodeScanner();
             } else {
-                // When all scans are done, send data to the form activity
                 Intent formIntent = new Intent(this, form.class);
-                formIntent.putStringArrayListExtra("scannedDataList", scannedDataList); // Pass all scanned data
+                formIntent.putStringArrayListExtra("scannedDataList", scannedDataList);
+                passUserData(formIntent);
                 startActivity(formIntent);
-                finish(); // End activity after sending all data
+                finish();
             }
         }
     }
 
+    private void passUserData(Intent intent) {
+        intent.putExtra("NAME", getUserFullName());
+        intent.putExtra("EMAIL", UserSession.getEmail());
+        intent.putExtra("CONTACT", UserSession.getContactNum());
+        intent.putExtra("PROGRAM", UserSession.getProgram());
+    }
 }
-
