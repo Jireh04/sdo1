@@ -7,12 +7,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
+    android:background="@color/translucent_overlay"
     tools:context=".PrefectLoginDialogFragment">
 
+    <!-- CardView with glass effect -->
     <androidx.cardview.widget.CardView
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        app:cardElevation="20dp"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="#E6FFFFFF"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,64 +25,77 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_gravity="center_horizontal"
             android:padding="24dp">
+
 
             <!-- Close Button -->
             <ImageButton
                 android:id="@+id/close_button"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_marginBottom="15dp"
                 android:layout_gravity="end"
+                android:layout_marginBottom="10dp"
+                android:layout_marginRight="-5dp"
                 android:background="@android:color/transparent"
-                android:src="@drawable/baseline_close_24"/>
+                android:src="@drawable/baseline_close_24"
+                app:tint="@color/black" />
 
+            <!-- Title Text -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Prefect Login"
-                android:background="@color/red2"
-                android:textSize="26sp"
+                android:text="PREFECT DISCIPLINE"
+                android:textSize="22sp"
                 android:textAlignment="center"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white"
+                android:fontFamily="sans-serif-medium"
+                android:background="@drawable/rounded_header_background"
+                android:padding="12dp"
+                android:layout_marginBottom="16dp"/>
 
+            <!-- Username EditText with rounded corners -->
             <EditText
+                android:id="@+id/login_username"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:id="@+id/login_username"
-                android:background="@drawable/red_border"
-                android:layout_marginTop="20dp"
-                android:padding="8dp"
-                android:hint="Username"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/rounded_edittext_background"
                 android:drawableLeft="@drawable/baseline_person_pin_24"
                 android:drawablePadding="10dp"
-                android:textColor="@color/black"/>
+                android:hint="Username"
+                android:padding="12dp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/light_grey"/>
 
+            <!-- Password EditText with rounded corners -->
             <EditText
+                android:id="@+id/login_password"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:id="@+id/login_password"
-                android:background="@drawable/red_border"
-                android:layout_marginTop="20dp"
-                android:padding="8dp"
-                android:hint="Password"
-                android:inputType="textPassword"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/rounded_edittext_background"
                 android:drawableLeft="@drawable/baseline_lock_24"
                 android:drawablePadding="10dp"
-                android:textColor="@color/black"/>
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:padding="12dp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/light_grey"/>
 
+            <!-- Login Button with rounded corners -->
             <Button
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text="Login"
                 android:id="@+id/login_button"
+                android:layout_width="260dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="24dp"
+                android:backgroundTint="#E95565"
+                android:layout_gravity="center"
+                android:text="Login"
+                android:textColor="@color/white"
                 android:textSize="18sp"
-                android:layout_marginTop="15dp"
-                android:backgroundTint="@color/green3"
-                app:cornerRadius="20dp"/>
-        </LinearLayout>
+                app:cornerRadius="25dp"/>
+    </LinearLayout>
 
-    </androidx.cardview.widget.CardView>
+</androidx.cardview.widget.CardView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>

@@ -141,7 +141,6 @@ public class ReportersFragment extends Fragment {
             reportersContainer.addView(referrerItemView);
         }
     }
-
     private void viewLogs(String referrerType, String referrerId) {
         String collectionName;
         String subCollectionName;
@@ -181,6 +180,8 @@ public class ReportersFragment extends Fragment {
                             ScrollView scrollView = new ScrollView(getContext());
                             scrollView.addView(logContainer);
 
+                            boolean hasAcceptedLogs = false;  // Track if there are any "accepted" logs
+
                             for (DocumentSnapshot document : task.getResult()) {
                                 // Extract student details from the document
                                 String studentName = document.getString("student_name");
@@ -195,57 +196,64 @@ public class ReportersFragment extends Fragment {
                                 String date = document.getString("date");
                                 String reffer = document.getString("student_reffer");
 
-                                // Create a TextView for each violation summary
-                                TextView logSummaryTextView = new TextView(getContext());
-                                logSummaryTextView.setText("Student: " + studentName + "\nViolation: " + violation + "\nStatus: " + status + "\n");
-                                logContainer.addView(logSummaryTextView);
+                                // Check if the status is "accepted"
+                                if ("accepted".equalsIgnoreCase(status)) {
+                                    // If accepted, create a TextView for each violation summary
+                                    TextView logSummaryTextView = new TextView(getContext());
+                                    logSummaryTextView.setText("Student: " + studentName + "\nViolation: " + violation + "\nStatus: " + status + "\n");
+                                    logContainer.addView(logSummaryTextView);
 
-                                // Create a button for each violation
-                                Button viewViolationButton = new Button(getContext());
-                                viewViolationButton.setText("View");
-                                viewViolationButton.setPadding(16, 8, 16, 8);
+                                    // Create a button for each violation
+                                    Button viewViolationButton = new Button(getContext());
+                                    viewViolationButton.setText("View");
+                                    viewViolationButton.setPadding(16, 8, 16, 8);
 
-                                // Set up button click listener to open ReporterView fragment with violation details
-                                // Set up button click listener to open ReporterView fragment with detailed information
-                                viewViolationButton.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        // Create a new instance of the ReporterView fragment
-                                        ReporterView reporterViewFragment = new ReporterView();
+                                    // Set up button click listener to open ReporterView fragment with violation details
+                                    viewViolationButton.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            // Create a new instance of the ReporterView fragment
+                                            ReporterView reporterViewFragment = new ReporterView();
 
-                                        // Create a bundle to pass the details to the fragment
-                                        Bundle args = new Bundle();
-                                        args.putString("STUDENT_ID", studentId);
-                                        args.putString("STUDENT_NAME", studentName);
-                                        args.putString("STUDENT_PROGRAM", studentProgram);
-                                        args.putString("STUDENT_CONTACT", studentContact);
-                                        args.putString("STUDENT_YEAR", studentYear);
-                                        args.putString("BLOCK", block);
-                                        args.putString("VIOLATION", violation);
-                                        args.putString("REMARKS", remarks);
-                                        args.putString("DATE", date);
-                                        args.putString("STUDENT_REFERRER", reffer);
+                                            // Create a bundle to pass the details to the fragment
+                                            Bundle args = new Bundle();
+                                            args.putString("STUDENT_ID", studentId);
+                                            args.putString("STUDENT_NAME", studentName);
+                                            args.putString("STUDENT_PROGRAM", studentProgram);
+                                            args.putString("STUDENT_CONTACT", studentContact);
+                                            args.putString("STUDENT_YEAR", studentYear);
+                                            args.putString("BLOCK", block);
+                                            args.putString("VIOLATION", violation);
+                                            args.putString("REMARKS", remarks);
+                                            args.putString("DATE", date);
+                                            args.putString("STUDENT_REFERRER", reffer);
 
-                                        // Set the arguments for the fragment
-                                        reporterViewFragment.setArguments(args);
+                                            // Set the arguments for the fragment
+                                            reporterViewFragment.setArguments(args);
 
-                                        // Replace the current fragment with ReporterView fragment
-                                        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-                                        transaction.replace(R.id.fragment_container, reporterViewFragment);
-                                        transaction.addToBackStack(null); // Optional: adds to back stack
-                                        transaction.commit();
+                                            // Replace the current fragment with ReporterView fragment
+                                            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+                                            transaction.replace(R.id.fragment_container, reporterViewFragment);
+                                            transaction.addToBackStack(null); // Optional: adds to back stack
+                                            transaction.commit();
 
-                                        detailDialog.dismiss();// Close the detail dialog
-                                    }
-                                });
+                                            detailDialog.dismiss(); // Close the detail dialog
+                                        }
+                                    });
 
-                                logContainer.addView(viewViolationButton);
+                                    logContainer.addView(viewViolationButton);
+                                    hasAcceptedLogs = true;  // Mark that we have "accepted" logs
+                                }
                             }
 
-                            detailDialogBuilder.setView(scrollView);
-                            detailDialogBuilder.setPositiveButton("Close", null);
-                            detailDialog = detailDialogBuilder.create();
-                            detailDialog.show();
+                            if (!hasAcceptedLogs) {
+                                showLogsDialog(referrerId, "No accepted logs found for this referrer.");
+                            } else {
+                                detailDialogBuilder.setView(scrollView);
+                                detailDialogBuilder.setPositiveButton("Close", null);
+                                detailDialog = detailDialogBuilder.create();
+                                detailDialog.show();
+                            }
                         } else {
                             showLogsDialog(referrerId, "No logs found for this referrer.");
                         }

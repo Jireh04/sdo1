@@ -3,7 +3,6 @@ package com.finals.lagunauniversitysdo;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +11,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -146,7 +144,7 @@ public class PrefectReferralDashboard extends Fragment {
                 userNames.add(userDoc.getString("name"));
                 userDepartments.add(userDoc.getString("program"));
                 userEmails.add(userDoc.getString("email"));
-                userContacts.add(userDoc.getLong("contact"));
+                userContacts.add(userDoc.getLong("contacts"));
                 userIds.add(userDoc.getString("student_id"));
             }
         }
@@ -183,43 +181,29 @@ public class PrefectReferralDashboard extends Fragment {
     }
 
     private void addSearchResultToLayout(String name, String studId, String contact, LinearLayout searchResultsContainer, String program) {
-        RelativeLayout userLayout = new RelativeLayout(getActivity());
+        LinearLayout userLayout = new LinearLayout(getActivity());
+        userLayout.setOrientation(LinearLayout.HORIZONTAL);
         userLayout.setPadding(10, 10, 10, 10);
 
-        // Create the TextView for displaying student info
         TextView userInfo = new TextView(getActivity());
-        userInfo.setText(studId + " | " + name + " | " + program);
-        userInfo.setTextSize(name.length() > 18 ? 14 : 16); // Adjust text size if the name is long
-        userInfo.setEllipsize(TextUtils.TruncateAt.END); // Truncate with "..." if text is too long
-        userInfo.setSingleLine(true); // Keep text on a single line
-        userInfo.setId(View.generateViewId());
+        userInfo.setText(studId + ", " + name);
+        userInfo.setTextSize(18);
 
-        RelativeLayout.LayoutParams userInfoParams = new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT
-        );
-        userInfoParams.addRule(RelativeLayout.ALIGN_PARENT_START);
-        userInfoParams.addRule(RelativeLayout.CENTER_VERTICAL);
-        userInfo.setLayoutParams(userInfoParams);
-
-        // Create the Button for action
         Button actionButton = new Button(getActivity());
         actionButton.setText("+");
         actionButton.setBackgroundResource(R.drawable.round_button);
         actionButton.setTextColor(Color.WHITE);
         actionButton.setAllCaps(false);
-        actionButton.setTextSize(24);
-        actionButton.setPadding(20, 13, 20, 13);
-        actionButton.setId(View.generateViewId());
 
-        RelativeLayout.LayoutParams buttonLayoutParams = new RelativeLayout.LayoutParams(
-                140,
-                140
+        LinearLayout.LayoutParams buttonLayoutParams = new LinearLayout.LayoutParams(
+                150,
+                150
         );
-        buttonLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_END);
-        buttonLayoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
-        buttonLayoutParams.setMargins(0, 0, 35, 0); // Add right margin for spacing
+        buttonLayoutParams.setMargins(16, 0, 0, 0);
         actionButton.setLayoutParams(buttonLayoutParams);
+
+        actionButton.setTextSize(24);
+        actionButton.setPadding(24, 16, 24, 16);
 
         actionButton.setOnClickListener(v -> handleAddButtonClick(studId, name, contact, program));
 
@@ -254,7 +238,7 @@ public class PrefectReferralDashboard extends Fragment {
 
         // Check if the search term is empty
         if (searchTerm.isEmpty()) {
-            Toast.makeText(getActivity(), "Please enter a name or student ID", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Please enter a name", Toast.LENGTH_SHORT).show();
             paginationControls.setVisibility(View.GONE);
             return;
         }
@@ -276,9 +260,8 @@ public class PrefectReferralDashboard extends Fragment {
                         String studId = document.getString("student_id");
                         String contact = document.getString("contact");
 
-                        // Check if the search term is in either the name or student ID (case insensitive)
-                        if ((name != null && name.toLowerCase().contains(searchTerm)) ||
-                                (studId != null && studId.toLowerCase().contains(searchTerm))) {
+                        // Ensure the name is not null and contains the search term (case insensitive)
+                        if (name != null && name.toLowerCase().contains(searchTerm)) {
                             allDocuments.add(document); // Add matching documents to the list
                             Log.d("SearchResults", "Found Student: " + name + " with ID: " + studId + " and Contact: " + contact);
                         }

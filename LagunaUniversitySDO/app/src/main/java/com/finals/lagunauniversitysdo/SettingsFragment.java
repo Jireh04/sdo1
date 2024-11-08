@@ -2,6 +2,7 @@ package com.finals.lagunauniversitysdo;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -159,7 +160,7 @@ public class SettingsFragment extends Fragment {
         // Create an Edit button
         Button editButton = new Button(getContext());
         editButton.setText("Edit");
-        editButton.setBackgroundTintList(getResources().getColorStateList(R.color.yellow)); // Use setBackgroundTintList for API level >= 21
+        editButton.setBackgroundTintList(getResources().getColorStateList(R.color.light_yellow)); // Use setBackgroundTintList for API level >= 21
         editButton.setTextColor(getResources().getColor(android.R.color.black));
 
         // Add views to the row
@@ -313,12 +314,14 @@ public class SettingsFragment extends Fragment {
         typeHeader.setText("TYPE");
         typeHeader.setTextSize(16);
         typeHeader.setTypeface(null, Typeface.BOLD);
+        typeHeader.setGravity(Gravity.CENTER);
         typeHeader.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1));
 
         TextView actionHeader = new TextView(getContext());
         actionHeader.setText("ACTION");
         actionHeader.setTextSize(16);
         actionHeader.setTypeface(null, Typeface.BOLD);
+        actionHeader.setGravity(Gravity.CENTER);
         actionHeader.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1));
 
         headerRow.addView(violationHeader);
@@ -330,8 +333,8 @@ public class SettingsFragment extends Fragment {
 
     private void saveViolationToFirestore(String violation, String offenseType) {
         HashMap<String, Object> violationData = new HashMap<>();
-        violationData.put("violation", offenseType);
-        violationData.put("type", violation);
+        violationData.put("violation", violation);
+        violationData.put("type", offenseType);
 
         db.collection("violation_type").add(violationData)
                 .addOnSuccessListener(documentReference -> Log.d("SettingsFragment", "Violation added with ID: " + documentReference.getId()))

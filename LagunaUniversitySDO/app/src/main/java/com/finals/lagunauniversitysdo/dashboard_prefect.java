@@ -92,6 +92,8 @@ public class dashboard_prefect extends Fragment {
         // Set OnClickListener for the QR code scanner button
         pickQrCodeButton.setOnClickListener(v -> openQrScanner());
 
+
+
         referToGuidanceButton.setOnClickListener(v -> openReferralDashboard());
         viewReporters.setOnClickListener(v -> openViewReporters());
 
@@ -181,7 +183,7 @@ public class dashboard_prefect extends Fragment {
                                 // Make the TextView clickable
                                 studentTextView.setOnClickListener(v -> {
                                     // Fetch violations for the selected student
-                                    fetchViolations(studentId, name, program, year, block, remarks, contact); // Use studentId here
+                                   navigateToPrefectView(studentId, name, program, year, block, remarks, contact); // Use studentId here
                                 });
 
                                 // Set the onClickListener for the button
@@ -230,6 +232,18 @@ public class dashboard_prefect extends Fragment {
         }
     }
 
+    private void openReferralDashboard() {
+        // Create a new instance of the PrefectReferralDashboardFragment
+        PrefectReferralDashboard referralDashboardFragment = new PrefectReferralDashboard();
+
+        // Use FragmentTransaction to replace the current fragment with the referral dashboard fragment
+        getActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, referralDashboardFragment)  // Replace with the correct fragment
+                .addToBackStack(null)  // Add to back stack for backward navigation
+                .commit();  // Commit the transaction
+    }
+
+
     // Add this method to manage button visibility and listeners
     private void updatePaginationButtons() {
         if (currentPage > 1) {
@@ -262,93 +276,14 @@ public class dashboard_prefect extends Fragment {
 
 
 
-    private void fetchViolations(String studentId, String name, String program, String year, String block, String remarks, String contact) {
-        // Reference to the Firestore collections
-        CollectionReference studentReferrals = db.collection("student_refferal_history");
-        CollectionReference prefectReferrals = db.collection("prefect_referral_history");
-        CollectionReference personnelReferrals = db.collection("personnel_refferal_history");
+    private void navigateToPrefectView(String studentId, String name, String program, String year, String block, String remarks, String contact) {
+        // Set mock or passed values for violations, referrerId, and date.
+        String violations = "No violations found.";  // You can set this to a default message or pass any other value.
+           // This can be fetched or set to a default value.
+        String date = "Unknown";                     // This can be fetched or set to a default value.
 
-        // Initialize a StringBuilder to accumulate violations
-        StringBuilder violationsBuilder = new StringBuilder();
-
-        // Fetch violations from each collection using student_id
-        studentReferrals.whereEqualTo("student_id", studentId).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                QuerySnapshot studentSnapshot = task.getResult();
-                if (studentSnapshot != null && !studentSnapshot.isEmpty()) {
-                    for (QueryDocumentSnapshot document : studentSnapshot) {
-                        String violation = document.getString("violation");
-                        String remarksStudent = document.getString("remarks"); // Fetch remarks
-                        String date = document.getString("date"); // Fetch date
-                        if (violation != null) {
-                            // Combine remarksStudent and violation into one string with date last
-                            violationsBuilder.append(remarksStudent != null ? "(Remarks: " + remarksStudent + ") " : "")
-                                    .append(violation)
-                                    .append(date != null ? " [" + date + "]" : "") // Date now comes last
-                                    .append("\n");
-                        }
-                    }
-                }
-            } else {
-                Log.e("FetchViolations", "Error fetching student violations: " + task.getException().getMessage());
-            }
-
-            // Fetch prefect referrals
-            prefectReferrals.whereEqualTo("student_id", studentId).get().addOnCompleteListener(prefectTask -> {
-                if (prefectTask.isSuccessful()) {
-                    QuerySnapshot prefectSnapshot = prefectTask.getResult();
-                    if (prefectSnapshot != null && !prefectSnapshot.isEmpty()) {
-                        for (QueryDocumentSnapshot document : prefectSnapshot) {
-                            String violation = document.getString("violation");
-                            String remarksStudent = document.getString("remarks"); // Fetch remarks
-                            String date = document.getString("date"); // Fetch date
-                            if (violation != null) {
-                                // Combine remarks and violation into one string with date last
-                                violationsBuilder.append(remarksStudent != null ? "(Remarks: " + remarksStudent + ") " : "")
-                                        .append(violation)
-                                        .append(date != null ? " [" + date + "]" : "") // Date now comes last
-                                        .append("\n");
-                            }
-                        }
-                    }
-                } else {
-                    Log.e("FetchViolations", "Error fetching prefect violations: " + prefectTask.getException().getMessage());
-                }
-
-                // Fetch personnel referrals
-                personnelReferrals.whereEqualTo("student_id", studentId).get().addOnCompleteListener(personnelTask -> {
-                    if (personnelTask.isSuccessful()) {
-                        QuerySnapshot personnelSnapshot = personnelTask.getResult();
-                        if (personnelSnapshot != null && !personnelSnapshot.isEmpty()) {
-                            for (QueryDocumentSnapshot document : personnelSnapshot) {
-                                String violation = document.getString("violation");
-                                String remarksStudent = document.getString("remarks"); // Fetch remarks
-                                String date = document.getString("date"); // Fetch date
-                                if (violation != null) {
-                                    // Combine remarks and violation into one string with date last
-                                    violationsBuilder.append(remarksStudent != null ? "(Remarks: " + remarksStudent + ") " : "")
-                                            .append(violation)
-                                            .append(date != null ? " [" + date + "]" : "") // Date now comes last
-                                            .append("\n");
-                                }
-                            }
-                        }
-                    } else {
-                        Log.e("FetchViolations", "Error fetching personnel violations: " + personnelTask.getException().getMessage());
-                    }
-
-                    // Send the violations to PrefectView
-                    String violations = violationsBuilder.toString().trim(); // Get final string
-                    navigateToPrefectView(studentId, name, program, year, block, violations, remarks, contact); // Changed to studentId
-                });
-            });
-        });
-    }
-
-    // Method to navigate to PrefectView
-    private void navigateToPrefectView(String studentId, String name, String program, String year, String block, String violations, String contact, String remarks) {
-        // Create an instance of the PrefectView fragment
-        PrefectView prefectViewFragment = PrefectView.newInstance(studentId, name, program, contact, remarks, year, block, violations);
+        // Create an instance of the PrefectView fragment with all necessary parameters
+        PrefectView prefectViewFragment = PrefectView.newInstance(studentId, name, program, contact, year, block, violations, remarks, date);
 
         // Replace the current fragment with PrefectView
         getParentFragmentManager().beginTransaction()  // Use getParentFragmentManager() if inside a fragment
@@ -358,13 +293,11 @@ public class dashboard_prefect extends Fragment {
     }
 
 
-
     private void openQrScanner() {
         // Create an Intent to launch the PrefectQRScannerActivity
         Intent intent = new Intent(getActivity(), Prefect_QRScannerActivity.class);
         startActivity(intent);
     }
-
     public void showAddViolatorDialog(String studId, String name) {
         // Inflate the custom dialog layout using getContext() instead of this
         LayoutInflater inflater = LayoutInflater.from(getContext());
@@ -417,6 +350,12 @@ public class dashboard_prefect extends Fragment {
             } else if (dateTime.isEmpty() || reporter.isEmpty() || reporterId.isEmpty() || location.isEmpty() || violation.equals("Select a Violation") || remarks.isEmpty()) {
                 Toast.makeText(getContext(), "Please fill in all required fields.", Toast.LENGTH_SHORT).show();
             } else {
+                // Validate violation selection
+                if (violation.equals("Select a Violation")) {
+                    Toast.makeText(getContext(), "Please select a valid violation.", Toast.LENGTH_SHORT).show();
+                    return; // Exit the method if no valid violation is selected
+                }
+
                 // Prepare the data to be saved to Firestore
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -445,6 +384,22 @@ public class dashboard_prefect extends Fragment {
                         .addOnSuccessListener(documentReference -> {
                             // Show a success message
                             Toast.makeText(getContext(), "Violator Added!", Toast.LENGTH_SHORT).show();
+
+                            // Save the same data to the student's accepted_status sub-collection
+                            db.collection("students")
+                                    .document(studId) // Use the studentId to get the student's document
+                                    .collection("accepted_status")
+                                    .document(documentId) // Use the same document ID as for the referral history
+                                    .set(violatorData) // Save the same violator data to the accepted_status
+                                    .addOnSuccessListener(aVoid -> {
+                                        // Successfully saved to accepted_status
+                                        Log.d("Firestore", "Data saved to accepted_status.");
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        // Handle failure to save to accepted_status
+                                        Toast.makeText(getContext(), "Error saving to accepted_status: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    });
+
                             // Close the dialog
                             dialog.dismiss();
                         })
@@ -466,6 +421,7 @@ public class dashboard_prefect extends Fragment {
     private boolean isValidInput(String input) {
         return input != null && input.matches(".*[a-zA-Z0-9].*");
     }
+
     private void fetchViolationTypes(Spinner violationSpinner) {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         CollectionReference violationTypesRef = firestore.collection("violation_type");
@@ -536,23 +492,6 @@ public class dashboard_prefect extends Fragment {
                 Toast.makeText(getContext(), "Failed to load violation types", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-
-
-
-
-
-
-    private void openReferralDashboard() {
-        // Create a new instance of the PrefectReferralDashboardFragment
-        PrefectReferralDashboard referralDashboardFragment = new PrefectReferralDashboard();
-
-        // Use FragmentTransaction to replace the current fragment with the referral dashboard fragment
-        getActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, referralDashboardFragment)  // Make sure R.id.fragment_container is the ID of your container in the layout
-                .addToBackStack(null)  // Add to back stack to allow user to go back
-                .commit();
     }
 
     private void openViewReporters() {

@@ -395,6 +395,10 @@ public class form extends AppCompatActivity {
         // Retrieve remarks from remarks_field
         String remarks = ((EditText) findViewById(R.id.remarks_field)).getText().toString().trim();
 
+        if (violation.equals("Select a Violation")) {
+            Toast.makeText(this, "Please select a valid violation.", Toast.LENGTH_SHORT).show();
+            return; // Exit the method if no valid violation is selected
+        }
         // Retrieve checkbox states and create a single string for user concerns
         String userConcern = "";
         CheckBox disciplineCheckbox = findViewById(R.id.discipline_concerns);
