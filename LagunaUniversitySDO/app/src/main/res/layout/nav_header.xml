@@ -21,8 +21,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="SDOMS"
-        android:textColor="#FFFFFF"
-    android:textSize="30sp"
-    android:textStyle="bold"
-    android:gravity="center_vertical"/>
+        android:textColor="#25A18E"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:gravity="center_vertical"/>
 </LinearLayout>

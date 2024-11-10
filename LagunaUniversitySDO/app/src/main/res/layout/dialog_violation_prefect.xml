@@ -12,7 +12,7 @@
         android:text="Add Violation"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:textColor="@color/green" />
+        android:textColor="#25A18E" />
 
     <!-- Type of Offense Spinner -->
     <TextView
@@ -54,13 +54,14 @@
             android:id="@+id/button_close"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@color/light_grey"
             android:text="Close" />
 
         <Button
             android:id="@+id/button_save"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/green"
+            android:layout_height="60dp"
+            android:backgroundTint="#25A18E"
             android:text="Save"
             android:textColor="@android:color/white"
             android:layout_marginStart="8dp" />

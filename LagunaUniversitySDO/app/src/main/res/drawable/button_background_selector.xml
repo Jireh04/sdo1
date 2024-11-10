@@ -1,0 +1,9 @@
+<!-- res/drawable/button_background_selector.xml -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Pressed state -->
+    <item android:state_pressed="true" android:color="#82B6B9" /> <!-- Darker color when pressed -->
+    <!-- Focused (hover) state -->
+    <item android:state_focused="true" android:color="#B5E1E5" /> <!-- Lighter color when hovered -->
+    <!-- Default state -->
+    <item android:color="#A1CCD1" /> <!-- Original color -->
+</selector>

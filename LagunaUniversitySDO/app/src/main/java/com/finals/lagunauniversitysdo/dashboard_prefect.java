@@ -147,6 +147,7 @@ public class dashboard_prefect extends Fragment {
 
                                 // Create the TextView for displaying student info
                                 TextView studentTextView = new TextView(getActivity());
+                                studentTextView.setPadding(30, 0, 0, 0);
                                 studentTextView.setText(studentId + " | " + name + " | " + program);
                                 studentTextView.setTextSize(name.length() > 18 ? 14 : 16); // Adjust text size if the name is long
                                 studentTextView.setEllipsize(TextUtils.TruncateAt.END); // Truncate with "..." if text is too long
@@ -172,12 +173,12 @@ public class dashboard_prefect extends Fragment {
                                 addButton.setId(View.generateViewId());
 
                                 RelativeLayout.LayoutParams buttonLayoutParams = new RelativeLayout.LayoutParams(
-                                        140,
-                                        140
+                                        130,
+                                        130
                                 );
                                 buttonLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_END);
                                 buttonLayoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
-                                buttonLayoutParams.setMargins(0, 0, 35, 0); // Add right margin for spacing
+                                buttonLayoutParams.setMargins(0, 0, 25, 0); // Add right margin for spacing
                                 addButton.setLayoutParams(buttonLayoutParams);
 
                                 // Make the TextView clickable

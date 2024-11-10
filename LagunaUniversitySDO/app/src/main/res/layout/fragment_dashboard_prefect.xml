@@ -23,7 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SDOMS"
-            android:textColor="@color/green3"
+            android:textColor="#25A18E"
             android:textSize="24sp"
             android:textStyle="bold" />
 
@@ -97,14 +97,18 @@
                 android:id="@+id/search_button"
                 android:layout_width="wrap_content"
                 android:layout_height="55dp"
+                android:background="#25A18E"
                 android:layout_marginLeft="10dp"
+                android:textColor="@color/white"
                 android:text="Search" />
 
             <!-- QR Scanner Button -->
             <ImageButton
                 android:id="@+id/pick_qr_code_button"
                 android:layout_width="wrap_content"
-                android:layout_height="53dp"
+                android:layout_height="65dp"
+                android:layout_marginTop="-5dp"
+                android:backgroundTint="#25A18E"
                 android:contentDescription="Scan QR Code"
                 android:src="@drawable/baseline_qr_code_scanner_24" />
         </TableRow>

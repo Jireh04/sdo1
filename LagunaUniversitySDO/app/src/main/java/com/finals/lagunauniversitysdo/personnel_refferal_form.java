@@ -201,6 +201,7 @@ public class personnel_refferal_form extends Fragment {
 
 
     private void performSearch() {
+
         String searchTerm = searchBar.getText().toString().trim().toLowerCase();
 
         // Check if the search term is empty
@@ -281,6 +282,7 @@ public class personnel_refferal_form extends Fragment {
     }
 
     private void addSearchResultToLayout(String name, String studId, String contact, LinearLayout searchResultsContainer, String program) {
+
         // Create a RelativeLayout for fixed button positioning
         RelativeLayout userLayout = new RelativeLayout(getActivity());
         userLayout.setPadding(10, 10, 10, 10);
@@ -288,7 +290,7 @@ public class personnel_refferal_form extends Fragment {
         // Create the TextView for displaying student info
         TextView userInfo = new TextView(getActivity());
         userInfo.setText(studId + " | " + name + " | " + program);
-        userInfo.setTextSize(name.length() > 18 ? 14 : 16); // Adjust text size if the name is long
+        userInfo.setTextSize(name.length() > 18 ? 12 : 14); // Adjust text size if the name is long
         userInfo.setEllipsize(TextUtils.TruncateAt.END); // Truncate with "..." if text is too long
         userInfo.setSingleLine(true); // Keep text on a single line
         userInfo.setId(View.generateViewId());
@@ -308,16 +310,16 @@ public class personnel_refferal_form extends Fragment {
         actionButton.setTextColor(Color.WHITE);
         actionButton.setAllCaps(false);
         actionButton.setTextSize(24);
-        actionButton.setPadding(20, 13, 20, 13);
+        actionButton.setPadding(15, 10, 15, 10);
         actionButton.setId(View.generateViewId());
 
         RelativeLayout.LayoutParams buttonLayoutParams = new RelativeLayout.LayoutParams(
-                140,
-                140
+                130,
+                130
         );
         buttonLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_END);
         buttonLayoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
-        buttonLayoutParams.setMargins(0, 0, 35, 0); // Add right margin for spacing
+        buttonLayoutParams.setMargins(0, 0, 155, 0); // Add right margin for spacing
         actionButton.setLayoutParams(buttonLayoutParams);
 
         actionButton.setOnClickListener(v -> handleAddButtonClick(studId, name, contact, program));
@@ -387,6 +389,13 @@ public class personnel_refferal_form extends Fragment {
 
     private void displayStudentDetails(String name, String program, String studId, String contact) {
         TableLayout detailsTable = getActivity().findViewById(R.id.details_table);
+        TableRow defaultRow = detailsTable.findViewById(R.id.default_row);
+
+        // Check if the default row exists before removing
+        if (defaultRow != null) {
+            detailsTable.removeView(defaultRow);
+        }
+
 
         // Create a new table row
         TableRow newRow = new TableRow(getActivity());

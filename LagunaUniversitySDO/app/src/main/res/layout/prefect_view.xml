@@ -20,7 +20,6 @@
             android:paddingBottom="12dp"
             android:textColor="#000" />
 
-        <!-- Name, Program, Year/Block, etc. -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -79,17 +78,37 @@
                     android:text="CONTACT NO: "
                     android:textStyle="bold"
                     android:textSize="18sp"
-                android:textColor="#000" />
+                    android:textColor="#000" />
 
-                <TextView
-                    android:id="@+id/logsTextView"
+                <!-- Logs Section with Button -->
+                <LinearLayout
+                    android:orientation="horizontal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="LOGS: "
-                    android:textStyle="bold"
-                    android:textSize="18sp"
-                android:textColor="#000"
-                android:paddingTop="8dp" />
+                    android:gravity="start"
+                    android:paddingTop="8dp">
+
+                    <TextView
+                        android:id="@+id/logsTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="LOGS: "
+                        android:textColor="#000"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/logsButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="New Log"
+                        android:textColor="#FFF"
+                        android:backgroundTint="#E06C78"
+                        android:padding="8dp"
+                        android:layout_gravity="center_vertical"
+                        android:visibility="gone" /> <!-- Button hidden initially -->
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
@@ -138,9 +157,9 @@
                 android:layout_height="wrap_content"
                 android:text="Add Violation"
                 android:textColor="#FFF"
-                android:backgroundTint="@color/red"
+                android:backgroundTint="#E06C78"
                 android:padding="10dp"
-                android:layout_marginEnd="8dp" /> <!-- Added margin -->
+                android:layout_marginEnd="8dp" />
 
             <Button
                 android:id="@+id/exportPdfButton"
@@ -148,7 +167,7 @@
                 android:layout_height="wrap_content"
                 android:text="Export as PDF"
                 android:textColor="#FFF"
-                android:backgroundTint="@color/red"
+                android:backgroundTint="#E06C78"
                 android:padding="10dp" />
         </LinearLayout>
 
@@ -166,7 +185,7 @@
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#4CAF50">
+                android:background="#6AAB9C">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -203,8 +222,51 @@
                     android:textStyle="bold"
                     android:padding="8dp"
                     android:textColor="#FFF" />
+
             </TableRow>
 
         </TableLayout>
+
+        <!-- Violation Details Section -->
+        <LinearLayout
+            android:id="@+id/violationDetailsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="#FFFFFF"
+            android:elevation="2dp"
+            android:visibility="gone"> <!-- Initially hidden -->
+
+            <TextView
+                android:id="@+id/violationDetailsTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Violation Details"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="#000"
+                android:paddingBottom="8dp" />
+
+            <TextView
+                android:id="@+id/violationDetailsTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="#555" />
+
+            <!-- Settled Button to mark as resolved -->
+            <Button
+                android:id="@+id/settledButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mark as Settled"
+                android:textColor="#FFF"
+                android:backgroundTint="#E06C78"
+                android:layout_gravity="end"
+                android:padding="8dp"
+                android:layout_marginTop="16dp" />
+        </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

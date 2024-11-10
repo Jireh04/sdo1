@@ -3,6 +3,7 @@ package com.finals.lagunauniversitysdo;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -78,7 +80,7 @@ public class PrefectReferralDashboard extends Fragment {
         nextButton = view.findViewById(R.id.next_button);
         paginationControls = view.findViewById(R.id.pagination_controls);
         pageNumberContainer = view.findViewById(R.id.page_number_container);
-        proceedToReferral = view.findViewById(R.id.proceed_to_referral);
+        proceedToReferral = view.findViewById(R.id.proceedtoRefferal);
     }
 
     private void setButtonListeners(View view) {
@@ -181,29 +183,44 @@ public class PrefectReferralDashboard extends Fragment {
     }
 
     private void addSearchResultToLayout(String name, String studId, String contact, LinearLayout searchResultsContainer, String program) {
-        LinearLayout userLayout = new LinearLayout(getActivity());
-        userLayout.setOrientation(LinearLayout.HORIZONTAL);
+        // Create a RelativeLayout for fixed button positioning
+        RelativeLayout userLayout = new RelativeLayout(getActivity());
         userLayout.setPadding(10, 10, 10, 10);
 
+        // Create the TextView for displaying student info
         TextView userInfo = new TextView(getActivity());
-        userInfo.setText(studId + ", " + name);
-        userInfo.setTextSize(18);
+        userInfo.setText(studId + " | " + name + " | " + program);
+        userInfo.setTextSize(name.length() > 18 ? 12 : 14); // Adjust text size if the name is long
+        userInfo.setEllipsize(TextUtils.TruncateAt.END); // Truncate with "..." if text is too long
+        userInfo.setSingleLine(true); // Keep text on a single line
+        userInfo.setId(View.generateViewId());
 
+        RelativeLayout.LayoutParams userInfoParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+        );
+        userInfoParams.addRule(RelativeLayout.ALIGN_PARENT_START);
+        userInfoParams.addRule(RelativeLayout.CENTER_VERTICAL);
+        userInfo.setLayoutParams(userInfoParams);
+
+        // Create the Button for action
         Button actionButton = new Button(getActivity());
         actionButton.setText("+");
         actionButton.setBackgroundResource(R.drawable.round_button);
         actionButton.setTextColor(Color.WHITE);
         actionButton.setAllCaps(false);
-
-        LinearLayout.LayoutParams buttonLayoutParams = new LinearLayout.LayoutParams(
-                150,
-                150
-        );
-        buttonLayoutParams.setMargins(16, 0, 0, 0);
-        actionButton.setLayoutParams(buttonLayoutParams);
-
         actionButton.setTextSize(24);
-        actionButton.setPadding(24, 16, 24, 16);
+        actionButton.setPadding(15, 10, 15, 10);
+        actionButton.setId(View.generateViewId());
+
+        RelativeLayout.LayoutParams buttonLayoutParams = new RelativeLayout.LayoutParams(
+                130,
+                130
+        );
+        buttonLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_END);
+        buttonLayoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
+        buttonLayoutParams.setMargins(0, 0, 155, 0); // Add right margin for spacing
+        actionButton.setLayoutParams(buttonLayoutParams);
 
         actionButton.setOnClickListener(v -> handleAddButtonClick(studId, name, contact, program));
 
@@ -334,7 +351,14 @@ public class PrefectReferralDashboard extends Fragment {
     }
 
     private void displayStudentDetails(String name, String program, String studId, String contact) {
-        TableLayout tableLayout = getView().findViewById(R.id.details_table);
+        TableLayout detailsTable = getActivity().findViewById(R.id.details_table);
+        TableRow defaultRow = detailsTable.findViewById(R.id.default_row);
+
+        // Check if the default row exists before removing
+        if (defaultRow != null) {
+            detailsTable.removeView(defaultRow);
+        }
+
         TableRow row = new TableRow(getActivity());
         row.setPadding(16, 16, 16, 16);
 
@@ -343,12 +367,19 @@ public class PrefectReferralDashboard extends Fragment {
         addTextViewToRow(row, studId);
         addTextViewToRow(row, contact);
 
-        Button deleteButton = new Button(getActivity());
-        deleteButton.setText("Delete");
-        deleteButton.setOnClickListener(v -> tableLayout.removeView(row));
+        // Create delete button
+        ImageButton deleteButton = new ImageButton(getActivity());
+        deleteButton.setImageResource(R.drawable.baseline_delete_outline_24);
+        deleteButton.setBackgroundResource(android.R.color.transparent); // Make button background transparent
+        deleteButton.setOnClickListener(v -> {
+            detailsTable.removeView(row); // Remove the row when button is clicked
+            addedUserIds.remove(studId);
+            addedUserDetails.remove(studId);
+            Toast.makeText(getActivity(), name + " removed", Toast.LENGTH_SHORT).show(); // Show confirmation
+        });
 
         row.addView(deleteButton);
-        tableLayout.addView(row);
+        detailsTable.addView(row);
     }
 
     private void addTextViewToRow(TableRow row, String text) {

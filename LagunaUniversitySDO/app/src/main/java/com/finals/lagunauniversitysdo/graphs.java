@@ -173,12 +173,10 @@ public class graphs {
 
     // Example color list (you can customize these colors)
     private int[] programColors = {
-            Color.parseColor("#A8E6CF"), // Program 1
-            Color.parseColor("#8DAEFB"), // Program 2
-            Color.parseColor("#FF4C4C"), // Program 3
-            Color.parseColor("#28a745"), // Program 4
-            Color.CYAN,                  // Program 5
-            Color.MAGENTA                // Program 6
+            Color.parseColor("#6AAB9C"), // Program 1
+            Color.parseColor("#5874DC"), // Program 2
+            Color.parseColor("#E06C78"), // Program 3
+            Color.parseColor("#25A18E"), // Program 4
     };
 
     public void setupBarChart() {
@@ -221,7 +219,6 @@ public class graphs {
         barChart.getDescription().setPosition(barChart.getWidth() * 0.5f , 25);
         barChart.getDescription().setTextColor(Color.parseColor("#333333"));
 
-
         // Customize X-Axis to display program names
         barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(programLabels));
         barChart.getXAxis().setGranularity(1f);
@@ -234,10 +231,19 @@ public class graphs {
         barChart.getXAxis().setGridColor(Color.parseColor("#E5E5E5"));
         barChart.getAxisLeft().setGridColor(Color.parseColor("#E5E5E5"));
 
+        // Customize the legend to place the color blocks to the right of the labels
+        Legend legend = barChart.getLegend();
+        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL); // Set horizontal orientation
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER); // Align in the center
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM); // Align vertically at the bottom
+        legend.setDrawInside(false); // Ensure legend items are outside the chart area
+        legend.setFormSize(10f); // Adjust size of the color blocks
+        legend.setTextColor(Color.parseColor("#333333")); // Set the text color for the legend
 
         // Refresh the chart with new data
         barChart.invalidate();
     }
+
 
     public void setupLineChart() {
         List<Entry> lightOffenseEntries = new ArrayList<>();

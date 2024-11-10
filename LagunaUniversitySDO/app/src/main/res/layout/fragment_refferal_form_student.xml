@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/main"
     android:orientation="vertical"
-    android:padding="10dp"
+    android:padding="15dp"
     tools:context=".QRScannerActivity">
 
     <!-- Title Section -->
@@ -20,7 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SDOMS"
-            android:textColor="@color/green3"
+            android:textColor="#25A18E"
             android:textSize="24sp"
             android:textStyle="bold" />
 
@@ -48,13 +48,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:stretchColumns="1"
-                android:padding="16dp">
+                android:padding="0dp">
 
                 <!-- Table Header -->
                 <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/green3">
+                    android:background="#A1CCD1">
 
                     <TextView
                         android:layout_width="200dp"
@@ -76,6 +76,7 @@
                         android:text="ID NUMBER"
                         android:padding="8dp"
                         android:textColor="@android:color/white" />
+
                     <TextView
                         android:layout_width="150dp"
                         android:layout_height="wrap_content"
@@ -91,8 +92,26 @@
                         android:textColor="@android:color/white" />
                 </TableRow>
 
-                <!-- Add more rows as needed -->
+                <!-- Default Row for No Data -->
+                <TableRow
+                    android:id="@+id/default_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#E8E8E8">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_span="5"
+                        android:gravity="center"
+                        android:padding="16dp"
+                        android:text="No student added yet"
+                        android:textColor="@android:color/darker_gray" />
+                </TableRow>
+
+                <!-- Add more rows dynamically as needed -->
             </TableLayout>
+
         </ScrollView>
     </HorizontalScrollView>
 
@@ -103,7 +122,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
         android:layout_marginTop="270dp"
-        android:background="@color/green3"
+        android:background="#A1CCD1"
         android:text="Proceed to Referral Form"
         android:textColor="@android:color/white"
         android:textSize="16sp" />
@@ -136,13 +155,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
+                android:background="#A1CCD1"
+                android:textColor="@color/white"
                 android:text="Search" />
 
             <!-- QR Scanner Button -->
             <ImageButton
                 android:id="@+id/pick_qr_code_button"
                 android:layout_width="wrap_content"
-                android:layout_height="53dp"
+                android:layout_height="63dp"
+                android:backgroundTint="#A1CCD1"
+                android:layout_marginTop="-10dp"
                 android:contentDescription="Scan QR Code"
                 android:src="@drawable/baseline_qr_code_scanner_24" />
         </TableRow>

@@ -20,6 +20,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:text="Student Violations"
+                android:textColor="#25A18E"
                 android:textSize="24sp"
                 android:textStyle="bold"
                 app:layout_constraintTop_toTopOf="parent"
@@ -35,7 +36,7 @@
                 app:layout_constraintTop_toBottomOf="@id/titleTextView">
 
                 <TableRow
-                    android:background="@color/green3">
+                    android:background="#6AAB9C">
 
                     <TextView
                         android:layout_width="wrap_content"

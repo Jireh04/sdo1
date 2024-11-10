@@ -335,7 +335,7 @@
                         <TableRow
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:background="@color/green3">
+                            android:background="#6AAB9C">
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:id="@+id/violators_name"
@@ -397,7 +397,7 @@
                 android:layout_height="wrap_content"
                 android:text="Submit"
                 android:layout_marginTop="20dp"
-                android:backgroundTint="@color/design_default_color_primary" />
+                android:backgroundTint="#6AAB9C" />
 
         </LinearLayout>
     </ScrollView>

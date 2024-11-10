@@ -96,15 +96,6 @@ public class refferals_prefect extends Fragment {
             }
         }
 
-        // Initialize the referral views
-        ScrollView scrollViewPending = view.findViewById(R.id.scroll_view_pending);
-        ScrollView scrollViewAccepted = view.findViewById(R.id.scroll_view_accepted);
-        ScrollView scrollViewRejected = view.findViewById(R.id.scroll_view_rejected);
-
-        // Define the colors
-        int colorBlack = getResources().getColor(R.color.black);
-        int colorWhite = getResources().getColor(R.color.white);
-
         // Clear any default tab selection
         tabLayout.clearOnTabSelectedListeners();
 
