@@ -19,8 +19,13 @@ import androidx.fragment.app.DialogFragment;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PersonnelLoginDialogFragment extends DialogFragment {
 
@@ -109,6 +114,7 @@ public class PersonnelLoginDialogFragment extends DialogFragment {
 
                                 Log.d("Auth", "Login successful for personnel: " + personnelName);
                                 Toast.makeText(getActivity(), "Personnel logged in", Toast.LENGTH_SHORT).show();
+                                logUserActivity(personnelId, "Login");
 
                                 // Proceed to the personnel main activity
                                 Intent intent = new Intent(getActivity(), personnel_MainActivity.class);
@@ -129,6 +135,33 @@ public class PersonnelLoginDialogFragment extends DialogFragment {
                         }
                     }
                 });
+    }
+
+    private void logUserActivity(String personnelID, String activityType) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // Reference to the personnel's ActivityLog subcollection
+        CollectionReference activityLogRef = db.collection("personnel").document(personnelID).collection("ActivityLog");
+
+        // Query to get the existing count of documents for the specific activity type (e.g., "Login" or "Logout")
+        activityLogRef.whereEqualTo("type", activityType)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    // Count the number of existing logs of this type
+                    int count = querySnapshot.size() + 1; // Next sequence number
+                    String documentId = activityType + ": " + count; // Format the document ID
+
+                    // Create the log entry data
+                    Map<String, Object> logEntry = new HashMap<>();
+                    logEntry.put("type", activityType); // "Login" or "Logout"
+                    logEntry.put("timestamp", FieldValue.serverTimestamp()); // Auto-generated server timestamp
+
+                    // Add the log entry with the custom document ID
+                    activityLogRef.document(documentId)
+                            .set(logEntry)
+                            .addOnSuccessListener(aVoid -> Log.d("ActivityLog", "Log entry added with ID: " + documentId))
+                            .addOnFailureListener(e -> Log.w("ActivityLog", "Error adding log entry with ID: " + documentId, e));
+                })
+                .addOnFailureListener(e -> Log.w("ActivityLog", "Error fetching existing logs for personnel: " + personnelID, e));
     }
 
 
