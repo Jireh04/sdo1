@@ -98,7 +98,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="DATE OF FILING:"
+                        android:text="DATE AND TIME OF FILING:"
                         android:textStyle="bold" />
 
                     <EditText
@@ -124,10 +124,14 @@
                         android:text="TERM:"
                         android:textStyle="bold" />
 
-                    <Spinner
-                        android:id="@+id/term_spinner"
+                    <EditText
+                        android:id="@+id/term_field"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:hint="TERM"
+                        android:focusable="false"
+                        android:clickable="false"
+                        android:enabled="false" />
                 </LinearLayout>
 
             </LinearLayout>

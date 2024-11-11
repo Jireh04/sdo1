@@ -58,6 +58,7 @@ import android.os.Environment;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Map;
@@ -830,21 +831,28 @@ public class refferals_prefect extends Fragment {
         db.collection("students").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (DocumentSnapshot studentDocument : task.getResult().getDocuments()) {
-                    // Get all referral history documents
+                    // Access the student's referral history for 'accepted' status, ordered by date
                     db.collection("students").document(studentDocument.getId())
                             .collection("student_refferal_history")
-                            .whereEqualTo("status", "accepted")
+                            .whereEqualTo("status", "accepted")  // Filter by status "accepted"
+
                             .get()
                             .addOnCompleteListener(subTask -> {
                                 if (subTask.isSuccessful()) {
                                     for (DocumentSnapshot referralDocument : subTask.getResult().getDocuments()) {
+                                        // Add a row in the accepted table layout for each referral
                                         addReferralRow(tableLayoutAccepted, referralDocument);
                                     }
+                                } else {
+                                    Log.e("Firestore Error", "Error fetching referral documents: ", subTask.getException());
                                 }
                             });
                 }
+            } else {
+                Log.e("Firestore Error", "Error fetching student documents: ", task.getException());
             }
         });
+
 
         // Fetch accepted referrals from personnel_refferal_history (personnel)
         db.collection("personnel").get().addOnCompleteListener(task -> {
@@ -854,6 +862,7 @@ public class refferals_prefect extends Fragment {
                     db.collection("personnel").document(personnelDocument.getId())
                             .collection("personnel_refferal_history")
                             .whereEqualTo("status", "accepted")
+                            .orderBy("date", Query.Direction.ASCENDING)  // Order from latest to oldest
                             .get()
                             .addOnCompleteListener(subTask -> {
                                 if (subTask.isSuccessful()) {

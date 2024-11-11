@@ -45,8 +45,8 @@ import android.widget.CheckBox;
 
 public class form extends AppCompatActivity {
 
-    private Spinner termSpinner, violationSpinner;
-    private EditText dateField, nameField, emailField, contactField, programField, remarksField;
+    private Spinner violationSpinner;
+    private EditText dateField, nameField, emailField, contactField, programField, remarksField, termField;
     private TextView violatorsName, violatorsProgram, violatorsStudID, violatorsContact;
     private TableLayout detailsTable;
     private FirebaseFirestore firestore;
@@ -63,6 +63,7 @@ public class form extends AppCompatActivity {
     private static final String EMAIL_KEY = "EMAIL";
     private static final String CONTACT_NUM_KEY = "CONTACT_NUM";
     private static final String PROGRAM_KEY = "PROGRAM";
+    private static final String TERM_KEY = "TERM";
     private static final String STUDENT_ID_KEY = "STUDENT_ID";
     private ArrayList<Map<String, String>> scannedStudentDataList = new ArrayList<>();
 
@@ -79,11 +80,11 @@ public class form extends AppCompatActivity {
         // Populate fields from intent
         populateFieldsFromIntent();
 
-        // Set up spinner options
-        setupSpinners();
-
         // Set current date and time
         setCurrentDateTime();
+
+        // Set up spinner options
+        setupSpinners();
 
         // Retrieve and display previously added students
         retrieveAndDisplayAddedStudents();
@@ -99,7 +100,7 @@ public class form extends AppCompatActivity {
 
     // Initialize UI elements
     private void initializeUIElements() {
-        termSpinner = findViewById(R.id.term_spinner);
+        termField = findViewById(R.id.term_field);
         violationSpinner = findViewById(R.id.violation_spinner);
         dateField = findViewById(R.id.date_field);
         nameField = findViewById(R.id.name_field);
@@ -134,6 +135,7 @@ public class form extends AppCompatActivity {
         emailField.setText(studentEmail != null ? studentEmail : "");
         contactField.setText(studentContact != 0L ? String.valueOf(studentContact) : "");
         programField.setText(studentProgram != null ? studentProgram : "");
+        termField.setText("2nd Semester");
 
         this.studentReferrer = UserSession.getStudentName();
         Log.d("FormActivity", "Student Referrer: " + this.studentReferrer);
@@ -254,15 +256,12 @@ public class form extends AppCompatActivity {
         }
     }
 
-
+    // Set up spinner options
     private void setupSpinners() {
-        // Set up the term spinner with hardcoded values
-        String[] terms = {"First Sem", "Second Sem", "Summer"};
-        setupSpinner(termSpinner, Arrays.asList(terms)); // Convert String[] to List<String>
-
         // Fetch violation types from Firestore and set up the violation spinner
         fetchViolationTypes();
     }
+
 
     // Method to fetch violation types from Firestore
     private void fetchViolationTypes() {
@@ -313,10 +312,12 @@ public class form extends AppCompatActivity {
     }
 
 
+
+
     // Set current date and time
     private void setCurrentDateTime() {
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
         String currentDateTime = dateFormat.format(calendar.getTime());
         dateField.setText(currentDateTime);
     }
@@ -379,7 +380,7 @@ public class form extends AppCompatActivity {
         String email = emailField.getText().toString().trim();
         String contactString = contactField.getText().toString().trim();
         String program = programField.getText().toString().trim();
-        String term = termSpinner.getSelectedItem().toString();
+        String term = "2nd Semester";
         String violation = violationSpinner.getSelectedItem().toString();
         String date = dateField.getText().toString().trim();
         String studId = studentId; // Assuming this is the student's ID being referred
@@ -543,7 +544,6 @@ public class form extends AppCompatActivity {
         emailField.setText("");
         contactField.setText("");
         programField.setText("");
-        termSpinner.setSelection(0);
         violationSpinner.setSelection(0);
         setCurrentDateTime();
     }

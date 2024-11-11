@@ -38,8 +38,8 @@ import android.widget.CheckBox;
 
 public class PersonnelForm extends AppCompatActivity {
 
-    private Spinner termSpinner, violationSpinner;
-    private EditText dateField, nameField, emailField, contactField, programField, remarksField;
+    private Spinner violationSpinner;
+    private EditText dateField, nameField, emailField, contactField, programField, remarksField, termField;
     private TextView violatorsName, violatorsProgram, violatorsStudID, violatorsContact;
     private TableLayout detailsTable;
     private FirebaseFirestore firestore;
@@ -86,7 +86,7 @@ public class PersonnelForm extends AppCompatActivity {
 
     // Initialize UI elements
     private void initializeUIElements() {
-        termSpinner = findViewById(R.id.term_spinner);
+        termField = findViewById(R.id.term_field);
         violationSpinner = findViewById(R.id.violation_spinner);
         dateField = findViewById(R.id.date_field);
         nameField = findViewById(R.id.name_field);
@@ -119,6 +119,7 @@ public class PersonnelForm extends AppCompatActivity {
         emailField.setText(personnelEmail != null ? personnelEmail : "");
         contactField.setText(personnelContact != 0L ? String.valueOf(personnelContact) : "0");
         programField.setText(personnelDepartment != null ? personnelDepartment : "");
+        termField.setText("2nd Semester");
 
         // Retrieve student data from the intent
         ArrayList<String> userNames = intent.getStringArrayListExtra("ADDED_STUDENT_NAMES");
@@ -236,10 +237,6 @@ public class PersonnelForm extends AppCompatActivity {
 
     // Set up spinner options
     private void setupSpinners() {
-        // Set up the term spinner with hardcoded values
-        String[] terms = {"First Sem", "Second Sem", "Summer"};
-        setupSpinner(termSpinner, Arrays.asList(terms)); // Convert String[] to List<String>
-
         // Fetch violation types from Firestore and set up the violation spinner
         fetchViolationTypes();
     }
@@ -294,7 +291,7 @@ public class PersonnelForm extends AppCompatActivity {
     // Set current date and time
     private void setCurrentDateTime() {
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
         String currentDateTime = dateFormat.format(calendar.getTime());
         dateField.setText(currentDateTime);
     }
@@ -368,7 +365,7 @@ public class PersonnelForm extends AppCompatActivity {
         String email = emailField.getText().toString().trim();
         String contactString = contactField.getText().toString().trim();
         String program = programField.getText().toString().trim();
-        String term = termSpinner.getSelectedItem().toString();
+        String term = "2nd Semester";
         String violation = violationSpinner.getSelectedItem().toString();
         String date = dateField.getText().toString().trim();
         String studId = violatorsStudID.getText().toString().trim();
@@ -597,7 +594,6 @@ public class PersonnelForm extends AppCompatActivity {
         contactField.setText("");
         programField.setText("");
         remarksField.setText("");
-        termSpinner.setSelection(0); // Reset to first item
         violationSpinner.setSelection(0); // Reset to first item
         dateField.setText("");
         violatorsStudID.setText("");
