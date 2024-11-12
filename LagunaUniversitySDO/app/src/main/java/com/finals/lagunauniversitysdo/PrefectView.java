@@ -60,7 +60,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 
-
 public class PrefectView extends Fragment {
 
     private TextView studentNameTextView, studentIdTextView, studentProgramTextView, studentContactTextView, studentYearTextView, studentBlockTextView;
@@ -96,9 +95,6 @@ public class PrefectView extends Fragment {
         super.onCreate(savedInstanceState);
         View view = inflater.inflate(R.layout.prefect_view, container, false);
 
-        // Initialize Firebase Firestore
-        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-
         // Initialize UI elements
         studentNameTextView = view.findViewById(R.id.studentNameTextView);
         studentIdTextView = view.findViewById(R.id.studentIDTextView);
@@ -127,6 +123,9 @@ public class PrefectView extends Fragment {
             studentYearTextView.setText("Year: " + studentYear);
             studentBlockTextView.setText("Block: " + studentBlock);
 
+            // Fetch the student details (year, block, contact) using studentId from Firestore
+            fetchStudentDetails(studentId);
+
             // Fetch violations and update logs count
             fetchViolationsData(studentId);
             updateStudentLogsCount(studentId);  // This will update the logs count in logsTextView
@@ -137,6 +136,31 @@ public class PrefectView extends Fragment {
 
         return view;
     }
+
+    private void fetchStudentDetails(String studentId) {
+        // Fetching the student details from Firestore using the studentId
+        firestore.collection("students").document(studentId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot studentDoc = task.getResult();
+                        if (studentDoc.exists()) {
+                            // Retrieve student details
+                            String studentYear = studentDoc.getString("year");
+                            String studentBlock = studentDoc.getString("block");
+                            String studentContact = String.valueOf(studentDoc.get("contacts"));  // Ensure contact is a string
+
+                            // Update the UI with the fetched details
+                            studentYearTextView.setText("Year: " + studentYear);
+                            studentBlockTextView.setText("Block: " + studentBlock);
+                            studentContactTextView.setText("Contact No: " + studentContact);
+                        }
+                    } else {
+                        Log.d("PrefectView", "Error getting student details: ", task.getException());
+                    }
+                });
+    }
+
 
     // Method to fetch violation, remarks, and date data from Firestore based on studentId
     private void fetchViolationsData(String studentId) {
@@ -157,9 +181,11 @@ public class PrefectView extends Fragment {
                                 String violation = documentSnapshot.getString("violation");
                                 String remarks = documentSnapshot.getString("remarks");
                                 String date = documentSnapshot.getString("date");
-
+                                String location = documentSnapshot.getString("location");
+                                String term = documentSnapshot.getString("term");
+                                String offense = documentSnapshot.getString("offense");
                                 // Populate the TableLayout with the fetched data
-                                populateViolationTable(violation, remarks, date, documentSnapshot);
+                                populateViolationTable(violation, remarks, date, location, term, offense, documentSnapshot);
                             }
                         }
                     } else {
@@ -172,34 +198,129 @@ public class PrefectView extends Fragment {
     }
 
     // Method to populate the TableLayout or other UI elements with violation data
-    private void populateViolationTable(String violation, String remarks, String date, DocumentSnapshot documentSnapshot) {
+    private void populateViolationTable(String violation, String remarks, String date, String location, String term, String offense, DocumentSnapshot documentSnapshot) {
+        // Initialize the iteration counter outside the loop
+        int iterationCounter = 0;
+
         if (violation != null && !violation.isEmpty()) {
             // Create a new TableRow for each violation record
             TableRow row = new TableRow(getContext());
+            row.setLayoutParams(new TableRow.LayoutParams(
+                    TableRow.LayoutParams.MATCH_PARENT,
+                    TableRow.LayoutParams.WRAP_CONTENT));
 
-            // Create and add TextViews for violation, remarks, and date
+            // Create TextViews for basic fields to display in the table
+            TextView numberText = new TextView(getContext());
+            if (iterationCounter == 0) {
+                numberText.setText(String.valueOf(violationTable.getChildCount()));  // First iteration: -1
+            } else {
+                numberText.setText(String.valueOf(violationTable.getChildCount() - 2));  // Subsequent iterations: -2
+                iterationCounter++;
+            }
+            numberText.setPadding(16, 16, 16, 16);
+            row.addView(numberText);
+
             TextView violationTextView = new TextView(getContext());
             violationTextView.setText(violation);
-            violationTextView.setClickable(true);
-            violationTextView.setOnClickListener(v -> showViolationDetailsDialog(documentSnapshot));
+            violationTextView.setPadding(8, 8, 8, 8);
             row.addView(violationTextView);
 
-            TextView remarksTextView = new TextView(getContext());
-            remarksTextView.setText(remarks);
-            remarksTextView.setClickable(true);
-            remarksTextView.setOnClickListener(v -> showViolationDetailsDialog(documentSnapshot));
-            row.addView(remarksTextView);
+            TextView offenseTextView = new TextView(getContext());
+            offenseTextView.setText(offense);
+            offenseTextView.setPadding(8, 8, 8, 8);
+            row.addView(offenseTextView);
 
             TextView dateTextView = new TextView(getContext());
             dateTextView.setText(date);
-            dateTextView.setClickable(true);
-            dateTextView.setOnClickListener(v -> showViolationDetailsDialog(documentSnapshot));
             row.addView(dateTextView);
 
             // Add the row to the TableLayout
             violationTable.addView(row);
+
+            // Create an additional row for the details (hidden by default)
+            TableRow detailsRow = new TableRow(getContext());
+            detailsRow.setVisibility(View.GONE); // Initially hidden
+            detailsRow.setLayoutParams(new TableRow.LayoutParams(
+                    TableRow.LayoutParams.MATCH_PARENT,
+                    TableRow.LayoutParams.WRAP_CONTENT));
+            detailsRow.setBackgroundColor(Color.parseColor("#ECECEC"));
+
+            // Details TextView to show reporter, location, semester, etc.
+            TextView numTextView = new TextView(getContext());
+            String numText = " ";
+            numTextView.setText(numText);
+            numTextView.setPadding(16, 16, 16, 16);
+            detailsRow.addView(numTextView);
+
+            // Details TextView to show reporter, location, semester, etc.
+            TextView LocationTextView = new TextView(getContext());
+            String locationText = "Location: " + location;
+            LocationTextView.setText(locationText);
+            LocationTextView.setPadding(16, 16, 16, 16);
+            detailsRow.addView(LocationTextView);
+
+            // Details TextView to show reporter, location, semester, etc.
+            TextView SemesterTextView = new TextView(getContext());
+            String semText = "Semester: " + term;
+            SemesterTextView.setText(semText);
+            SemesterTextView.setPadding(16, 16, 16, 16);
+            detailsRow.addView(SemesterTextView);
+
+            TextView RemarksTextView = new TextView(getContext());
+            String remarksText = "Remarks: " + remarks;
+            RemarksTextView.setText(remarksText);
+            RemarksTextView.setPadding(16, 16, 16, 16);
+            detailsRow.addView(RemarksTextView);
+
+            // Create an additional row for the buttons (hidden by default)
+            TableRow buttonRow = new TableRow(getContext());
+            buttonRow.setVisibility(View.GONE); // Initially hidden
+            buttonRow.setLayoutParams(new TableRow.LayoutParams(
+                    TableRow.LayoutParams.MATCH_PARENT,
+                    TableRow.LayoutParams.WRAP_CONTENT));
+            buttonRow.setBackgroundColor(Color.parseColor("#ECECEC"));
+
+            TextView numTextView2 = new TextView(getContext());
+            String numText2 = " ";
+            numTextView2.setText(numText2);
+            numTextView2.setPadding(16, 16, 16, 16);
+            buttonRow.addView(numTextView2);
+
+            Button settledButton = new Button(getContext());
+            settledButton.setText("Settled");
+            settledButton.setTextSize(12);
+            settledButton.setOnClickListener(v -> {
+                // Show sanction input dialog after setting status to "Settled"
+                DocumentReference violationRef = documentSnapshot.getReference();
+                showSanctionInputDialog(violationRef); // Call method for input dialog
+            });
+            buttonRow.addView(settledButton);
+
+            Button editButton = new Button(getContext());
+            editButton.setText("Edit");
+            editButton.setOnClickListener(v -> showEditViolationDialog(documentSnapshot));  // Correct reference here
+            buttonRow.addView(editButton);
+
+            // Add the details row to the table
+            violationTable.addView(detailsRow);
+            violationTable.addView(buttonRow);
+
+            // Set an OnClickListener on the main row to toggle details visibility
+            row.setOnClickListener(v -> {
+                if (detailsRow.getVisibility() == View.GONE && buttonRow.getVisibility() == View.GONE) {
+                    detailsRow.setVisibility(View.VISIBLE); // Expand to show details
+                    buttonRow.setVisibility(View.VISIBLE); // Show buttons
+                } else {
+                    detailsRow.setVisibility(View.GONE); // Collapse to hide details
+                    buttonRow.setVisibility(View.GONE); // Hide buttons
+                }
+            });
+
+            iterationCounter++;
         }
     }
+
+
 
     // Method to update the logs count displayed on the logsTextView
     private void updateStudentLogsCount(String studentId) {
@@ -225,34 +346,6 @@ public class PrefectView extends Fragment {
             Toast.makeText(getContext(), "Error fetching logs for student: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         });
     }
-    // Method to show the dialog with all details of the selected violation
-    private void showViolationDetailsDialog(DocumentSnapshot documentSnapshot) {
-        String violation = documentSnapshot.getString("violation");
-        String remarks = documentSnapshot.getString("remarks");
-        String date = documentSnapshot.getString("date");
-
-        String fullDetails = "Violation: " + violation + "\nRemarks: " + remarks + "\nDate: " + date;
-
-        // Create and show an AlertDialog with the violation details
-        new AlertDialog.Builder(getContext())
-                .setTitle("Violation Details")
-                .setMessage(fullDetails)
-                .setPositiveButton("Settled", (dialog, which) -> {
-                    // Show sanction input dialog after setting status to "Settled"
-                    DocumentReference violationRef = documentSnapshot.getReference();
-                    showSanctionInputDialog(violationRef);
-
-                    // Update the violation status to "Settled"
-                    updateViolationStatus(documentSnapshot, "Settled");
-                    dialog.dismiss();
-                })
-                .setNeutralButton("Refer to Guidance", (dialog, which) -> {
-                    updateViolationStatus(documentSnapshot, "Referred to Guidance");
-                    dialog.dismiss();
-                })
-                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
-                .show();
-    }
 
 
     private void showSanctionInputDialog(DocumentReference violationRef) {
@@ -269,18 +362,29 @@ public class PrefectView extends Fragment {
                         Map<String, Object> update = new HashMap<>();
                         update.put("sanction", sanctionText);
 
+                        // Get current logs count and then update the document
                         violationRef.get().addOnSuccessListener(documentSnapshot -> {
                             int logsCount = documentSnapshot.getLong("logs") != null ? documentSnapshot.getLong("logs").intValue() : 0;
                             update.put("logs", logsCount + 1);  // Increment logs count
 
+                            // Update sanction and logs count in Firestore
                             violationRef.update(update)
                                     .addOnSuccessListener(aVoid -> {
-                                        // Immediately set the status to "Settled" and remove the UI element
-                                        updateViolationStatus(documentSnapshot, "Settled");
-                                        Toast.makeText(getContext(), "Sanction added: " + sanctionText, Toast.LENGTH_SHORT).show();
+                                        // After sanction and logs update, now update the violation status to "Settled"
+                                        Map<String, Object> statusUpdate = new HashMap<>();
+                                        statusUpdate.put("violation_status", "Settled");
 
-                                        // Update logs count display
-                                        updateStudentLogsCount(violationRef.getParent().getParent().getId());
+                                        violationRef.update(statusUpdate)
+                                                .addOnSuccessListener(aVoidStatus -> {
+                                                    // UI feedback for success
+                                                    Toast.makeText(getContext(), "Sanction added and status set to Settled", Toast.LENGTH_SHORT).show();
+
+                                                    // Update logs count display
+                                                    updateStudentLogsCount(violationRef.getParent().getParent().getId());
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    Toast.makeText(getContext(), "Error updating violation status: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                });
                                     })
                                     .addOnFailureListener(e -> {
                                         Toast.makeText(getContext(), "Error updating sanction: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -297,6 +401,8 @@ public class PrefectView extends Fragment {
 
         sanctionDialog.show();
     }
+
+
 
     // Method to show the violation status dialog when "Logs" is clicked
 
@@ -322,18 +428,18 @@ public class PrefectView extends Fragment {
                             String violation = documentSnapshot.getString("violation");
                             String remarks = documentSnapshot.getString("remarks");
                             String date = documentSnapshot.getString("date");
+                            String offense = documentSnapshot.getString("offense");
 
                             // Create a container for each violation
                             LinearLayout violationContainer = new LinearLayout(getContext());
                             violationContainer.setOrientation(LinearLayout.VERTICAL);
                             violationContainer.setPadding(8, 8, 8, 8);
-                            violationContainer.setBackgroundResource(android.R.color.darker_gray);
                             violationContainer.setLayoutParams(new LinearLayout.LayoutParams(
                                     LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
                             // Add violation details to the container
                             TextView violationTextView = new TextView(getContext());
-                            violationTextView.setText("Violation: " + violation + "\nRemarks: " + remarks + "\nDate: " + date);
+                            violationTextView.setText("Violation: " + violation + "\n Offense Type: "+ offense + "\nRemarks: " + remarks + "\nDate: " + date);
                             violationTextView.setPadding(8, 8, 8, 8);
                             violationContainer.addView(violationTextView);
 
@@ -363,21 +469,7 @@ public class PrefectView extends Fragment {
                             buttonsLayout.setOrientation(LinearLayout.HORIZONTAL);
                             buttonsLayout.setWeightSum(3);  // Distribute buttons equally
 
-                            // Edit Button
-                            Button editButton = new Button(getContext());
-                            editButton.setText("Edit");
-                            editButton.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-                            editButton.setOnClickListener(v -> {
-                                showEditViolationDialog(documentSnapshot);
-                            });
 
-                            // Refer to Guidance Button
-                            Button referButton = new Button(getContext());
-                            referButton.setText("Refer to Guidance");
-                            referButton.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-                            referButton.setOnClickListener(v -> {
-                                referViolationToGuidance(documentSnapshot);
-                            });
 
                             // Unsettle Button
                             Button unsettleButton = new Button(getContext());
@@ -387,9 +479,7 @@ public class PrefectView extends Fragment {
                                 unsettleViolation(documentSnapshot);
                             });
 
-                            // Add buttons to the layout
-                            buttonsLayout.addView(editButton);
-                            buttonsLayout.addView(referButton);
+
                             buttonsLayout.addView(unsettleButton);
 
                             // Add the buttons layout to the violation container
@@ -414,20 +504,6 @@ public class PrefectView extends Fragment {
                 });
     }
 
-    private void referViolationToGuidance(DocumentSnapshot documentSnapshot) {
-        DocumentReference docRef = documentSnapshot.getReference();
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("violation_status", "Referred to Guidance");
-
-        docRef.update(updates)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Violation referred to guidance.", Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error referring to guidance: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
-    }
-
     private void unsettleViolation(DocumentSnapshot documentSnapshot) {
         DocumentReference docRef = documentSnapshot.getReference();
 
@@ -439,7 +515,7 @@ public class PrefectView extends Fragment {
         // Update the document with the new violation status and reset logs to 0
         docRef.update(updates)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Violation is now unsettled. Logs reset to 0.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Violation is now unsettled", Toast.LENGTH_SHORT).show();
 
                     // After updating the status, you can also add logic here to refresh the UI
                     // For example, updating the table with the "Unsettled" violations or refreshing the view
@@ -460,16 +536,10 @@ public class PrefectView extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Edit Violation");
 
-        // Create input fields for violation, date, and sanction
+        // Create input fields for date, reporter, location, violation, and remarks
         LinearLayout layout = new LinearLayout(getContext());
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(16, 16, 16, 16);
-
-        // Create Spinner for violation selection
-        Spinner violationSpinner = new Spinner(getContext());
-
-        // Fetch the violation types from Firestore and set up the spinner
-        fetchViolationTypes(violationSpinner, doc);
 
         // EditText for date (non-editable)
         EditText dateInput = new EditText(getContext());
@@ -481,52 +551,68 @@ public class PrefectView extends Fragment {
         dateInput.setBackgroundResource(android.R.color.transparent);
         layout.addView(dateInput);
 
-        // EditText for sanction
-        EditText sanctionInput = new EditText(getContext());
-        sanctionInput.setHint("Sanction");
-        sanctionInput.setText(doc.getString("sanction"));
-        layout.addView(sanctionInput);
+        // TextView for reporter name
+        String reporterName = "";
+        if (doc.contains("personnel_referrer")) {
+            reporterName = doc.getString("personnel_referrer");
+        } else if (doc.contains("student_referrer")) {
+            reporterName = doc.getString("student_referrer");
+        } else if (doc.contains("prefect_referrer")) {
+            reporterName = doc.getString("prefect_referrer");
+        }
+        TextView reporterTextView = new TextView(getContext());
+        reporterTextView.setText("Reporter: " + reporterName);
+        reporterTextView.setTextSize(16);
+        reporterTextView.setPadding(16, 16, 16, 16);
+        layout.addView(reporterTextView);
 
-        // Add the spinner to the layout
+        // EditText for location
+        EditText locationInput = new EditText(getContext());
+        locationInput.setHint("Location");
+        locationInput.setText(doc.getString("location"));  // Set existing location
+        layout.addView(locationInput);
+
+        // Spinner for violation selection
+        Spinner violationSpinner = new Spinner(getContext());
+        fetchViolationTypes(violationSpinner, doc); // Fetch the violation types from Firestore
         layout.addView(violationSpinner);
 
-        // Dynamically determine the referrer type and name
-        String referrerType = "";
-        String referrerName = "";
-
-        if (doc.contains("personnel_referrer")) {
-            referrerType = "Personnel";
-            referrerName = doc.getString("personnel_referrer");
-        } else if (doc.contains("student_referrer")) {
-            referrerType = "Student";
-            referrerName = doc.getString("student_referrer");
-        } else if (doc.contains("prefect_referrer")) {
-            referrerType = "Prefect";
-            referrerName = doc.getString("prefect_referrer");
-        }
-
-        // Add a TextView to display the referrer information
-        TextView referrerTextView = new TextView(getContext());
-        referrerTextView.setText("Referrer Type: " + referrerType + "\n" + "Referrer Name: " + referrerName);
-        referrerTextView.setTextSize(16); // Set text size to match the date input
-        referrerTextView.setPadding(16, 16, 16, 16); // Same padding as the date input
-        referrerTextView.setBackgroundResource(android.R.color.transparent); // Same background for consistency
-        layout.addView(referrerTextView);
+        // EditText for remarks
+        EditText remarksInput = new EditText(getContext());
+        remarksInput.setHint("Remarks");
+        remarksInput.setText(doc.getString("remarks"));  // Set existing remarks
+        layout.addView(remarksInput);
 
         builder.setView(layout);
 
         // Set the buttons
         builder.setPositiveButton("Save", (dialog, which) -> {
-            // Get the selected violation from the Spinner
-            String newViolation = violationSpinner.getSelectedItem().toString();
+            // Get the selected violation and offense type
+            String selectedViolation = ((CheckboxSpinnerAdapter) violationSpinner.getAdapter()).getSelectedViolation();
+            String selectedType = ((CheckboxSpinnerAdapter) violationSpinner.getAdapter()).getSelectedType();
+
             String newDate = dateInput.getText().toString();
-            String newSanction = sanctionInput.getText().toString();
+            String newLocation = locationInput.getText().toString();
+            String newRemarks = remarksInput.getText().toString();
+
+            // Validate inputs (location and remarks)
+            String validPattern = "^[a-zA-Z0-9\\s]+$";
+            if (!newLocation.matches(validPattern)) {
+                Toast.makeText(getContext(), "Location contains invalid characters!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!newRemarks.matches(validPattern)) {
+                Toast.makeText(getContext(), "Remarks contain invalid characters!", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             // Update Firestore with the new values
             Map<String, Object> updatedData = new HashMap<>();
-            updatedData.put("violation", newViolation);
+            updatedData.put("violation", selectedType);
+            updatedData.put("offense", selectedViolation);  // Store the selected offense type
             updatedData.put("date", newDate);
-            updatedData.put("sanction", newSanction.isEmpty() ? null : newSanction);
+            updatedData.put("location", newLocation.isEmpty() ? null : newLocation);
+            updatedData.put("remarks", newRemarks.isEmpty() ? null : newRemarks);
 
             doc.getReference().update(updatedData)
                     .addOnSuccessListener(aVoid -> {

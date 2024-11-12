@@ -171,61 +171,77 @@
                 android:padding="10dp" />
         </LinearLayout>
 
-        <!-- Violation Table -->
-        <TableLayout
-            android:id="@+id/violationTable"
+        <!-- Scrollable container for the violation table -->
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:stretchColumns="1"
-            android:padding="16dp"
-            android:background="#FFF"
-            android:elevation="2dp"> <!-- Added background and elevation for depth -->
+            android:fillViewport="true">
 
-            <!-- Header Row -->
-            <TableRow
+            <HorizontalScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#6AAB9C">
+                android:layout_height="wrap_content">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <!-- Violation Table -->
+                <TableLayout
+                    android:id="@+id/violationTable"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/number_field"
-                    android:text="#"
-                    android:textStyle="bold"
-                    android:padding="8dp"
-                    android:textColor="#FFF" />
+                    android:stretchColumns="1"
+                    android:padding="16dp"
+                    android:background="#FFF"
+                    android:elevation="2dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/remarks_field"
-                    android:text="Violation"
-                    android:textStyle="bold"
-                    android:padding="8dp"
-                    android:textColor="#FFF" />
+                    <!-- Header Row -->
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#6AAB9C">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Type of Offense"
-                    android:id="@+id/offenseEditTextView"
-                    android:textStyle="bold"
-                    android:padding="8dp"
-                    android:textColor="#FFF" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/number_field"
+                            android:text="#"
+                            android:textStyle="bold"
+                            android:padding="8dp"
+                            android:textColor="#FFF" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/dateEditTextView"
-                    android:text="Date of Incident"
-                    android:textStyle="bold"
-                    android:padding="8dp"
-                    android:textColor="#FFF" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/remarks_field"
+                            android:text="Violation"
+                            android:textStyle="bold"
+                            android:padding="8dp"
+                            android:textColor="#FFF" />
 
-            </TableRow>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/offenseEditTextView"
+                            android:text="Type of Offense"
+                            android:textStyle="bold"
+                            android:padding="8dp"
+                            android:textColor="#FFF" />
 
-        </TableLayout>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/dateEditTextView"
+                            android:text="Date of Incident"
+                            android:textStyle="bold"
+                            android:padding="8dp"
+                            android:textColor="#FFF" />
+
+                    </TableRow>
+
+                    <!-- Dynamic rows will be added here programmatically -->
+
+                </TableLayout>
+
+            </HorizontalScrollView>
+        </ScrollView>
+
 
         <!-- Violation Details Section -->
         <LinearLayout

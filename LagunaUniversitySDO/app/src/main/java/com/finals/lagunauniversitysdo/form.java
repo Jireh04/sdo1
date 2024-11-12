@@ -24,6 +24,8 @@ import com.google.android.gms.tasks.Task;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 
 import androidx.activity.EdgeToEdge;
@@ -45,8 +47,8 @@ import android.widget.CheckBox;
 
 public class form extends AppCompatActivity {
 
-    private Spinner termSpinner, violationSpinner;
-    private EditText dateField, nameField, emailField, contactField, programField, remarksField;
+    private Spinner violationSpinner;
+    private EditText dateField, nameField, emailField, contactField, programField, remarksField, termField;
     private TextView violatorsName, violatorsProgram, violatorsStudID, violatorsContact;
     private TableLayout detailsTable;
     private FirebaseFirestore firestore;
@@ -55,7 +57,7 @@ public class form extends AppCompatActivity {
     private String scannedStudentNo;
     private String scannedProgram;
     private String studentReferrer; // Declare a variable to hold the student referrer
-
+    private String selectedType = null;
     private String firstName, lastName, studentId;
 
     // Keys for intent extras
@@ -63,6 +65,7 @@ public class form extends AppCompatActivity {
     private static final String EMAIL_KEY = "EMAIL";
     private static final String CONTACT_NUM_KEY = "CONTACT_NUM";
     private static final String PROGRAM_KEY = "PROGRAM";
+    private static final String TERM_KEY = "TERM";
     private static final String STUDENT_ID_KEY = "STUDENT_ID";
     private ArrayList<Map<String, String>> scannedStudentDataList = new ArrayList<>();
 
@@ -79,11 +82,11 @@ public class form extends AppCompatActivity {
         // Populate fields from intent
         populateFieldsFromIntent();
 
-        // Set up spinner options
-        setupSpinners();
-
         // Set current date and time
         setCurrentDateTime();
+
+        // Set up spinner options
+        setupSpinners();
 
         // Retrieve and display previously added students
         retrieveAndDisplayAddedStudents();
@@ -92,14 +95,14 @@ public class form extends AppCompatActivity {
         Button submitButton = findViewById(R.id.submit_button);
         submitButton.setOnClickListener(v -> saveData());
 
-
+        setupTermText();
 
     }
 
 
     // Initialize UI elements
     private void initializeUIElements() {
-        termSpinner = findViewById(R.id.term_spinner);
+
         violationSpinner = findViewById(R.id.violation_spinner);
         dateField = findViewById(R.id.date_field);
         nameField = findViewById(R.id.name_field);
@@ -135,6 +138,7 @@ public class form extends AppCompatActivity {
         contactField.setText(studentContact != 0L ? String.valueOf(studentContact) : "");
         programField.setText(studentProgram != null ? studentProgram : "");
 
+
         this.studentReferrer = UserSession.getStudentName();
         Log.d("FormActivity", "Student Referrer: " + this.studentReferrer);
 
@@ -156,6 +160,9 @@ public class form extends AppCompatActivity {
     }
 
     private void processMultipleScannedData(ArrayList<String> scannedDataList) {
+        // Create a set to track student numbers and prevent duplicates
+        Set<String> uniqueStudentNos = new HashSet<>();
+
         for (String scannedData : scannedDataList) {
             String[] scannedFields = scannedData.split("\n");
 
@@ -164,43 +171,48 @@ public class form extends AppCompatActivity {
                 String scannedName = scannedFields[1];  // Assuming the second line is the scanned name
                 String block = scannedFields[2];  // Assuming the third line is the block
 
-                // Display the student details in the table without the contact info
-                displayStudentDetails(scannedName, block, studentNo, ""); // Pass an empty string for contact
+                // Check if the student has already been added based on student number
+                if (!uniqueStudentNos.contains(studentNo)) {
+                    // Display the student details in the table
+                    displayStudentDetails(scannedName, block, studentNo, ""); // Pass an empty string for contact
 
-                // Store the scanned data in a list for later use
-                Map<String, String> studentData = new HashMap<>();
-                studentData.put("student_no", studentNo);
-                studentData.put("student_name", scannedName);
-                studentData.put("student_program", block);
-                this.scannedStudentDataList.add(studentData); // Maintain the list of scanned data
+                    // Add the student number to the set to track uniqueness
+                    uniqueStudentNos.add(studentNo);
 
-                // Optional: Display the latest scanned data in the input fields
-                this.scannedProgram = block; // Store block instead of program
+                    // Store the scanned data in a list for later use
+                    Map<String, String> studentData = new HashMap<>();
+                    studentData.put("student_no", studentNo);
+                    studentData.put("student_name", scannedName);
+                    studentData.put("student_program", block);
+                    this.scannedStudentDataList.add(studentData); // Maintain the list of scanned data
 
-                // Retrieve student data from UserSession
-                String studentName = UserSession.getStudentName();
-                String firstName = UserSession.getFirstName();
-                String lastName = UserSession.getLastName();
-                String studentEmail = UserSession.getEmail();
-                Long studentContact = UserSession.getContactNum();
-                String studentProgram = UserSession.getProgram();
-                studentId = UserSession.getStudentId();
+                    // Optional: Display the latest scanned data in the input fields
+                    this.scannedProgram = block; // Store block instead of program
 
-                // Populate fields with standard student data
-                nameField.setText(studentName != null ? studentName : "");
-                emailField.setText(studentEmail != null ? studentEmail : "");
-                contactField.setText(studentContact != null ? String.valueOf(studentContact) : "");
-                programField.setText(studentProgram != null ? studentProgram : "");
+                    // Retrieve student data from UserSession
+                    String studentName = UserSession.getStudentName();
+                    String studentEmail = UserSession.getEmail();
+                    Long studentContact = UserSession.getContactNum();
+                    String studentProgram = UserSession.getProgram();
+                    studentId = UserSession.getStudentId();
 
-                // Store the latest scanned data for submission
-                this.scannedName = scannedName; // Store scanned name for later use
-                this.scannedContact = studentContact != null ? String.valueOf(studentContact) : ""; // Store scanned contact
-                this.scannedStudentNo = studentNo; // Store student number
+                    // Populate fields with standard student data
+                    nameField.setText(studentName != null ? studentName : "");
+                    emailField.setText(studentEmail != null ? studentEmail : "");
+                    contactField.setText(studentContact != null ? String.valueOf(studentContact) : "");
+                    programField.setText(studentProgram != null ? studentProgram : "");
+
+                    // Store the latest scanned data for submission
+                    this.scannedName = scannedName; // Store scanned name for later use
+                    this.scannedContact = studentContact != null ? String.valueOf(studentContact) : ""; // Store scanned contact
+                    this.scannedStudentNo = studentNo; // Store student number
+                }
             } else {
                 Toast.makeText(this, "Invalid QR code format", Toast.LENGTH_LONG).show();
             }
         }
     }
+
 
     private void processScannedData(String scannedData) {
         // Process the scanned data
@@ -254,15 +266,36 @@ public class form extends AppCompatActivity {
         }
     }
 
-
+    // Set up spinner options
     private void setupSpinners() {
-        // Set up the term spinner with hardcoded values
-        String[] terms = {"First Sem", "Second Sem", "Summer"};
-        setupSpinner(termSpinner, Arrays.asList(terms)); // Convert String[] to List<String>
-
         // Fetch violation types from Firestore and set up the violation spinner
         fetchViolationTypes();
+
+
     }
+
+    private void setupTermText() {
+        TextView termTextView = findViewById(R.id.term_text);
+
+        // Get the current month
+        Calendar calendar = Calendar.getInstance();
+        int currentMonth = calendar.get(Calendar.MONTH); // January = 0, December = 11
+
+        // Set the term based on the current month
+        String currentTerm = "";
+
+        if (currentMonth >= Calendar.AUGUST && currentMonth <= Calendar.DECEMBER) {
+            currentTerm = "1st Semester"; // August - December
+        } else if (currentMonth >= Calendar.JANUARY && currentMonth <= Calendar.MAY) {
+            currentTerm = "2nd Semester"; // January - May
+        } else if (currentMonth >= Calendar.JUNE && currentMonth <= Calendar.JULY) {
+            currentTerm = "Summer"; // June - July
+        }
+
+        // Set the text of the TextView to show the current term
+        termTextView.setText(currentTerm);
+    }
+
 
     // Method to fetch violation types from Firestore
     private void fetchViolationTypes() {
@@ -313,10 +346,12 @@ public class form extends AppCompatActivity {
     }
 
 
+
+
     // Set current date and time
     private void setCurrentDateTime() {
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
         String currentDateTime = dateFormat.format(calendar.getTime());
         dateField.setText(currentDateTime);
     }
@@ -363,7 +398,6 @@ public class form extends AppCompatActivity {
 
 
 
-
     private void saveData() {
         // Initialize CheckBox for privacy consent
         CheckBox privacyConsentCheckbox = findViewById(R.id.privacy_consent);
@@ -379,8 +413,6 @@ public class form extends AppCompatActivity {
         String email = emailField.getText().toString().trim();
         String contactString = contactField.getText().toString().trim();
         String program = programField.getText().toString().trim();
-        String term = termSpinner.getSelectedItem().toString();
-        String violation = violationSpinner.getSelectedItem().toString();
         String date = dateField.getText().toString().trim();
         String studId = studentId; // Assuming this is the student's ID being referred
         String status = "pending"; // Default status
@@ -388,10 +420,16 @@ public class form extends AppCompatActivity {
         // Retrieve remarks from remarks_field
         String remarks = ((EditText) findViewById(R.id.remarks_field)).getText().toString().trim();
 
-        if (violation.equals("Select a Violation")) {
+        // Retrieve violation and type from CheckboxSpinnerAdapter
+        CheckboxSpinnerAdapter adapter = (CheckboxSpinnerAdapter) violationSpinner.getAdapter();
+        String violation = adapter.getSelectedViolation();
+        String selectedType = adapter.getSelectedType();
+
+        if (violation == null || violation.equals("Select a Violation")) {
             Toast.makeText(this, "Please select a valid violation.", Toast.LENGTH_SHORT).show();
             return; // Exit the method if no valid violation is selected
         }
+
         // Retrieve checkbox states and create a single string for user concerns
         String userConcern = "";
         CheckBox disciplineCheckbox = findViewById(R.id.discipline_concerns);
@@ -421,6 +459,9 @@ public class form extends AppCompatActivity {
             return;
         }
 
+        // Get the current term using setupTermText method
+        String selectedTerm = getCurrentTerm();
+
         // Generate dateTimeId for the main student data here
 
         // Retrieve previously added students for submission
@@ -440,14 +481,15 @@ public class form extends AppCompatActivity {
                 studentData.put("student_name", addedUserNames.get(i));
                 studentData.put("student_program", addedUserPrograms.get(i));
                 studentData.put("student_id", addedStudentId); // Use added student ID
-                studentData.put("term", term);
-                studentData.put("violation", violation);
+                studentData.put("offense", violation);  // Save violation in "offense" field
+                studentData.put("violation", selectedType);  // Save selected type in "violation" field
                 studentData.put("date", date);
                 studentData.put("status", status);
                 studentData.put("user_concern", userConcern); // Add user concern to the student data
                 studentData.put("remarks", remarks); // Add remarks to the student data
                 studentData.put("student_referrer", studentReferrer); // Add student_referrer to Firestore data
                 studentData.put("referrer_id", studId); // Add referrer_id to Firestore data
+                studentData.put("term", selectedTerm); // Add the selected term to Firestore data
 
                 Log.d("Firestore", "Student ID: " + addedStudentId);
 
@@ -480,14 +522,15 @@ public class form extends AppCompatActivity {
             scannedStudentData.put("student_name", scannedName);
             scannedStudentData.put("student_program", scannedProgram);
             scannedStudentData.put("student_id", scannedStudentNo); // Use scanned student number
-            scannedStudentData.put("term", term);
-            scannedStudentData.put("violation", violation);
+            scannedStudentData.put("offense", violation);  // Save violation in "offense" field
+            scannedStudentData.put("violation", selectedType);  // Save selected type in "violation" field
             scannedStudentData.put("date", date);
             scannedStudentData.put("status", status);
             scannedStudentData.put("user_concern", userConcern); // Add user concern to scanned student data
             scannedStudentData.put("remarks", remarks); // Add remarks to scanned student data
             scannedStudentData.put("student_referrer", studentReferrer); // Add student_referrer to Firestore data
             scannedStudentData.put("referrer_id", studId); // Add referrer_id to scanned student data
+            scannedStudentData.put("term", selectedTerm); // Add the selected term to Firestore data
 
             // Save each scanned student's data into their respective sub-collection
             firestore.collection("students")
@@ -506,6 +549,25 @@ public class form extends AppCompatActivity {
                         Log.e("Firestore", "Error adding scanned student document", e);
                     });
         }
+    }
+
+    private String getCurrentTerm() {
+        // Get the current month
+        Calendar calendar = Calendar.getInstance();
+        int currentMonth = calendar.get(Calendar.MONTH); // January = 0, December = 11
+
+        // Set the term based on the current month
+        String currentTerm = "";
+
+        if (currentMonth >= Calendar.AUGUST && currentMonth <= Calendar.DECEMBER) {
+            currentTerm = "1st Semester"; // August - December
+        } else if (currentMonth >= Calendar.JANUARY && currentMonth <= Calendar.MAY) {
+            currentTerm = "2nd Semester"; // January - May
+        } else if (currentMonth >= Calendar.JUNE && currentMonth <= Calendar.JULY) {
+            currentTerm = "Summer"; // June - July
+        }
+
+        return currentTerm;
     }
 
     private boolean validateInputs(String name, String email, String contact, String program, String remarks, String userConcern) {
@@ -543,7 +605,6 @@ public class form extends AppCompatActivity {
         emailField.setText("");
         contactField.setText("");
         programField.setText("");
-        termSpinner.setSelection(0);
         violationSpinner.setSelection(0);
         setCurrentDateTime();
     }

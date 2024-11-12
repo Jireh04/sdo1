@@ -37,6 +37,9 @@ import android.util.Log;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import androidx.annotation.NonNull;
 
 import android.widget.Spinner;
 
@@ -79,31 +82,26 @@ public class ReporterView extends Fragment {
 
     // Static method to create a new instance of the fragment and pass arguments
     public static ReporterView newInstance(String studentId, String studentName, String studentProgram,
-                                           String studentContact, String studentYear, String block,
-                                           String violation, String referrerId, String remarks, String date) {
+                                           String studentContact, String violation, String referrerId,
+                                           String remarks, String date) {
         ReporterView fragment = new ReporterView();
         Bundle args = new Bundle();
         args.putString("STUDENT_ID", studentId);
         args.putString("STUDENT_NAME", studentName);
-        args.putString("STUDENT_PROGRAM", studentProgram);
-        args.putString("STUDENT_CONTACT", studentContact);
-        args.putString("STUDENT_YEAR", studentYear);
-        args.putString("BLOCK", block);
         args.putString("VIOLATION", violation);
-        args.putString("REFERRER_ID", referrerId);  // Added referrer_id
+        args.putString("REFERRER_ID", referrerId);
         args.putString("REMARKS", remarks);
         args.putString("DATE", date);
         fragment.setArguments(args);
         return fragment;
     }
 
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         View view = inflater.inflate(R.layout.prefect_view, container, false);
         firestore = FirebaseFirestore.getInstance();
+
         // Initialize the TextViews and Button
         studentNameTextView = view.findViewById(R.id.studentNameTextView);
         studentIdTextView = view.findViewById(R.id.studentIDTextView);
@@ -126,25 +124,49 @@ public class ReporterView extends Fragment {
         if (arguments != null) {
             String studentId = arguments.getString("STUDENT_ID");
             String studentName = arguments.getString("STUDENT_NAME");
-            String studentProgram = arguments.getString("STUDENT_PROGRAM");
-            String studentContact = arguments.getString("STUDENT_CONTACT");
-            String studentYear = arguments.getString("STUDENT_YEAR");
-            String studentBlock = arguments.getString("BLOCK");
+            String violation = arguments.getString("VIOLATION");
+            String referrerId = arguments.getString("REFERRER_ID");
+            String remarks = arguments.getString("REMARKS");
+            String date = arguments.getString("DATE");
 
-            // Set the retrieved data to TextViews
+            // Set the student name to the TextView (this is passed as an argument)
             studentNameTextView.setText("Name: " + studentName);
             studentIdTextView.setText("ID: " + studentId);
-            studentProgramTextView.setText("Program: " + studentProgram);
-            studentContactTextView.setText("Contact No: " + studentContact);
-            studentYearTextView.setText("Year: " + studentYear);
-            studentBlockTextView.setText("Block: " + studentBlock);
 
-            // Call method to populate the violation table and update the count
-            populateViolationTableFromFirestore(studentId);
+            // Fetch all student details (including program, contact, year, block) from Firestore
+            firestore.collection("students").document(studentId)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot studentDoc = task.getResult();
+                                if (studentDoc.exists()) {
+                                    // Fetching student details from Firestore
+                                    String studentProgram = studentDoc.getString("program");
+                                    Long studentContact = studentDoc.getLong("contacts");
+                                    String studentYear = studentDoc.getString("year");
+                                    String studentBlock = studentDoc.getString("block");
+
+                                    // Set the retrieved values to the corresponding TextViews
+                                    studentProgramTextView.setText("Program: " + studentProgram);
+                                    studentContactTextView.setText("Contact No: " + studentContact);
+                                    studentYearTextView.setText("Year: " + studentYear);
+                                    studentBlockTextView.setText("Block: " + studentBlock);
+
+                                    // Call method to populate the violation table and update the count
+                                    populateViolationTableFromFirestore(studentId);
+                                }
+                            } else {
+                                Log.d("ReporterView", "Error getting student details: ", task.getException());
+                            }
+                        }
+                    });
         }
 
         return view;
     }
+
 
 
 
@@ -353,7 +375,6 @@ public class ReporterView extends Fragment {
         }
     }
 
-    // Method to populate the TableLayout with violation data
     private void populateViolationTableFromFirestore(String studentId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference violationsRef = db.collection("students")
@@ -362,27 +383,19 @@ public class ReporterView extends Fragment {
 
         violationsRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                int settledViolationCount = 0;  // Variable to count Settled violations
-                List<QueryDocumentSnapshot> settledViolations = new ArrayList<>();  // List to store settled violations
-
-                // Clear the table before populating it
-                violationTable.removeAllViews();
+                int settledViolationCount = 0;
+                List<QueryDocumentSnapshot> settledViolations = new ArrayList<>();
 
                 for (QueryDocumentSnapshot document : task.getResult()) {
-                    // Fetch all details from the document
                     String violation = document.getString("violation");
                     String date = document.getString("date");
                     String location = document.getString("location");
-                    String referrerId = document.getString("referrer_id");
                     String remarks = document.getString("remarks");
-                    String status = document.getString("status");
-                    String studentName = document.getString("student_name");
-                    String studentProgram = document.getString("student_program");
                     String term = document.getString("term");
-                    String userConcern = document.getString("user_concern");
-                    String sanction = document.getString("sanction"); // Fetching the sanction field
+                    String sanction = document.getString("sanction");
+                    String offense = document.getString("offense");
+                    String violationId = document.getId();
 
-                    // Dynamically determine the referrer type based on available field
                     String referrerType;
                     if (document.contains("personnel_referrer")) {
                         referrerType = document.getString("personnel_referrer");
@@ -392,67 +405,102 @@ public class ReporterView extends Fragment {
                         referrerType = document.getString("prefect_referrer");
                     }
 
-                    // Get the violationId (document ID)
-                    String violationId = document.getId();
-
-                    // Check if the violation status is Settled
                     String violationStatus = document.getString("violation_status");
                     if ("Settled".equals(violationStatus)) {
                         settledViolationCount++;
-                        settledViolations.add(document);  // Add the settled violation to the list
-                        continue; // Skip adding settled violations to the table
+                        settledViolations.add(document);
+                        continue;
                     }
 
-                    // Create a new row for each non-settled violation
                     TableRow row = new TableRow(getContext());
-                    row.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT));
+                    row.setLayoutParams(new TableRow.LayoutParams(
+                            TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT));
 
-                    // Create TextViews for basic fields to display in the table
+                    TextView numText = new TextView(getContext());
+                    numText.setText(String.valueOf(violationTable.getChildCount() + 1));
+                    numText.setPadding(16, 16, 16, 16);
+
                     TextView violationTextView = new TextView(getContext());
                     violationTextView.setText(violation != null ? violation : "N/A");
                     violationTextView.setPadding(16, 16, 16, 16);
+
+                    TextView offenseTextView = new TextView(getContext());
+                    offenseTextView.setText(offense);
+                    offenseTextView.setPadding(16, 16, 16, 16);
 
                     TextView dateTextView = new TextView(getContext());
                     dateTextView.setText(date != null ? date : "N/A");
                     dateTextView.setPadding(16, 16, 16, 16);
 
-                    // Add these TextViews to the row
+                    row.addView(numText);
                     row.addView(violationTextView);
+                    row.addView(offenseTextView);
                     row.addView(dateTextView);
+                    violationTable.addView(row);
 
-                    // Set an onClickListener to show details when clicked
-                    row.setOnClickListener(v -> showViolationDetails(
-                            studentId,  // Pass the studentId here
-                            violation,
-                            date,
-                            location,
-                            referrerType,
-                            referrerId,
-                            remarks,
-                            status,
-                            studentName,
-                            studentProgram,
-                            term,
-                            userConcern,
-                            sanction,
-                            violationId
-                    ));
+                    TableRow detailsRow = new TableRow(getContext());
+                    detailsRow.setVisibility(View.GONE);
+                    detailsRow.setLayoutParams(new TableRow.LayoutParams(
+                            TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT));
+                    detailsRow.setBackgroundColor(Color.parseColor("#ECECEC"));
 
-                    violationTable.addView(row); // Add row to the table
+                    TextView locationTextView = new TextView(getContext());
+                    locationTextView.setText("Location: " + location);
+                    locationTextView.setPadding(16, 16, 16, 16);
+                    detailsRow.addView(locationTextView);
+
+                    TextView semesterTextView = new TextView(getContext());
+                    semesterTextView.setText("Semester: " + term);
+                    semesterTextView.setPadding(16, 16, 16, 16);
+                    detailsRow.addView(semesterTextView);
+
+                    TextView remarksTextView = new TextView(getContext());
+                    remarksTextView.setText("Remarks: " + remarks);
+                    remarksTextView.setPadding(16, 16, 16, 16);
+                    detailsRow.addView(remarksTextView);
+
+                    TableRow buttonRow = new TableRow(getContext());
+                    buttonRow.setVisibility(View.GONE);
+                    buttonRow.setLayoutParams(new TableRow.LayoutParams(
+                            TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT));
+                    buttonRow.setBackgroundColor(Color.parseColor("#ECECEC"));
+
+                    Button settledButton = new Button(getContext());
+                    settledButton.setText("Settled");
+                    settledButton.setOnClickListener(v -> {
+                        DocumentReference violationReference = db.collection("students")
+                                .document(studentId)
+                                .collection("accepted_status")
+                                .document(violationId);
+                        showSanctionInputDialog(violationReference); // Show dialog first
+                    });
+                    buttonRow.addView(settledButton);
+
+                    Button editButton = new Button(getContext());
+                    editButton.setText("Edit");
+                    editButton.setOnClickListener(v -> showEditViolationDialog(document));
+                    buttonRow.addView(editButton);
+
+                    violationTable.addView(detailsRow);
+                    violationTable.addView(buttonRow);
+
+                    row.setOnClickListener(v -> {
+                        if (detailsRow.getVisibility() == View.GONE && buttonRow.getVisibility() == View.GONE) {
+                            detailsRow.setVisibility(View.VISIBLE);
+                            buttonRow.setVisibility(View.VISIBLE);
+                        } else {
+                            detailsRow.setVisibility(View.GONE);
+                            buttonRow.setVisibility(View.GONE);
+                        }
+                    });
                 }
 
-                // Display the count of only "Settled" violations
-                String settledViolationsText = settledViolationCount + " Settled Violations";
-                violationCountButton.setText(settledViolationsText);
-                logEntryTextView.setText("Logs: " + settledViolationCount);  // Log the settled violation count
+                violationCountButton.setText(settledViolationCount + " Settled Violations");
+                logEntryTextView.setText("Logs: " + settledViolationCount);
 
-                // Set both buttons to perform the same action when clicked
                 View.OnClickListener settledViolationsClickListener = v -> {
-                    showSettledViolations(settledViolations);  // Show the settled violations
-                    removeSettledViolationsFromTable(settledViolations);  // Remove them from the table
+                    showSettledViolations(settledViolations);
                 };
-
-                // Set the OnClickListener to both buttons
                 violationCountButton.setOnClickListener(settledViolationsClickListener);
                 logEntryTextView.setOnClickListener(settledViolationsClickListener);
 
@@ -478,10 +526,11 @@ public class ReporterView extends Fragment {
             String date = doc.getString("date");
             String sanction = doc.getString("sanction");
             String violationId = doc.getId();
+            String offense = doc.getString("offense");
 
             // Create a TextView for the violation details
             TextView violationDetails = new TextView(getContext());
-            violationDetails.setText("Violation: " + violation + "\n" +
+            violationDetails.setText("Violation: " + violation + "\n" + "Offense Type: "+offense+"\n"+
                     "Date: " + date + "\n" +
                     "Sanction: " + (sanction != null ? sanction : "N/A"));
             violationDetails.setPadding(0, 10, 0, 10);
@@ -491,28 +540,16 @@ public class ReporterView extends Fragment {
             LinearLayout buttonLayout = new LinearLayout(getContext());
             buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
 
-            // "Edit" button to modify violation details
-            Button editButton = new Button(getContext());
-            editButton.setText("Edit");
-            editButton.setOnClickListener(v -> showEditViolationDialog(doc));
+
 
             // "Unsettle" button to mark the violation as unsettled
             Button unsettleButton = new Button(getContext());
             unsettleButton.setText("Unsettle");
             unsettleButton.setOnClickListener(v -> unsettleViolation((DocumentSnapshot) doc));
 
-            // "Refer to Guidance" button for any custom referral action
-            Button referButton = new Button(getContext());
-            referButton.setText("Refer to Guidance");
-            referButton.setOnClickListener(v -> {
-                Toast.makeText(getContext(), "Referred to Guidance", Toast.LENGTH_SHORT).show();
-                // Optional: Add custom logic here for referring to guidance
-            });
 
-            // Add buttons to the button layout and the layout to the main layout
-            buttonLayout.addView(editButton);
+
             buttonLayout.addView(unsettleButton);
-            buttonLayout.addView(referButton);
             layout.addView(buttonLayout);
         }
 
@@ -535,7 +572,7 @@ public class ReporterView extends Fragment {
         // Update the document with the new violation status and reset logs to 0
         docRef.update(updates)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Violation is now unsettled. Logs reset to 0.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Violation is now unsettled", Toast.LENGTH_SHORT).show();
 
                     // After updating the status, you can also add logic here to refresh the UI
                     // For example, updating the table with the "Unsettled" violations or refreshing the view
@@ -550,23 +587,16 @@ public class ReporterView extends Fragment {
                 });
     }
 
-
     // Show a dialog to edit violation details
     private void showEditViolationDialog(QueryDocumentSnapshot doc) {
         // Create an AlertDialog to edit the violation details
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Edit Violation");
 
-        // Create input fields for violation, date, and sanction
+        // Create input fields for date, reporter, location, violation, and remarks
         LinearLayout layout = new LinearLayout(getContext());
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(16, 16, 16, 16);
-
-        // Create Spinner for violation selection
-        Spinner violationSpinner = new Spinner(getContext());
-
-        // Fetch the violation types from Firestore and set up the spinner
-        fetchViolationTypes(violationSpinner, doc);
 
         // EditText for date (non-editable)
         EditText dateInput = new EditText(getContext());
@@ -578,52 +608,68 @@ public class ReporterView extends Fragment {
         dateInput.setBackgroundResource(android.R.color.transparent);
         layout.addView(dateInput);
 
-        // EditText for sanction
-        EditText sanctionInput = new EditText(getContext());
-        sanctionInput.setHint("Sanction");
-        sanctionInput.setText(doc.getString("sanction"));
-        layout.addView(sanctionInput);
+        // TextView for reporter name
+        String reporterName = "";
+        if (doc.contains("personnel_referrer")) {
+            reporterName = doc.getString("personnel_referrer");
+        } else if (doc.contains("student_referrer")) {
+            reporterName = doc.getString("student_referrer");
+        } else if (doc.contains("prefect_referrer")) {
+            reporterName = doc.getString("prefect_referrer");
+        }
+        TextView reporterTextView = new TextView(getContext());
+        reporterTextView.setText("Reporter: " + reporterName);
+        reporterTextView.setTextSize(16);
+        reporterTextView.setPadding(16, 16, 16, 16);
+        layout.addView(reporterTextView);
 
-        // Add the spinner to the layout
+        // EditText for location
+        EditText locationInput = new EditText(getContext());
+        locationInput.setHint("Location");
+        locationInput.setText(doc.getString("location"));  // Set existing location
+        layout.addView(locationInput);
+
+        // Spinner for violation selection
+        Spinner violationSpinner = new Spinner(getContext());
+        fetchViolationTypes(violationSpinner, doc); // Fetch the violation types from Firestore
         layout.addView(violationSpinner);
 
-        // Dynamically determine the referrer type and name
-        String referrerType = "";
-        String referrerName = "";
-
-        if (doc.contains("personnel_referrer")) {
-            referrerType = "Personnel";
-            referrerName = doc.getString("personnel_referrer");
-        } else if (doc.contains("student_referrer")) {
-            referrerType = "Student";
-            referrerName = doc.getString("student_referrer");
-        } else if (doc.contains("prefect_referrer")) {
-            referrerType = "Prefect";
-            referrerName = doc.getString("prefect_referrer");
-        }
-
-        // Add a TextView to display the referrer information
-        TextView referrerTextView = new TextView(getContext());
-        referrerTextView.setText("Referrer Type: " + referrerType + "\n" + "Referrer Name: " + referrerName);
-        referrerTextView.setTextSize(16); // Set text size to match the date input
-        referrerTextView.setPadding(16, 16, 16, 16); // Same padding as the date input
-        referrerTextView.setBackgroundResource(android.R.color.transparent); // Same background for consistency
-        layout.addView(referrerTextView);
+        // EditText for remarks
+        EditText remarksInput = new EditText(getContext());
+        remarksInput.setHint("Remarks");
+        remarksInput.setText(doc.getString("remarks"));  // Set existing remarks
+        layout.addView(remarksInput);
 
         builder.setView(layout);
 
         // Set the buttons
         builder.setPositiveButton("Save", (dialog, which) -> {
-            // Get the selected violation from the Spinner
-            String newViolation = violationSpinner.getSelectedItem().toString();
+            // Get the selected violation and offense type
+            String selectedViolation = ((CheckboxSpinnerAdapter) violationSpinner.getAdapter()).getSelectedViolation();
+            String selectedType = ((CheckboxSpinnerAdapter) violationSpinner.getAdapter()).getSelectedType();
+
             String newDate = dateInput.getText().toString();
-            String newSanction = sanctionInput.getText().toString();
+            String newLocation = locationInput.getText().toString();
+            String newRemarks = remarksInput.getText().toString();
+
+            // Validate inputs (location and remarks)
+            String validPattern = "^[a-zA-Z0-9\\s]+$";
+            if (!newLocation.matches(validPattern)) {
+                Toast.makeText(getContext(), "Location contains invalid characters!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!newRemarks.matches(validPattern)) {
+                Toast.makeText(getContext(), "Remarks contain invalid characters!", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             // Update Firestore with the new values
             Map<String, Object> updatedData = new HashMap<>();
-            updatedData.put("violation", newViolation);
+            updatedData.put("violation", selectedType);
+            updatedData.put("offense", selectedViolation);  // Store the selected offense type
             updatedData.put("date", newDate);
-            updatedData.put("sanction", newSanction.isEmpty() ? null : newSanction);
+            updatedData.put("location", newLocation.isEmpty() ? null : newLocation);
+            updatedData.put("remarks", newRemarks.isEmpty() ? null : newRemarks);
 
             doc.getReference().update(updatedData)
                     .addOnSuccessListener(aVoid -> {
@@ -638,6 +684,8 @@ public class ReporterView extends Fragment {
 
         builder.show();
     }
+
+
 
     // Method to fetch violation types from Firestore and populate the spinner
     private void fetchViolationTypes(Spinner violationSpinner, QueryDocumentSnapshot doc) {
@@ -817,18 +865,29 @@ public class ReporterView extends Fragment {
                         Map<String, Object> update = new HashMap<>();
                         update.put("sanction", sanctionText);
 
+                        // Get current logs count and then update the document
                         violationRef.get().addOnSuccessListener(documentSnapshot -> {
                             int logsCount = documentSnapshot.getLong("logs") != null ? documentSnapshot.getLong("logs").intValue() : 0;
                             update.put("logs", logsCount + 1);  // Increment logs count
 
+                            // Update sanction and logs count in Firestore
                             violationRef.update(update)
                                     .addOnSuccessListener(aVoid -> {
-                                        // Immediately set the status to "Settled" and remove the UI element
-                                        updateViolationStatus(violationRef, "Settled");
-                                        Toast.makeText(getContext(), "Sanction added: " + sanctionText, Toast.LENGTH_SHORT).show();
+                                        // Change status to "Settled" after sanction and logs are updated
+                                        Map<String, Object> statusUpdate = new HashMap<>();
+                                        statusUpdate.put("violation_status", "Settled");
 
-                                        // Update logs count display
-                                        updateStudentLogsCount(violationRef.getParent().getParent().getId());
+                                        violationRef.update(statusUpdate)
+                                                .addOnSuccessListener(aVoidStatus -> {
+                                                    // UI feedback for success
+                                                    Toast.makeText(getContext(), "Sanction added and status set to Settled", Toast.LENGTH_SHORT).show();
+
+                                                    // Update logs count display
+                                                    updateStudentLogsCount(violationRef.getParent().getParent().getId());
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    Toast.makeText(getContext(), "Error updating violation status: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                });
                                     })
                                     .addOnFailureListener(e -> {
                                         Toast.makeText(getContext(), "Error updating sanction: " + e.getMessage(), Toast.LENGTH_SHORT).show();

@@ -12,7 +12,10 @@ import android.util.Log;
 import android.util.Patterns;
 import java.util.HashSet;
 import java.util.Set;
-
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,8 +41,8 @@ import android.widget.CheckBox;
 
 public class PersonnelForm extends AppCompatActivity {
 
-    private Spinner termSpinner, violationSpinner;
-    private EditText dateField, nameField, emailField, contactField, programField, remarksField;
+    private Spinner violationSpinner;
+    private EditText dateField, nameField, emailField, contactField, programField, remarksField, termField;
     private TextView violatorsName, violatorsProgram, violatorsStudID, violatorsContact;
     private TableLayout detailsTable;
     private FirebaseFirestore firestore;
@@ -82,11 +85,12 @@ public class PersonnelForm extends AppCompatActivity {
         // Set up submit button
         Button submitButton = findViewById(R.id.submit_button);
         submitButton.setOnClickListener(v -> saveData());
+
+        setupTermText();
     }
 
     // Initialize UI elements
     private void initializeUIElements() {
-        termSpinner = findViewById(R.id.term_spinner);
         violationSpinner = findViewById(R.id.violation_spinner);
         dateField = findViewById(R.id.date_field);
         nameField = findViewById(R.id.name_field);
@@ -119,6 +123,7 @@ public class PersonnelForm extends AppCompatActivity {
         emailField.setText(personnelEmail != null ? personnelEmail : "");
         contactField.setText(personnelContact != 0L ? String.valueOf(personnelContact) : "0");
         programField.setText(personnelDepartment != null ? personnelDepartment : "");
+
 
         // Retrieve student data from the intent
         ArrayList<String> userNames = intent.getStringArrayListExtra("ADDED_STUDENT_NAMES");
@@ -197,6 +202,9 @@ public class PersonnelForm extends AppCompatActivity {
 
     // New method to process multiple scanned data inputs
     private void processMultipleScannedData(ArrayList<String> scannedDataList) {
+        // Create a set to track unique student numbers (or a combination of studentNo, scannedName, and block)
+        Set<String> uniqueStudentIdentifiers = new HashSet<>();
+
         for (String scannedData : scannedDataList) {
             // Process each scanned data string
             String[] scannedFields = scannedData.split("\n");
@@ -207,24 +215,29 @@ public class PersonnelForm extends AppCompatActivity {
                 String scannedName = scannedFields[1];  // Assuming the second line is the scanned name
                 String block = scannedFields[2];  // Assuming the third line is the block
 
-                // Display the student details in the table without the contact info
-                displayStudentDetails(scannedName, block, studentNo, ""); // Pass an empty string for contact
+                // Create a unique identifier for each student (based on studentNo, scannedName, and block)
+                String studentIdentifier = studentNo + "_" + scannedName + "_" + block;
 
-                // Store block for later use
-                this.scannedProgram = block; // Store block instead of program
+                // Check if the student is already added
+                if (!uniqueStudentIdentifiers.contains(studentIdentifier)) {
+                    // Display the student details in the table without the contact info
+                    displayStudentDetails(scannedName, block, studentNo, ""); // Pass an empty string for contact
 
-                // Store scanned data in fields or temporary variables for submission
-                this.scannedName = scannedName; // Store scanned name for later use
-                this.scannedContact = UserSession.getContactNum() != null ? String.valueOf(PersonnelSession.getContactNum()) : ""; // Store scanned contact
-                this.scannedStudentNo = studentNo; // Store student number
+                    // Add the student identifier to the set to track uniqueness
+                    uniqueStudentIdentifiers.add(studentIdentifier);
 
-                // Store the scanned data in a list for later use
-                Map<String, String> studentData = new HashMap<>();
-                studentData.put("student_no", studentNo);
-                studentData.put("student_name", scannedName);
-                studentData.put("student_program", block);
-                this.scannedStudentDataList.add(studentData); // Maintain the list of scanned data
+                    // Store scanned data in fields or temporary variables for submission
+                    this.scannedName = scannedName; // Store scanned name for later use
+                    this.scannedContact = UserSession.getContactNum() != null ? String.valueOf(UserSession.getContactNum()) : ""; // Store scanned contact
+                    this.scannedStudentNo = studentNo; // Store student number
 
+                    // Store the scanned data in a list for later use
+                    Map<String, String> studentData = new HashMap<>();
+                    studentData.put("student_no", studentNo);
+                    studentData.put("student_name", scannedName);
+                    studentData.put("student_program", block);
+                    this.scannedStudentDataList.add(studentData); // Maintain the list of scanned data
+                }
             } else {
                 Toast.makeText(this, "Invalid QR code format for data: " + scannedData, Toast.LENGTH_LONG).show();
             }
@@ -233,15 +246,34 @@ public class PersonnelForm extends AppCompatActivity {
 
 
 
-
-    // Set up spinner options
     private void setupSpinners() {
-        // Set up the term spinner with hardcoded values
-        String[] terms = {"First Sem", "Second Sem", "Summer"};
-        setupSpinner(termSpinner, Arrays.asList(terms)); // Convert String[] to List<String>
-
         // Fetch violation types from Firestore and set up the violation spinner
         fetchViolationTypes();
+
+
+    }
+
+    // Set up the term spinner
+    private void setupTermText() {
+        TextView termTextView = findViewById(R.id.term_text);
+
+        // Get the current month
+        Calendar calendar = Calendar.getInstance();
+        int currentMonth = calendar.get(Calendar.MONTH); // January = 0, December = 11
+
+        // Set the term based on the current month
+        String currentTerm = "";
+
+        if (currentMonth >= Calendar.AUGUST && currentMonth <= Calendar.DECEMBER) {
+            currentTerm = "1st Semester"; // August - December
+        } else if (currentMonth >= Calendar.JANUARY && currentMonth <= Calendar.MAY) {
+            currentTerm = "2nd Semester"; // January - May
+        } else if (currentMonth >= Calendar.JUNE && currentMonth <= Calendar.JULY) {
+            currentTerm = "Summer"; // June - July
+        }
+
+        // Set the text of the TextView to show the current term
+        termTextView.setText(currentTerm);
     }
 
     // Method to fetch violation types from Firestore
@@ -294,7 +326,7 @@ public class PersonnelForm extends AppCompatActivity {
     // Set current date and time
     private void setCurrentDateTime() {
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
         String currentDateTime = dateFormat.format(calendar.getTime());
         dateField.setText(currentDateTime);
     }
@@ -368,18 +400,29 @@ public class PersonnelForm extends AppCompatActivity {
         String email = emailField.getText().toString().trim();
         String contactString = contactField.getText().toString().trim();
         String program = programField.getText().toString().trim();
-        String term = termSpinner.getSelectedItem().toString();
-        String violation = violationSpinner.getSelectedItem().toString();
         String date = dateField.getText().toString().trim();
         String studId = violatorsStudID.getText().toString().trim();
         String status = "pending"; // Default status
 
         // Retrieve remarks from remarks_field
         String remarks = ((EditText) findViewById(R.id.remarks_field)).getText().toString().trim();
-        if (violation.equals("Select a Violation")) {
+
+        // Get selected violation and offense from the spinner
+        CheckboxSpinnerAdapter violationAdapter = (CheckboxSpinnerAdapter) violationSpinner.getAdapter();
+        String violation = violationAdapter.getSelectedViolation();
+        String offense = violationAdapter.getSelectedType();
+
+        if (violation == null || violation.equals("Select a Violation")) {
             Toast.makeText(this, "Please select a valid violation.", Toast.LENGTH_SHORT).show();
             return; // Exit the method if no valid violation is selected
         }
+
+        // Check if offense is selected (optional, depending on your requirements)
+        if (offense == null || offense.trim().isEmpty()) {
+            Toast.makeText(this, "Please select a valid offense type.", Toast.LENGTH_SHORT).show();
+            return; // Exit the method if no offense type is selected
+        }
+
         // Retrieve checkbox states and create a single string for user concerns
         String userConcern = "";
         CheckBox disciplineCheckbox = findViewById(R.id.discipline_concerns);
@@ -413,8 +456,6 @@ public class PersonnelForm extends AppCompatActivity {
         String personnelReferrer = PersonnelSession.getPersonnelName(); // Use the name from PersonnelSession
         String personnelID = PersonnelSession.getPersonnelId(); // Use the ID from PersonnelSession
 
-        Log.d("PersonnelReferrer", "Personnel ID: " + personnelID);
-
         if (personnelReferrer == null) {
             personnelReferrer = ""; // Default to empty if not found
         }
@@ -428,6 +469,15 @@ public class PersonnelForm extends AppCompatActivity {
         // Track already added student IDs to prevent duplicates
         Set<String> addedStudentIdsSet = new HashSet<>();
 
+        // Get current term from the setupTermText method
+        String term = getCurrentTerm();
+
+        // Check if the term is empty or invalid (if needed)
+        if (term == null || term.equals("Select a Term")) {
+            Toast.makeText(this, "Please select a valid term.", Toast.LENGTH_SHORT).show();
+            return; // Exit the method if no valid term is selected
+        }
+
         // Check if there are added students and add them to Firestore
         if (addedUserNames != null && addedUserContacts != null && addedUserPrograms != null && addedUserStudentIds != null) {
             for (int i = 0; i < addedUserNames.size(); i++) {
@@ -440,14 +490,15 @@ public class PersonnelForm extends AppCompatActivity {
                         studentData.put("student_name", addedUserNames.get(i));
                         studentData.put("student_program", addedUserPrograms.get(i));
                         studentData.put("student_id", studentId);
-                        studentData.put("term", term);
-                        studentData.put("violation", violation);
+                        studentData.put("violation", offense);
+                        studentData.put("offense", violation); // Save the offense type
                         studentData.put("date", date);
                         studentData.put("status", status);
                         studentData.put("user_concern", userConcern); // Add user concern to the student data
                         studentData.put("remarks", remarks);
                         studentData.put("personnel_referrer", personnelReferrer); // Add personnel referrer
                         studentData.put("referrer_id", personnelID); // Add referrer_id
+                        studentData.put("term", term); // Add the selected term
 
                         // Get current date and time to use as the document ID for the referral
                         String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + studentId; // Append studentId
@@ -460,6 +511,7 @@ public class PersonnelForm extends AppCompatActivity {
                                 .set(studentData)
                                 .addOnSuccessListener(documentReference -> {
                                     Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
+                                    finish();
                                 })
                                 .addOnFailureListener(e -> {
                                     Toast.makeText(this, "Failed to submit data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -489,22 +541,24 @@ public class PersonnelForm extends AppCompatActivity {
                     studentData.put("student_name", nameCell.getText().toString());
                     studentData.put("student_program", programCell.getText().toString());
                     studentData.put("student_id", studentId);
-                    studentData.put("term", term);
-                    studentData.put("violation", violation);
+                    studentData.put("violation", offense);
+                    studentData.put("offense", violation); // Save the offense type
                     studentData.put("date", date);
                     studentData.put("status", status);
+                    studentData.put("user_concern", userConcern);
                     studentData.put("remarks", remarks); // Add remarks if needed
                     studentData.put("personnel_referrer", personnelReferrer); // Add personnel referrer
                     studentData.put("referrer_id", personnelID); // Add referrer_id
+                    studentData.put("term", term); // Add the selected term
 
                     // Get current date and time to use as the document ID for the referral
                     String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + studentId; // Append studentId
 
                     // Add each student's data directly to the Firestore collection
                     firestore.collection("personnel")
-                            .document(personnelID) // Use personnel number as document ID
+                            .document(personnelID) // Use personnel's ID as the document ID
                             .collection("personnel_refferal_history") // Subcollection for the personnel's referrals
-                            .document(dateTimeId) // Document ID based on date, time, and student ID
+                            .document(dateTimeId) // Document ID based on the current timestamp and student ID
                             .set(studentData)
                             .addOnSuccessListener(documentReference -> {
                                 Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
@@ -517,47 +571,23 @@ public class PersonnelForm extends AppCompatActivity {
                 }
             }
         }
+    }
 
-        // Process scanned data for each scanned student
-        for (Map<String, String> scannedData : scannedStudentDataList) {
-            String scannedName = scannedData.get("student_name");
-            String scannedStudentNo = scannedData.get("student_no");
-            String scannedProgram = scannedData.get("student_program");
+    // Method to get the current term based on the month
+    private String getCurrentTerm() {
+        Calendar calendar = Calendar.getInstance();
+        int currentMonth = calendar.get(Calendar.MONTH); // January = 0, December = 11
+        String currentTerm = "";
 
-            // Check if the scanned student ID has already been added
-            if (!addedStudentIdsSet.contains(scannedStudentNo)) {
-                // Generate a unique dateTimeId for each scanned student
-                String scannedDateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + scannedStudentNo; // Append scannedStudentNo
-
-                // Create a map for the scanned student's data
-                Map<String, Object> scannedStudentData = new HashMap<>();
-                scannedStudentData.put("student_name", scannedName);
-                scannedStudentData.put("student_program", scannedProgram);
-                scannedStudentData.put("student_id", scannedStudentNo); // Use scanned student number
-                scannedStudentData.put("term", term);
-                scannedStudentData.put("violation", violation);
-                scannedStudentData.put("date", date);
-                scannedStudentData.put("status", status);
-                scannedStudentData.put("user_concern", userConcern); // Add user concern to scanned student data
-                scannedStudentData.put("remarks", remarks); // Add remarks to scanned student data
-                scannedStudentData.put("personnel_referrer", personnelReferrer); // Add personnel referrer name to Firestore data
-                scannedStudentData.put("referrer_id", personnelID); // Add referrer_id to scanned student data
-
-                // Add scanned student data under personnel's referral history in Firestore
-                firestore.collection("personnel")
-                        .document(personnelID) // Use personnel's ID as the document ID
-                        .collection("personnel_refferal_history") // Subcollection for the personnel's referrals
-                        .document(scannedDateTimeId) // Document ID based on unique dateTimeId and scanned student number
-                        .set(scannedStudentData)
-                        .addOnSuccessListener(aVoid -> {
-                            Toast.makeText(this, "Scanned student data submitted successfully", Toast.LENGTH_SHORT).show();
-                        })
-                        .addOnFailureListener(e -> {
-                            Toast.makeText(this, "Failed to submit scanned student data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            Log.e("Firestore", "Error adding scanned student document", e);
-                        });
-            }
+        if (currentMonth >= Calendar.AUGUST && currentMonth <= Calendar.DECEMBER) {
+            currentTerm = "1st Semester"; // August - December
+        } else if (currentMonth >= Calendar.JANUARY && currentMonth <= Calendar.MAY) {
+            currentTerm = "2nd Semester"; // January - May
+        } else if (currentMonth >= Calendar.JUNE && currentMonth <= Calendar.JULY) {
+            currentTerm = "Summer"; // June - July
         }
+
+        return currentTerm;
     }
 
 
@@ -597,7 +627,6 @@ public class PersonnelForm extends AppCompatActivity {
         contactField.setText("");
         programField.setText("");
         remarksField.setText("");
-        termSpinner.setSelection(0); // Reset to first item
         violationSpinner.setSelection(0); // Reset to first item
         dateField.setText("");
         violatorsStudID.setText("");

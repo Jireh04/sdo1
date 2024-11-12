@@ -34,6 +34,11 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
+
 public class PrefectForm extends AppCompatActivity {
 
     private Spinner termSpinner, violationSpinner;
@@ -80,11 +85,14 @@ public class PrefectForm extends AppCompatActivity {
         // Set up submit button
         Button submitButton = findViewById(R.id.submit_button);
         submitButton.setOnClickListener(v -> saveData());
+
+
+        // Set up the term text field
+        setupTermText();
     }
 
     // Initialize UI elements
     private void initializeUIElements() {
-        termSpinner = findViewById(R.id.term_spinner);
         violationSpinner = findViewById(R.id.violation_spinner);
         dateField = findViewById(R.id.date_field);
         nameField = findViewById(R.id.name_field);
@@ -202,6 +210,9 @@ public class PrefectForm extends AppCompatActivity {
 
     // New method to process multiple scanned data
     private void processMultipleScannedData(ArrayList<String> scannedDataList) {
+        // Create a set to track unique student identifiers (based on studentNo, name, and block)
+        Set<String> uniqueStudentIdentifiers = new HashSet<>();
+
         for (String scannedData : scannedDataList) {
             // Process each scanned data string
             String[] scannedFields = scannedData.split("\n");
@@ -212,30 +223,35 @@ public class PrefectForm extends AppCompatActivity {
                 String scannedName = scannedFields[1];  // Assuming the second line is the scanned name
                 String block = scannedFields[2];  // Assuming the third line is the block
 
-                // Display the student details in the table without the contact info
-                displayStudentDetails(scannedName, block, studentNo, ""); // Pass an empty string for contact
+                // Create a unique identifier for each student (based on studentNo, scannedName, and block)
+                String studentIdentifier = studentNo + "_" + scannedName + "_" + block;
 
-                // Store block for later use
-                this.scannedProgram = block; // Store block instead of program
+                // Check if the student is already added based on the identifier
+                if (!uniqueStudentIdentifiers.contains(studentIdentifier)) {
+                    // Display the student details in the table without the contact info
+                    displayStudentDetails(scannedName, block, studentNo, ""); // Pass an empty string for contact
 
-                // Store scanned data in fields or temporary variables for submission
-                this.scannedName = scannedName; // Store scanned name for later use
-                this.scannedContact = UserSession.getContactNum() != null ? String.valueOf(PersonnelSession.getContactNum()) : ""; // Store scanned contact
-                this.scannedStudentNo = studentNo; // Store student number
+                    // Add the student identifier to the set to track uniqueness
+                    uniqueStudentIdentifiers.add(studentIdentifier);
 
-                // Store the scanned data in a list for later use
-                Map<String, String> studentData = new HashMap<>();
-                studentData.put("student_no", studentNo);
-                studentData.put("student_name", scannedName);
-                studentData.put("student_program", block);
-                this.scannedStudentDataList.add(studentData); // Maintain the list of scanned data
+                    // Store scanned data in fields or temporary variables for submission
+                    this.scannedProgram = block; // Store block instead of program
+                    this.scannedName = scannedName; // Store scanned name for later use
+                    this.scannedContact = UserSession.getContactNum() != null ? String.valueOf(UserSession.getContactNum()) : ""; // Store scanned contact
+                    this.scannedStudentNo = studentNo; // Store student number
 
+                    // Store the scanned data in a list for later use
+                    Map<String, String> studentData = new HashMap<>();
+                    studentData.put("student_no", studentNo);
+                    studentData.put("student_name", scannedName);
+                    studentData.put("student_program", block);
+                    this.scannedStudentDataList.add(studentData); // Maintain the list of scanned data
+                }
             } else {
                 Toast.makeText(this, "Invalid QR code format for data: " + scannedData, Toast.LENGTH_LONG).show();
             }
         }
     }
-
     // Method to display prefect details on the UI
     private void displayPrefectDetails(String name, String email, String contact, String department) {
         // Assume you have TextViews in your layout to display the prefect details
@@ -256,14 +272,33 @@ public class PrefectForm extends AppCompatActivity {
 
     // Set up spinner options
     private void setupSpinners() {
-        // Set up the term spinner with hardcoded values
-        String[] terms = {"First Sem", "Second Sem", "Summer"};
-        setupSpinner(termSpinner, Arrays.asList(terms)); // Convert String[] to List<String>
+
 
         // Fetch violation types from Firestore and set up the violation spinner
         fetchViolationTypes();
     }
 
+    private void setupTermText() {
+        TextView termTextView = findViewById(R.id.term_text);
+
+        // Get the current month
+        Calendar calendar = Calendar.getInstance();
+        int currentMonth = calendar.get(Calendar.MONTH); // January = 0, December = 11
+
+        // Set the term based on the current month
+        String currentTerm = "";
+
+        if (currentMonth >= Calendar.AUGUST && currentMonth <= Calendar.DECEMBER) {
+            currentTerm = "1st Semester"; // August - December
+        } else if (currentMonth >= Calendar.JANUARY && currentMonth <= Calendar.MAY) {
+            currentTerm = "2nd Semester"; // January - May
+        } else if (currentMonth >= Calendar.JUNE && currentMonth <= Calendar.JULY) {
+            currentTerm = "Summer"; // June - July
+        }
+
+        // Set the text of the TextView to show the current term
+        termTextView.setText(currentTerm);
+    }
     // Method to fetch violation types from Firestore
     private void fetchViolationTypes() {
         CollectionReference violationTypesRef = firestore.collection("violation_type");
@@ -391,11 +426,14 @@ public class PrefectForm extends AppCompatActivity {
         String email = emailField.getText().toString().trim();
         String contactString = contactField.getText().toString().trim();
         String program = programField.getText().toString().trim();
-        String term = termSpinner.getSelectedItem().toString();
-        String violation = violationSpinner.getSelectedItem().toString();
         String date = dateField.getText().toString().trim();
         String studId = violatorsStudID.getText().toString().trim();
         String status = "accepted"; // Default status
+
+        // Get selected violation and offense from the spinner
+        CheckboxSpinnerAdapter violationAdapter = (CheckboxSpinnerAdapter) violationSpinner.getAdapter();
+        String violation = violationAdapter.getSelectedViolation();
+        String offense = violationAdapter.getSelectedType();
 
         // Retrieve remarks from remarks_field
         String remarks = ((EditText) findViewById(R.id.remarks_field)).getText().toString().trim();
@@ -403,6 +441,7 @@ public class PrefectForm extends AppCompatActivity {
             Toast.makeText(this, "Please select a valid violation.", Toast.LENGTH_SHORT).show();
             return; // Exit the method if no valid violation is selected
         }
+
         // Retrieve checkbox states and create a single string for user concerns
         String userConcern = "";
         CheckBox disciplineCheckbox = findViewById(R.id.discipline_concerns);
@@ -433,7 +472,7 @@ public class PrefectForm extends AppCompatActivity {
         }
 
         // Retrieve prefect name and ID for referrer
-        String prefectReferrer =  PrefectSession.getPrefectName();
+        String prefectReferrer = PrefectSession.getPrefectName();
         String prefectID = PrefectSession.getPrefectId(); // Assuming you have a prefect ID passed as well
 
         Log.d("PrefectReferrer", "Prefect ID: " + prefectID);
@@ -441,6 +480,9 @@ public class PrefectForm extends AppCompatActivity {
         if (prefectReferrer == null) {
             prefectReferrer = ""; // Default to empty if not found
         }
+
+        // Get the current term
+        String term = getCurrentTerm();
 
         // Retrieve previously added students for submission
         ArrayList<String> addedUserNames = getIntent().getStringArrayListExtra("ADDED_USER_NAMES");
@@ -464,21 +506,22 @@ public class PrefectForm extends AppCompatActivity {
                         studentData.put("student_program", addedUserPrograms.get(i));
                         studentData.put("student_id", studentId);
                         studentData.put("term", term);
-                        studentData.put("violation", violation);
+                        studentData.put("violation", offense);
+                        studentData.put("offense", violation); // Add offense
                         studentData.put("date", date);
                         studentData.put("status", status);
-                        studentData.put("user_concern", userConcern); // Add user concern to the student data
+                        studentData.put("user_concern", userConcern);
                         studentData.put("remarks", remarks);
                         studentData.put("prefect_referrer", prefectReferrer); // Add prefect referrer
-
+                        studentData.put("referrer_id", prefectID);
                         // Get current date and time to use as the document ID for the referral
-                        String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + studentId; // Append studentId
+                        String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + studentId;
 
                         // Add each student's data directly to the Firestore collection (Prefect collection)
                         firestore.collection("prefect")
-                                .document(prefectID) // Use prefect ID as document ID
-                                .collection("prefect_referral_history") // Subcollection for the prefect's referrals
-                                .document(dateTimeId) // Document ID based on date, time, and student ID
+                                .document(prefectID)
+                                .collection("prefect_referral_history")
+                                .document(dateTimeId)
                                 .set(studentData)
                                 .addOnSuccessListener(documentReference -> {
                                     Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
@@ -490,10 +533,10 @@ public class PrefectForm extends AppCompatActivity {
 
                         // Save the same data to the students/{studentId}/accepted_status collection
                         firestore.collection("students")
-                                .document(studentId) // Use studentId for the document ID
-                                .collection("accepted_status") // Subcollection for accepted status
-                                .document(dateTimeId) // Use dateTimeId for document ID
-                                .set(studentData) // Same data as in the prefect referral history
+                                .document(studentId)
+                                .collection("accepted_status")
+                                .document(dateTimeId)
+                                .set(studentData)
                                 .addOnSuccessListener(aVoid -> {
                                     Log.d("Firestore", "Accepted status saved for student: " + studentId);
                                 })
@@ -517,30 +560,29 @@ public class PrefectForm extends AppCompatActivity {
                 TextView contactCell = (TextView) row.getChildAt(3);
 
                 String studentId = studIdCell.getText().toString();
-                // Check if the student ID has already been added
                 if (!addedStudentIdsSet.contains(studentId)) {
                     addedStudentIdsSet.add(studentId); // Mark this ID as added
 
-                    // Create a map for the student data
                     Map<String, Object> studentData = new HashMap<>();
                     studentData.put("student_name", nameCell.getText().toString());
                     studentData.put("student_program", programCell.getText().toString());
                     studentData.put("student_id", studentId);
                     studentData.put("term", term);
-                    studentData.put("violation", violation);
+                    studentData.put("violation", offense);
+                    studentData.put("offense", violation); // Add offense
                     studentData.put("date", date);
                     studentData.put("status", status);
-                    studentData.put("remarks", remarks); // Add remarks if needed
-                    studentData.put("prefect_referrer", prefectReferrer); // Add prefect referrer
+                    studentData.put("remarks", remarks);
+                    studentData.put("user_concern", userConcern);
+                    studentData.put("referrer_id", prefectID);
+                    studentData.put("prefect_referrer", prefectReferrer);
 
-                    // Get current date and time to use as the document ID for the referral
-                    String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + studentId; // Append studentId
+                    String dateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + studentId;
 
-                    // Add each student's data directly to the Firestore collection (Prefect collection)
                     firestore.collection("prefect")
-                            .document(prefectID) // Use prefect ID as the document ID
-                            .collection("prefect_referral_history") // Subcollection for the prefect's referrals
-                            .document(dateTimeId) // Document ID based on date, time, and student ID
+                            .document(prefectID)
+                            .collection("prefect_referral_history")
+                            .document(dateTimeId)
                             .set(studentData)
                             .addOnSuccessListener(documentReference -> {
                                 Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
@@ -551,11 +593,10 @@ public class PrefectForm extends AppCompatActivity {
                                 Log.e("Firestore", "Error adding document", e);
                             });
 
-                    // Save the same data to the students/{studentId}/accepted_status collection
                     firestore.collection("students")
                             .document(studentId)
                             .collection("accepted_status")
-                            .document(dateTimeId) // Use dateTimeId for the document ID
+                            .document(dateTimeId)
                             .set(studentData)
                             .addOnSuccessListener(aVoid -> {
                                 Log.d("Firestore", "Accepted status saved for student: " + studentId);
@@ -567,35 +608,32 @@ public class PrefectForm extends AppCompatActivity {
             }
         }
 
-        // Process scanned data for each scanned student
         for (Map<String, String> scannedData : scannedStudentDataList) {
             String scannedName = scannedData.get("student_name");
             String scannedStudentNo = scannedData.get("student_no");
             String scannedProgram = scannedData.get("student_program");
 
-            // Check if the scanned student ID has already been added
             if (!addedStudentIdsSet.contains(scannedStudentNo)) {
-                // Generate a unique dateTimeId for each scanned student
-                String scannedDateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + scannedStudentNo; // Append scanned student ID
+                String scannedDateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + scannedStudentNo;
 
-                // Prepare student data to be saved in Firestore
                 Map<String, Object> scannedStudentData = new HashMap<>();
                 scannedStudentData.put("student_name", scannedName);
                 scannedStudentData.put("student_program", scannedProgram);
                 scannedStudentData.put("student_id", scannedStudentNo);
                 scannedStudentData.put("term", term);
-                scannedStudentData.put("violation", violation);
+                scannedStudentData.put("violation", offense);
+                scannedStudentData.put("offense", violation); // Add offense
                 scannedStudentData.put("date", date);
+                scannedData.put("user_concern", userConcern);
                 scannedStudentData.put("status", status);
-                scannedStudentData.put("remarks", remarks); // Add remarks if needed
-                scannedStudentData.put("prefect_referrer", prefectReferrer); // Add prefect referrer
-                scannedStudentData.put("prefect_id", prefectID); // Add prefect ID to the student data
+                scannedStudentData.put("remarks", remarks);
+                scannedStudentData.put("prefect_referrer", prefectReferrer);
+                scannedStudentData.put("prefect_id", prefectID);
 
-                // Add the scanned student's data directly to the Firestore collection
                 firestore.collection("prefect")
-                        .document(prefectID) // Use prefect ID as the document ID
-                        .collection("prefect_referral_history") // Subcollection for the prefect's referrals
-                        .document(scannedDateTimeId) // Document ID based on date, time, and scanned student ID
+                        .document(prefectID)
+                        .collection("prefect_referral_history")
+                        .document(scannedDateTimeId)
                         .set(scannedStudentData)
                         .addOnSuccessListener(documentReference -> {
                             Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
@@ -606,11 +644,10 @@ public class PrefectForm extends AppCompatActivity {
                             Log.e("Firestore", "Error adding document", e);
                         });
 
-                // Save the same scanned data to the students/{studentId}/accepted_status collection
                 firestore.collection("students")
-                        .document(scannedStudentNo) // Use scanned student ID as document ID
+                        .document(scannedStudentNo)
                         .collection("accepted_status")
-                        .document(scannedDateTimeId) // Use dateTimeId as document ID
+                        .document(scannedDateTimeId)
                         .set(scannedStudentData)
                         .addOnSuccessListener(aVoid -> {
                             Log.d("Firestore", "Accepted status saved for student: " + scannedStudentNo);
@@ -619,6 +656,20 @@ public class PrefectForm extends AppCompatActivity {
                             Log.e("Firestore", "Failed to save accepted status for student: " + scannedStudentNo, e);
                         });
             }
+        }
+    }
+
+    // Method to get the current term
+    private String getCurrentTerm() {
+        Calendar calendar = Calendar.getInstance();
+        int currentMonth = calendar.get(Calendar.MONTH); // January = 0, December = 11
+
+        if (currentMonth >= Calendar.AUGUST && currentMonth <= Calendar.DECEMBER) {
+            return "1st Semester"; // August - December
+        } else if (currentMonth >= Calendar.JANUARY && currentMonth <= Calendar.MAY) {
+            return "2nd Semester"; // January - May
+        } else {
+            return "Summer"; // June - July
         }
     }
 
