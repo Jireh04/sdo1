@@ -124,14 +124,16 @@
                         android:text="TERM:"
                         android:textStyle="bold" />
 
-                    <EditText
-                        android:id="@+id/term_field"
+                    <TextView
+                        android:id="@+id/term_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="TERM"
-                        android:focusable="false"
-                        android:clickable="false"
-                        android:enabled="false" />
+                        android:background="?android:attr/selectableItemBackground"
+                        android:padding="10dp"
+                        android:text="Select a Term"
+                        android:textColor="#000000"
+                        android:gravity="center" />
+
                 </LinearLayout>
 
             </LinearLayout>

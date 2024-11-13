@@ -8,33 +8,13 @@
         <string-array name="program_options">
             <item>BSCS</item>
             <item>BSIT</item>
-            <item>BSEntrep</item>
-            <item>BSME</item>
-            <item>BEED</item>
-            <item>BSA</item>
-            <item>BAComm</item>
-            <item>BSED - Eng</item>
-            <item>BSED - Math</item>
-            <item>BSTM</item>
-            <item>MID</item>
-            <item>BSED - SAPT</item>
-            <item>BSAIS</item>
-            <item>BSED - Science</item>
-            <item>BSCS-DS</item>
-            <item>BSIT-BA</item>
-            <item>BSIT-SD</item>
-            <item>BSCpE</item>
-            <item>BA Psych</item>
-            <item>BS Psych</item>
-            <item>BPEd</item>
         </string-array>
 
         <!-- Status Options -->
         <string-array name="status_options">
-            <item>Pending</item>
-            <item>In Process</item>
-            <item>Resolved</item>
-            <item>Closed</item>
+            <item>All</item>
+            <item>Settled</item>
+            <item>Unsettled</item>
         </string-array>
 
         <!-- Academic Year Options -->
@@ -49,7 +29,6 @@
         <string-array name="semester_options">
             <item>1st Semester</item>
             <item>2nd Semester</item>
-            <item>Summer Term</item>
         </string-array>
 
         <!-- Type of Offense Options -->

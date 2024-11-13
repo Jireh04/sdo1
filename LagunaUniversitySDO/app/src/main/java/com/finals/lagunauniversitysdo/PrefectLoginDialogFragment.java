@@ -45,6 +45,7 @@ public class PrefectLoginDialogFragment extends DialogFragment {
             public void onClick(View v) {
                 String username = loginUsername.getText().toString().trim();
                 String password = loginPassword.getText().toString().trim();
+                UserSession.init(getActivity());
 
                 // Check if the input fields are empty
                 if (username.isEmpty() || password.isEmpty()) {

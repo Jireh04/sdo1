@@ -32,6 +32,9 @@ import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
 
+
+
+
 public class ReportersFragment extends Fragment {
 
     private LinearLayout reportersContainer;
@@ -155,7 +158,6 @@ public class ReportersFragment extends Fragment {
         }
     }
 
-
     private void viewLogs(String referrerId) {
         String collectionName = "students";  // Collection where student data is stored
         String subCollectionName = "accepted_status";  // Subcollection for student logs
@@ -175,6 +177,10 @@ public class ReportersFragment extends Fragment {
                             for (QueryDocumentSnapshot studentDoc : task.getResult()) {
                                 String studentId = studentDoc.getId();  // Fetch studentId for each student
 
+                                // Fetch the 'year' and 'block' fields from the student document
+                                String studentYear = studentDoc.getString("year");
+                                String studentBlock = studentDoc.getString("block");
+
                                 // Query the "accepted_status" subcollection for each student
                                 db.collection(collectionName)
                                         .document(studentId)
@@ -193,17 +199,13 @@ public class ReportersFragment extends Fragment {
                                                         String date = document.getString("date");  // Ensure 'date' field is included
                                                         String remarks = document.getString("remarks");
 
-                                                        // Get other student details from the parent document
-                                                        String studentProgram = studentDoc.getString("program");
-                                                        String studentContact = studentDoc.getString("contact");
-                                                        String studentYear = studentDoc.getString("year");
-                                                        String block = studentDoc.getString("block");
-
                                                         // Create the log message for each student with date, violation, etc.
                                                         String logMessage = "Student: " + studentName + "\n" +
                                                                 "Violation: " + violation + "\n" +
                                                                 "Date: " + date + "\n" +
-                                                                "Remarks: " + remarks;  // Added remarks
+                                                                "Remarks: " + remarks + "\n" +
+                                                                "Year: " + studentYear + "\n" +
+                                                                "Block: " + studentBlock;
 
                                                         // Add this log message to the HashMap, keyed by studentId
                                                         logMap.put(studentId, logMessage);
@@ -225,6 +227,7 @@ public class ReportersFragment extends Fragment {
                     }
                 });
     }
+
 
     // Method to display logs in a dialog
     private void showLogsInDialog(HashMap<String, String> logMap) {

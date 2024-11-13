@@ -122,7 +122,7 @@ public class graphs {
 
         for (DocumentSnapshot document : querySnapshot.getDocuments()) {
             String studentProgram = document.getString("student_program");
-            String violation = document.getString("violation");
+            String violation = document.getString("offense");
             Object dateObj = document.get("date");
 
             // Counting unique students per program (BarChart)
@@ -143,7 +143,7 @@ public class graphs {
                     date = ((Timestamp) dateObj).toDate();
                 }
 
-                if (date != null) {
+                if (date != null && violation != null) {  // Check that violation is not null
                     String monthYear = monthYearFormat.format(date);
                     switch (violation) {
                         case "Light Offense":
@@ -168,8 +168,8 @@ public class graphs {
 
         lineChart.animateX(1000);  // Animates X-axis over 1 second
         barChart.animateY(1000);   // Animates Y-axis over 1.5 seconds
-
     }
+
 
     // Example color list (you can customize these colors)
     private int[] programColors = {
@@ -303,11 +303,11 @@ public class graphs {
         LineData lineData = new LineData(lightOffenseDataSet, seriousOffenseDataSet, majorOffenseDataSet);
         lineChart.setData(lineData);
 
-    // Set Y-axis value formatter
+        // Set Y-axis value formatter
         lineChart.getAxisLeft().setValueFormatter(new IntegerValueFormatter());
         lineChart.getAxisRight().setEnabled(false); // Disable the right Y-axis if not needed
 
-    // Customize the X-axis
+        // Customize the X-axis
         lineChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(months));
         lineChart.getXAxis().setGranularity(1f);
         lineChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -316,14 +316,14 @@ public class graphs {
         lineChart.getXAxis().setGridColor(Color.parseColor("#E5E5E5"));
         lineChart.getAxisLeft().setGridColor(Color.parseColor("#E5E5E5"));
 
-    // Set chart description
+        // Set chart description
         lineChart.getDescription().setText("Monthly Violations by Type");
         lineChart.getDescription().setTextAlign(Paint.Align.CENTER);
         lineChart.getDescription().setTextSize(12f);
         lineChart.getDescription().setPosition(lineChart.getWidth() * 0.5f, 25);
         lineChart.getDescription().setTextColor(Color.parseColor("#333333"));
 
-    // Configure the legend
+        // Configure the legend
         Legend legend = lineChart.getLegend();
         legend.setTextColor(Color.parseColor("#333333"));
         legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
@@ -333,11 +333,11 @@ public class graphs {
         legend.setYEntrySpace(10f); // Adjust vertical spacing
         legend.setYOffset(10f); // Add top margin for the legend
 
-    // Set up MarkerView to display data counts
+        // Set up MarkerView to display data counts
         MyMarkerView markerView = new MyMarkerView(lineChart.getContext(), R.layout.custom_marker_view);
         lineChart.setMarker(markerView); // Set the marker to the chart
 
-    // Refresh the chart with new data
+        // Refresh the chart with new data
         lineChart.invalidate();
 
     }
@@ -349,7 +349,7 @@ public class graphs {
         public String getFormattedValue(float value) {
             return String.valueOf((int) value);
         }
- }
+    }
 
 
 }

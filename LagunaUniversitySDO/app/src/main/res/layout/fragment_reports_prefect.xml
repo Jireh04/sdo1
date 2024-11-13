@@ -55,6 +55,7 @@
                 <Spinner
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:id="@+id/program_spinner"
                     android:entries="@array/program_options" />
             </LinearLayout>
 
@@ -76,6 +77,7 @@
                 <Spinner
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:id="@+id/status_spinner"
                     android:entries="@array/status_options" />
             </LinearLayout>
 
@@ -97,6 +99,7 @@
                 <Spinner
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:id="@+id/academicYearSpinner"
                     android:entries="@array/academic_year_options" />
             </LinearLayout>
 
@@ -118,6 +121,7 @@
                 <Spinner
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:id="@+id/semesterSpinner"
                     android:entries="@array/semester_options" />
             </LinearLayout>
 
@@ -139,6 +143,7 @@
                 <Spinner
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:id="@+id/offenseTypeSpinner"
                     android:entries="@array/offense_type_options" />
             </LinearLayout>
 
@@ -160,6 +165,7 @@
                 <EditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:id="@+id/dateRangeEditText"
                     android:hint="Use Date Range"
                     android:textSize="12dp"
                     android:backgroundTint="#4CAF50"
@@ -180,6 +186,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:backgroundTint="#25A18E"
+                android:id="@+id/group_name"
                 android:text="Generate Group by Name"
                 android:textColor="#FFFFFF" />
 
@@ -188,6 +195,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:backgroundTint="#25A18E"
+                android:id="@+id/group_date"
                 android:text="Generate Group by Date"
                 android:textColor="#FFFFFF"
                 android:layout_marginStart="8dp" />

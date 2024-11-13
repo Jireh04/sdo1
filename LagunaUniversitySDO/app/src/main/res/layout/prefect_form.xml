@@ -4,9 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".PersonnelForm"
+    tools:context=".form"
+    android:id="@+id/form_layout"
     android:padding="16dp"
-    android:orientation="vertical"> <!-- Set orientation to vertical -->
+    android:orientation="vertical">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -97,7 +98,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="DATE OF FILING:"
+                        android:text="DATE AND TIME OF FILING:"
                         android:textStyle="bold" />
 
                     <EditText
@@ -123,10 +124,16 @@
                         android:text="TERM:"
                         android:textStyle="bold" />
 
-                    <Spinner
-                        android:id="@+id/term_spinner"
+                    <TextView
+                        android:id="@+id/term_text"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:padding="10dp"
+                        android:text="Select a Term"
+                        android:textColor="#000000"
+                        android:gravity="center" />
+
                 </LinearLayout>
 
             </LinearLayout>
@@ -163,7 +170,7 @@
                         android:id="@+id/name_field"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Personnel Name"
+                        android:hint="Student Name"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:clickable="false" />
@@ -218,10 +225,10 @@
                         android:id="@+id/department_field"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@android:color/transparent"
+                        android:hint="Enter department"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        android:hint="Enter department" />
+                        android:background="@android:color/transparent" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -296,6 +303,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
+
+
             <!-- Insights/Observations -->
             <TextView
                 android:layout_width="wrap_content"
@@ -307,13 +316,11 @@
                 android:id="@+id/remarks_field"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Enter insights"
+                android:hint="Enter remarks"
                 android:inputType="textMultiLine"
                 android:minLines="4" />
 
             <!-- Scrollable Table Section -->
-
-            <!-- Privacy Consent Checkbox -->
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
@@ -321,15 +328,15 @@
                 android:fillViewport="true">
 
                 <ScrollView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent">
 
                     <TableLayout
                         android:id="@+id/details_table"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="16dp"
-                        android:stretchColumns="1">
+                        android:stretchColumns="1"
+                        android:padding="16dp">
 
                         <!-- Table Header -->
                         <TableRow
@@ -341,39 +348,39 @@
                                 android:id="@+id/violators_name"
                                 android:layout_width="200dp"
                                 android:layout_height="wrap_content"
-                                android:padding="8dp"
                                 android:text="NAME"
+                                android:padding="8dp"
                                 android:textColor="@android:color/white" />
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:id="@+id/violators_program"
                                 android:layout_width="100dp"
                                 android:layout_height="wrap_content"
-                                android:padding="8dp"
                                 android:text="PROGRAM"
+                                android:padding="8dp"
                                 android:textColor="@android:color/white" />
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:id="@+id/violators_studID"
                                 android:layout_width="150dp"
                                 android:layout_height="wrap_content"
-                                android:padding="8dp"
                                 android:text="STUDENT NO"
+                                android:padding="8dp"
                                 android:textColor="@android:color/white" />
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:id="@+id/violators_contact"
                                 android:layout_width="150dp"
                                 android:layout_height="wrap_content"
-                                android:padding="8dp"
                                 android:text="CONTACTS"
+                                android:padding="8dp"
                                 android:textColor="@android:color/white" />
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:layout_width="70dp"
                                 android:layout_height="wrap_content"
-                                android:padding="8dp"
                                 android:text="    "
+                                android:padding="8dp"
                                 android:textColor="@android:color/white" />
                         </TableRow>
 
@@ -382,22 +389,23 @@
                 </ScrollView>
             </HorizontalScrollView>
 
-            <!-- Submit Button -->
+            <!-- Privacy Consent Checkbox -->
             <CheckBox
                 android:id="@+id/privacy_consent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="I hereby affirm that all information supplied herein is complete and accurate. Withholding or giving false information will make me ineligible for admission or subject to dismissal. I also agree to the data privacy policy of Laguna University."
                 android:paddingTop="20dp"
-                android:paddingBottom="10dp"
-                android:text="I hereby affirm that all information supplied herein is complete and accurate. Withholding or giving false information will make me ineligible for admission or subject to dismissal. I also agree to the data privacy policy of Laguna University." />
+                android:paddingBottom="10dp" />
 
+            <!-- Submit Button -->
             <Button
                 android:id="@+id/submit_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Submit"
                 android:layout_marginTop="20dp"
-                android:backgroundTint="#6AAB9C" />
+                android:backgroundTint="#6AAB9C"/>
 
         </LinearLayout>
     </ScrollView>

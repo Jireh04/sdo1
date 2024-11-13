@@ -342,19 +342,27 @@ public class dashboard_prefect extends Fragment {
             String dateTime = dateTimeEditText.getText().toString().trim();
             String reporter = reporterEditText.getText().toString().trim();
             String location = locationEditText.getText().toString().trim();
-            String violation = violationSpinner.getSelectedItem().toString();
             String remarks = remarksEditText.getText().toString().trim();
 
             // Validate input fields for special characters or excessive whitespace
             if (!isValidInput(reporter) || !isValidInput(location) || !isValidInput(remarks)) {
                 Toast.makeText(getContext(), "Fields must contain meaningful text and cannot be only special characters or whitespace.", Toast.LENGTH_SHORT).show();
-            } else if (dateTime.isEmpty() || reporter.isEmpty() || reporterId.isEmpty() || location.isEmpty() || violation.equals("Select a Violation") || remarks.isEmpty()) {
+            } else if (dateTime.isEmpty() || reporter.isEmpty() || reporterId.isEmpty() || location.isEmpty()  || remarks.isEmpty()) {
                 Toast.makeText(getContext(), "Please fill in all required fields.", Toast.LENGTH_SHORT).show();
             } else {
-                // Validate violation selection
-                if (violation.equals("Select a Violation")) {
+                // Get selected violation and offense from the spinner
+                CheckboxSpinnerAdapter violationAdapter = (CheckboxSpinnerAdapter) violationSpinner.getAdapter();
+                String violation = violationAdapter.getSelectedViolation();
+                String offense = violationAdapter.getSelectedType();
+
+                // Validate violation and offense selection
+                if (violation == null || violation.isEmpty()) {
                     Toast.makeText(getContext(), "Please select a valid violation.", Toast.LENGTH_SHORT).show();
-                    return; // Exit the method if no valid violation is selected
+                    return;
+                }
+                if (offense == null || offense.isEmpty()) {
+                    Toast.makeText(getContext(), "Please select an offense.", Toast.LENGTH_SHORT).show();
+                    return;
                 }
 
                 // Prepare the data to be saved to Firestore
@@ -367,6 +375,7 @@ public class dashboard_prefect extends Fragment {
                 violatorData.put("referrer_id", reporterId); // Use the fetched reporter ID
                 violatorData.put("location", location);
                 violatorData.put("violation", violation);
+                violatorData.put("offense", offense); // Add the offense field
                 violatorData.put("remarks", remarks);
                 violatorData.put("student_id", studId);  // Add the studentId
                 violatorData.put("student_name", name);  // Add the studentName
@@ -417,6 +426,7 @@ public class dashboard_prefect extends Fragment {
         // Show the dialog
         dialog.show();
     }
+
 
     // Method to validate input fields for meaningful text and no special characters/whitespace only
     private boolean isValidInput(String input) {
