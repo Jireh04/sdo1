@@ -25,6 +25,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import android.widget.ImageButton;
 
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -89,6 +90,12 @@ public class PersonnelForm extends AppCompatActivity {
         setupTermText();
     }
 
+    // Declare lists to hold student IDs and their details
+    private List<String> addedUserIds = new ArrayList<>();  // Stores student IDs
+    private Map<String, String> addedUserDetails = new HashMap<>();  // Maps student ID to details (or other data)
+
+
+
     // Initialize UI elements
     private void initializeUIElements() {
         violationSpinner = findViewById(R.id.violation_spinner);
@@ -115,20 +122,20 @@ public class PersonnelForm extends AppCompatActivity {
         // Retrieve personnel data from the intent
         String personnelName = intent.getStringExtra("PERSONNEL_NAME_KEY");
         String personnelEmail = intent.getStringExtra("PERSONNEL_EMAIL_KEY");
-        Long personnelContact = intent.getLongExtra("PERSONNEL_CONTACT_NUM_KEY", 0L);
+        String personnelContact = intent.getStringExtra("PERSONNEL_CONTACT_NUM_KEY");
         String personnelDepartment = intent.getStringExtra("PERSONNEL_DEPARTMENT_KEY");
 
         // Populate personnel fields
         nameField.setText(personnelName != null ? personnelName : "");
         emailField.setText(personnelEmail != null ? personnelEmail : "");
-        contactField.setText(personnelContact != 0L ? String.valueOf(personnelContact) : "0");
+        contactField.setText(personnelContact != null ? personnelContact : "");
         programField.setText(personnelDepartment != null ? personnelDepartment : "");
 
 
         // Retrieve student data from the intent
         ArrayList<String> userNames = intent.getStringArrayListExtra("ADDED_STUDENT_NAMES");
         ArrayList<String> userEmails = intent.getStringArrayListExtra("ADDED_STUDENT_EMAILS");
-        ArrayList<Long> userContacts = (ArrayList<Long>) intent.getSerializableExtra("ADDED_STUDENT_CONTACTS");
+        ArrayList<String> userContacts = intent.getStringArrayListExtra("ADDED_STUDENT_CONTACTS");
         ArrayList<String> userDepartments = intent.getStringArrayListExtra("ADDED_STUDENT_DEPARTMENTS");
         ArrayList<String> userIds = intent.getStringArrayListExtra("ADDED_STUDENT_IDS");
 
@@ -141,7 +148,7 @@ public class PersonnelForm extends AppCompatActivity {
                         i < userDepartments.size() && i < userIds.size()) {
                     String name = userNames.get(i);
                     String email = userEmails.get(i);
-                    Long contact = userContacts.get(i);
+                    String contact = userContacts.get(i);
                     String department = userDepartments.get(i);
                     String studId = userIds.get(i);
 
@@ -350,6 +357,8 @@ public class PersonnelForm extends AppCompatActivity {
     }
 
     // Helper method to display student details in the table
+    // Example: Correct for Activity context
+    // Helper method to display student details in the table
     private void displayStudentDetails(String name, String program, String studId, String contact) {
         // Create a new TableRow
         TableRow row = new TableRow(this);
@@ -385,6 +394,7 @@ public class PersonnelForm extends AppCompatActivity {
         // Add the TableRow to the TableLayout
         detailsTable.addView(row);
     }
+
     private void saveData() {
         // Initialize CheckBox for privacy consent
         CheckBox privacyConsentCheckbox = findViewById(R.id.privacy_consent);

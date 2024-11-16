@@ -249,8 +249,8 @@ public class SettingsFragment extends Fragment {
         CollectionReference violationTypesRef = db.collection("violation_type");
 
         // Find the document based on old values
-        violationTypesRef.whereEqualTo("violation", oldViolation) // Check by old violation
-                .whereEqualTo("type", oldOffenseType) // Check by old offense type
+        violationTypesRef.whereEqualTo("violation", oldOffenseType) // Check by old violation
+                .whereEqualTo("type",oldViolation) // Check by old offense type
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && !task.getResult().isEmpty()) {
@@ -333,8 +333,8 @@ public class SettingsFragment extends Fragment {
 
     private void saveViolationToFirestore(String violation, String offenseType) {
         HashMap<String, Object> violationData = new HashMap<>();
-        violationData.put("violation", violation);
-        violationData.put("type", offenseType);
+        violationData.put("violation", offenseType);
+        violationData.put("type", violation);
 
         db.collection("violation_type").add(violationData)
                 .addOnSuccessListener(documentReference -> Log.d("SettingsFragment", "Violation added with ID: " + documentReference.getId()))

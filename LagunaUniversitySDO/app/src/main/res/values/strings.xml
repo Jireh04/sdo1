@@ -4,45 +4,5 @@
     <string name="close_nav">Close navigation drawer</string>
     <!-- TODO: Remove or change this placeholder text -->
 
-        <!-- Program Options -->
-        <string-array name="program_options">
-            <item>BSCS</item>
-            <item>BSIT</item>
-        </string-array>
-
-        <!-- Status Options -->
-        <string-array name="status_options">
-            <item>All</item>
-            <item>Settled</item>
-            <item>Unsettled</item>
-        </string-array>
-
-        <!-- Academic Year Options -->
-        <string-array name="academic_year_options">
-            <item>2023-2024</item>
-            <item>2024-2025</item>
-            <item>2025-2026</item>
-            <item>2026-2027</item>
-        </string-array>
-
-        <!-- Semester Options -->
-        <string-array name="semester_options">
-            <item>1st Semester</item>
-            <item>2nd Semester</item>
-        </string-array>
-
-        <!-- Type of Offense Options -->
-        <string-array name="offense_type_options">
-            <item>Light Offense</item>
-            <item>Major Offense</item>
-            <item>Serious Offense</item>
-            <!-- Add more offense types as needed -->
-        </string-array>
-
-        <string-array name="referral_type_options">
-            <item>Individual</item>
-            <item>Group</item>
-        </string-array>
-
 
 </resources>

@@ -104,7 +104,7 @@ public class PersonnelLoginDialogFragment extends DialogFragment {
                                 String personnelId = document.getId();  // Get the document ID (personnel ID)
                                 String personnelName = document.getString("name");
                                 String email = document.getString("email");
-                                Long contactNum = document.getLong("contactNum");
+                                String contactNum = document.getString("contact");
                                 String department = document.getString("department");
                                 String personnelUniqueId = document.getString("personnelUniqueId");
 

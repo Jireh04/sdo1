@@ -56,7 +56,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/program_spinner"
-                    android:entries="@array/program_options" />
+                    />
             </LinearLayout>
 
             <!-- Status Spinner -->
@@ -78,7 +78,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/status_spinner"
-                    android:entries="@array/status_options" />
+                    />
             </LinearLayout>
 
             <!-- Academic Year Spinner -->
@@ -100,7 +100,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/academicYearSpinner"
-                    android:entries="@array/academic_year_options" />
+                    />
             </LinearLayout>
 
             <!-- Semester Spinner -->
@@ -122,7 +122,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/semesterSpinner"
-                    android:entries="@array/semester_options" />
+                    />
             </LinearLayout>
 
             <!-- Type of Offense Spinner -->
@@ -144,7 +144,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/offenseTypeSpinner"
-                    android:entries="@array/offense_type_options" />
+                    />
             </LinearLayout>
 
             <!-- Filter Dates -->
@@ -229,6 +229,7 @@
             android:layout_marginBottom="16dp">
 
             <EditText
+                android:id="@+id/studentNoEditText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -236,6 +237,7 @@
                 android:backgroundTint="#4CAF50" />
 
             <ImageButton
+                android:id="@+id/searchButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/baseline_search_24"
@@ -243,7 +245,35 @@
                 android:contentDescription="Search"
                 app:tint="#25A18E"/>
 
+            <!-- PDF Button -->
+            <ImageButton
+                android:id="@+id/pdfButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/baseline_picture_as_pdf_24"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Generate PDF"
+                app:tint="#25A18E"
+                android:layout_marginStart="8dp" />
+
+            <TextView
+                android:id="@+id/studentNameTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Search Results will appear here"
+                android:textSize="16sp"
+                android:textColor="#000000"
+                android:padding="16dp"
+                android:visibility="gone"/>
+
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/logsCountTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Logs Count"
+            android:visibility="gone" />
 
     </LinearLayout>
 </ScrollView>

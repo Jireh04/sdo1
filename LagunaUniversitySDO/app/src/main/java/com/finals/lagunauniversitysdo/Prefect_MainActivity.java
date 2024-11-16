@@ -170,8 +170,6 @@ public class Prefect_MainActivity extends AppCompatActivity implements Navigatio
             selectedFragment = new refferals_prefect();
         } else if (itemId == R.id.Reports) {
             selectedFragment = new reports_prefect();
-        } else if (itemId == R.id.guidanceRefferals) {
-            selectedFragment = new guidanceRefferal_prefect();
         }
 
         if (selectedFragment != null) {

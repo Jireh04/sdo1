@@ -156,7 +156,7 @@ public class PrefectReferralDashboard extends Fragment {
         if (studentId != null && !studentId.isEmpty()) {
             String studentName = PersonnelSession.getStudentName();
             String studentEmail = PersonnelSession.getEmail();
-            Long studentContact = PersonnelSession.getContactNum();
+            String studentContact = PersonnelSession.getContactNum();
             String studentDepartment = PersonnelSession.getDepartment();
 
             // Pass student details to the intent
@@ -166,7 +166,6 @@ public class PrefectReferralDashboard extends Fragment {
 
             // Prepare student contact information as an ArrayList
             ArrayList<Long> studentContactList = new ArrayList<>();
-            studentContactList.add(studentContact != null ? studentContact : 0L);
             intent.putExtra("STUDENT_CONTACT_NUM", studentContactList);
             intent.putExtra("STUDENT_DEPARTMENT", studentDepartment);
         }
