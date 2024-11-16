@@ -74,7 +74,7 @@ public class SettingsFragment extends Fragment {
                         offenseTypes.add(type);
 
                         // Check if the violation already exists in the table before adding
-                        if (!violationExistsInTable(violation, type)) {
+                        if (!violationExistsInTable(type, violation)) {
                             addViolationToTable(type, violation); // Add the violation and its type to the table
                         }
                     } else {
@@ -160,7 +160,7 @@ public class SettingsFragment extends Fragment {
         // Create an Edit button
         Button editButton = new Button(getContext());
         editButton.setText("Edit");
-        editButton.setBackgroundTintList(getResources().getColorStateList(R.color.light_yellow)); // Use setBackgroundTintList for API level >= 21
+        editButton.setBackgroundTintList(getResources().getColorStateList(R.color.deep_green)); // Use setBackgroundTintList for API level >= 21
         editButton.setTextColor(getResources().getColor(android.R.color.black));
 
         // Add views to the row
@@ -250,7 +250,7 @@ public class SettingsFragment extends Fragment {
 
         // Find the document based on old values
         violationTypesRef.whereEqualTo("violation", oldOffenseType) // Check by old violation
-                .whereEqualTo("type", oldViolation) // Check by old offense type
+                .whereEqualTo("type",oldViolation) // Check by old offense type
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && !task.getResult().isEmpty()) {
@@ -333,8 +333,8 @@ public class SettingsFragment extends Fragment {
 
     private void saveViolationToFirestore(String violation, String offenseType) {
         HashMap<String, Object> violationData = new HashMap<>();
-        violationData.put("violation", violation);
-        violationData.put("type", offenseType);
+        violationData.put("violation", offenseType);
+        violationData.put("type", violation);
 
         db.collection("violation_type").add(violationData)
                 .addOnSuccessListener(documentReference -> Log.d("SettingsFragment", "Violation added with ID: " + documentReference.getId()))

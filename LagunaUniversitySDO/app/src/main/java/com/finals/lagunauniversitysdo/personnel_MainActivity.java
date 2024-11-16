@@ -276,8 +276,6 @@ public class personnel_MainActivity extends AppCompatActivity implements Navigat
             selectedFragment = new personnel_myRefferalForm();
         } else if (itemId == R.id.myViolation) {
             selectedFragment = new myViolations_student();
-        } else if (itemId == R.id.guidanceRefferal) {
-            selectedFragment = new guidanceRefferal_student();
         }
 
         if (selectedFragment != null) {

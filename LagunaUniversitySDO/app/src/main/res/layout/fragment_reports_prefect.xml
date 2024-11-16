@@ -55,7 +55,8 @@
                 <Spinner
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:entries="@array/program_options" />
+                    android:id="@+id/program_spinner"
+                    />
             </LinearLayout>
 
             <!-- Status Spinner -->
@@ -76,7 +77,8 @@
                 <Spinner
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:entries="@array/status_options" />
+                    android:id="@+id/status_spinner"
+                    />
             </LinearLayout>
 
             <!-- Academic Year Spinner -->
@@ -97,7 +99,8 @@
                 <Spinner
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:entries="@array/academic_year_options" />
+                    android:id="@+id/academicYearSpinner"
+                    />
             </LinearLayout>
 
             <!-- Semester Spinner -->
@@ -118,7 +121,8 @@
                 <Spinner
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:entries="@array/semester_options" />
+                    android:id="@+id/semesterSpinner"
+                    />
             </LinearLayout>
 
             <!-- Type of Offense Spinner -->
@@ -139,7 +143,8 @@
                 <Spinner
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:entries="@array/offense_type_options" />
+                    android:id="@+id/offenseTypeSpinner"
+                    />
             </LinearLayout>
 
             <!-- Filter Dates -->
@@ -160,6 +165,7 @@
                 <EditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:id="@+id/dateRangeEditText"
                     android:hint="Use Date Range"
                     android:textSize="12dp"
                     android:backgroundTint="#4CAF50"
@@ -180,6 +186,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:backgroundTint="#25A18E"
+                android:id="@+id/group_name"
                 android:text="Generate Group by Name"
                 android:textColor="#FFFFFF" />
 
@@ -188,6 +195,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:backgroundTint="#25A18E"
+                android:id="@+id/group_date"
                 android:text="Generate Group by Date"
                 android:textColor="#FFFFFF"
                 android:layout_marginStart="8dp" />
@@ -221,6 +229,7 @@
             android:layout_marginBottom="16dp">
 
             <EditText
+                android:id="@+id/studentNoEditText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -228,6 +237,7 @@
                 android:backgroundTint="#4CAF50" />
 
             <ImageButton
+                android:id="@+id/searchButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/baseline_search_24"
@@ -235,7 +245,35 @@
                 android:contentDescription="Search"
                 app:tint="#25A18E"/>
 
+            <!-- PDF Button -->
+            <ImageButton
+                android:id="@+id/pdfButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/baseline_picture_as_pdf_24"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Generate PDF"
+                app:tint="#25A18E"
+                android:layout_marginStart="8dp" />
+
+            <TextView
+                android:id="@+id/studentNameTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Search Results will appear here"
+                android:textSize="16sp"
+                android:textColor="#000000"
+                android:padding="16dp"
+                android:visibility="gone"/>
+
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/logsCountTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Logs Count"
+            android:visibility="gone" />
 
     </LinearLayout>
 </ScrollView>

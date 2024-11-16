@@ -5,7 +5,7 @@ public class PersonnelSession {
     private static String personnelId;  // Personnel ID
     private static String personnelName;
     private static String email;
-    private static Long contactNum;
+    private static String contactNum;
     private static String department;
 
     // Unique identifier for personnel
@@ -24,7 +24,7 @@ public class PersonnelSession {
     private static String studentId; // Student ID
     private static String studentName;
     private static String studentEmail;
-    private static Long studentContactNum;
+    private static String studentContactNum;
     private static String studentDepartment;
 
     // Setters for Personnel
@@ -36,7 +36,7 @@ public class PersonnelSession {
         personnelUniqueId = uniqueId;
     }
 
-    public static void setPersonnelDetails(String name, String email, Long contact, String department) {
+    public static void setPersonnelDetails(String name, String email, String contact, String department) {
         personnelName = name;
         PersonnelSession.email = email;
         contactNum = contact;
@@ -52,7 +52,7 @@ public class PersonnelSession {
         PersonnelSession.email = email;
     }
 
-    public static void setContactNum(Long contact) {
+    public static void setContactNum(String contact) {
         contactNum = contact;
     }
 
@@ -95,7 +95,7 @@ public class PersonnelSession {
         studentEmail = email;
     }
 
-    public static void setStudentContactNum(Long contact) {
+    public static void setStudentContactNum(String contact) {
         studentContactNum = contact;
     }
 
@@ -130,7 +130,7 @@ public class PersonnelSession {
         return email;
     }
 
-    public static Long getContactNum() {
+    public static String getContactNum() {
         return contactNum;
     }
 
@@ -173,7 +173,7 @@ public class PersonnelSession {
         return studentEmail;
     }
 
-    public static Long getStudentContactNum() {
+    public static String getStudentContactNum() {
         return studentContactNum;
     }
 

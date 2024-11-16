@@ -119,7 +119,7 @@ public class personnel_refferal_form extends Fragment {
         String uniqueId = PersonnelSession.getPersonnelUniqueId();
         String personnelName = PersonnelSession.getPersonnelName();
         String personnelEmail = PersonnelSession.getEmail();
-        Long personnelContactNum = PersonnelSession.getContactNum();
+        String personnelContactNum = PersonnelSession.getContactNum();
         String personnelProgram = PersonnelSession.getDepartment();
 
         Log.d("ContactNum", "Personnel contact number: " + personnelContactNum);
@@ -152,7 +152,7 @@ public class personnel_refferal_form extends Fragment {
         ArrayList<String> userNames = new ArrayList<>();
         ArrayList<String> userDepartments = new ArrayList<>();
         ArrayList<String> userEmails = new ArrayList<>();
-        ArrayList<Long> userContacts = new ArrayList<>();
+        ArrayList<String> userContacts = new ArrayList<>();
         ArrayList<String> userIds = new ArrayList<>();
 
         for (String userId : addedUserIds) {
@@ -161,7 +161,7 @@ public class personnel_refferal_form extends Fragment {
                 userNames.add(userDoc.getString("name"));
                 userDepartments.add(userDoc.getString("program"));
                 userEmails.add(userDoc.getString("email"));
-                userContacts.add(userDoc.getLong("contact"));
+                userContacts.add(userDoc.getString("contact"));
                 userIds.add(userDoc.getString("student_id"));
             }
         }
@@ -171,7 +171,7 @@ public class personnel_refferal_form extends Fragment {
         if (studentId != null && !studentId.isEmpty()) {
             String studentName = PersonnelSession.getStudentName();
             String studentEmail = PersonnelSession.getEmail();
-            Long studentContact = PersonnelSession.getContactNum();
+            String studentContact = PersonnelSession.getContactNum();
             String studentDepartment = PersonnelSession.getDepartment();
 
             // Pass student details to the intent
@@ -181,7 +181,6 @@ public class personnel_refferal_form extends Fragment {
 
             // Prepare student contact information as an ArrayList
             ArrayList<Long> studentContactList = new ArrayList<>();
-            studentContactList.add(studentContact != null ? studentContact : 0L);
             intent.putExtra("STUDENT_CONTACT_NUM", studentContactList);
             intent.putExtra("STUDENT_DEPARTMENT", studentDepartment);
         }

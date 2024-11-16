@@ -115,15 +115,12 @@
     </TableLayout>
 
     <!-- Scrollable Search Results Section -->
-
-    <!-- Pagination Controls -->
-
     <HorizontalScrollView
         android:id="@+id/search_results_scroll"
         android:layout_width="0dp"
         android:layout_height="450dp"
         android:fillViewport="true"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/pagination_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -148,47 +145,41 @@
                     android:padding="8dp" />
             </TableRow>
 
-            <!-- Add more TableRows here as needed -->
-
         </TableLayout>
     </HorizontalScrollView>
 
+    <!-- Pagination Buttons (Next and Previous) -->
     <LinearLayout
-        android:id="@+id/pagination_controls"
-        android:layout_width="0dp"
+        android:id="@+id/pagination_layout"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:padding="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="10dp"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/search_results_scroll"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+    app:layout_constraintTop_toBottomOf="@id/search_results_scroll"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent">
 
-        <Button
-            android:id="@+id/prev_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Previous" />
+    <!-- Previous Button -->
+    <Button
+        android:id="@+id/previous_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Previous"
+        android:textColor="@android:color/white"
+        android:background="#25A18E"
+        android:layout_marginEnd="16dp" />
 
-        <!-- Container for Page Number TextViews -->
-        <LinearLayout
-            android:id="@+id/page_number_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical" />
-
-        <Button
-            android:id="@+id/next_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Next" />
-    </LinearLayout>
+    <!-- Next Button -->
+    <Button
+        android:id="@+id/next_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Next"
+        android:textColor="@android:color/white"
+        android:background="#25A18E" />
+</LinearLayout>
 
     <!-- Include the graphs layout -->
     <include
@@ -200,6 +191,6 @@
         app:layout_constraintBottom_toTopOf="@+id/search_results_scroll"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/pagination_controls" />
+        app:layout_constraintTop_toBottomOf="@id/search_results_scroll" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

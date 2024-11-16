@@ -38,7 +38,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
-
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.Query;
 
 public class dashboard_prefect extends Fragment {
 
@@ -50,20 +51,19 @@ public class dashboard_prefect extends Fragment {
     private ImageButton pickQrCodeButton;  // QR code scanner button
 
     private graphs graphObj;
-
-    private int currentPage = 1;  // Current page number
-    private int pageSize = 5;      // Number of results per page
-    private int totalPages = 0;     // Total number of pages
-    private String lastVisibleStudentId = null; // For pagination
-
-    private Button prevButton, nextButton;
+    private int currentPage = 0; // To keep track of the current page
+    private static final int RESULTS_PER_PAGE = 5; // Changed to 3 results per page
+    private Button previousButton;
+    private Button nextButton;
+    private LinearLayout paginationLayout;
+    private DocumentSnapshot lastVisible; // To track the last document for pagination
 
     public dashboard_prefect() {
         // Required empty public constructor
     }
 
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_dashboard_prefect, container, false);
 
@@ -74,14 +74,17 @@ public class dashboard_prefect extends Fragment {
         // Initialize Firebase Firestore
         db = FirebaseFirestore.getInstance();
 
+        // Initialize the buttons and layout
+        previousButton = rootView.findViewById(R.id.previous_button);
+        nextButton = rootView.findViewById(R.id.next_button);
+        paginationLayout = rootView.findViewById(R.id.pagination_layout);
+
         // Initialize views
         searchBar = rootView.findViewById(R.id.search_bar);
         searchButton = rootView.findViewById(R.id.search_button);
         searchResultsContainer = rootView.findViewById(R.id.search_results_container);
         referralSection = rootView.findViewById(R.id.referral_section);  // Referral buttons container
         pickQrCodeButton = rootView.findViewById(R.id.pick_qr_code_button);  // QR code scanner button
-        prevButton = rootView.findViewById(R.id.prev_button);
-        nextButton = rootView.findViewById(R.id.next_button);
 
         Button referToGuidanceButton = rootView.findViewById(R.id.referToGuidance);
         Button viewReporters = rootView.findViewById(R.id.ViewReporters);
@@ -92,16 +95,21 @@ public class dashboard_prefect extends Fragment {
         // Set OnClickListener for the QR code scanner button
         pickQrCodeButton.setOnClickListener(v -> openQrScanner());
 
-
-
         referToGuidanceButton.setOnClickListener(v -> openReferralDashboard());
         viewReporters.setOnClickListener(v -> openViewReporters());
-
-        updatePaginationButtons();
+        nextButton.setOnClickListener(v -> {
+            currentPage++;
+            searchStudents();  // Re-run the search to fetch the next set of students
+        });
+        previousButton.setOnClickListener(v -> {
+            if (currentPage > 0) {
+                currentPage--;
+                searchStudents();  // Re-run the search to fetch the previous set of students
+            }
+        });
 
         return rootView;
     }
-
 
     private void searchStudents() {
         // Get the search query
@@ -120,13 +128,23 @@ public class dashboard_prefect extends Fragment {
             // Reference to the Firestore "students" collection
             CollectionReference studentsRef = db.collection("students");
 
-            // Fetch students from Firestore without limiting the number of results
-            studentsRef.get().addOnCompleteListener(task -> {
+            // Create the base query, ordering by 'name' (or any other field)
+            Query query = studentsRef.orderBy("name").limit(RESULTS_PER_PAGE);
+
+            // Use startAfter for pagination when moving to the next page (if currentPage > 0)
+            if (currentPage > 0 && lastVisible != null) {
+                query = query.startAfter(lastVisible); // Fetch data starting after the last document
+            }
+
+            query.get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     QuerySnapshot querySnapshot = task.getResult();
                     boolean foundResults = false;
 
                     if (querySnapshot != null && !querySnapshot.isEmpty()) {
+                        // Save the last document for pagination
+                        lastVisible = querySnapshot.getDocuments().get(querySnapshot.size() - 1);
+
                         // Iterate through the documents
                         for (QueryDocumentSnapshot document : querySnapshot) {
                             String name = document.getString("name");
@@ -184,7 +202,7 @@ public class dashboard_prefect extends Fragment {
                                 // Make the TextView clickable
                                 studentTextView.setOnClickListener(v -> {
                                     // Fetch violations for the selected student
-                                   navigateToPrefectView(studentId, name, program, year, block, remarks, contact); // Use studentId here
+                                    navigateToPrefectView(studentId, name, program, year, block, remarks, contact); // Use studentId here
                                 });
 
                                 // Set the onClickListener for the button
@@ -193,7 +211,7 @@ public class dashboard_prefect extends Fragment {
                                     showAddViolatorDialog(studentId, name);
                                 });
 
-                                // Add the TextView and Button to the LinearLayout
+                                // Add the TextView and Button to the RelativeLayout
                                 userLayout.addView(studentTextView);
                                 userLayout.addView(addButton);
 
@@ -209,12 +227,22 @@ public class dashboard_prefect extends Fragment {
                             noResultsTextView.setPadding(0, 180, 0, 0); // Add top padding
                             searchResultsContainer.addView(noResultsTextView);
                         }
+
+                        // Always show pagination buttons (Next and Previous)
+                        paginationLayout.setVisibility(View.VISIBLE);
+
+                        // Update pagination buttons visibility
+                        updatePaginationButtons(querySnapshot.size());
+
                     } else {
                         // If no students matched, show a "No students found" message
                         TextView noResultsTextView = new TextView(getContext());
                         noResultsTextView.setText("No students found matching '" + queryText + "'");
                         noResultsTextView.setPadding(0, 180, 0, 0); // Add top padding
                         searchResultsContainer.addView(noResultsTextView);
+
+                        // Disable the Next button if there are no results for this query
+                        nextButton.setEnabled(false);
                     }
                 } else {
                     // Handle the error if the query fails
@@ -222,6 +250,10 @@ public class dashboard_prefect extends Fragment {
                     errorTextView.setText("Error: " + task.getException().getMessage());
                     errorTextView.setPadding(0, 180, 0, 0); // Add top padding
                     searchResultsContainer.addView(errorTextView);
+
+                    // Disable pagination buttons if there's an error
+                    nextButton.setEnabled(false);
+                    previousButton.setEnabled(false);
                 }
             });
         } else {
@@ -232,6 +264,22 @@ public class dashboard_prefect extends Fragment {
             searchResultsContainer.addView(emptySearchTextView);
         }
     }
+
+    // Updated method to always show pagination buttons (Next and Previous)
+    private void updatePaginationButtons(int currentQuerySize) {
+        // Enable the previous button if we're not on the first page
+        previousButton.setEnabled(currentPage > 0);
+
+        // Enable the next button if we have more results to display
+        nextButton.setEnabled(currentQuerySize == RESULTS_PER_PAGE);
+    }
+
+
+
+
+
+
+
 
     private void openReferralDashboard() {
         // Create a new instance of the PrefectReferralDashboardFragment
@@ -245,35 +293,7 @@ public class dashboard_prefect extends Fragment {
     }
 
 
-    // Add this method to manage button visibility and listeners
-    private void updatePaginationButtons() {
-        if (currentPage > 1) {
-            prevButton.setVisibility(View.VISIBLE); // Show previous button
-        } else {
-            prevButton.setVisibility(View.GONE); // Hide previous button
-        }
 
-        if (currentPage < totalPages) {
-            nextButton.setVisibility(View.VISIBLE); // Show next button
-        } else {
-            nextButton.setVisibility(View.GONE); // Hide next button
-        }
-
-        // Set onClickListeners for pagination buttons
-        prevButton.setOnClickListener(v -> {
-            if (currentPage > 1) {
-                currentPage--; // Decrement page number
-                searchStudents(); // Re-fetch students for the previous page
-            }
-        });
-
-        nextButton.setOnClickListener(v -> {
-            if (currentPage < totalPages) {
-                currentPage++; // Increment page number
-                searchStudents(); // Re-fetch students for the next page
-            }
-        });
-    }
 
 
 
@@ -374,8 +394,8 @@ public class dashboard_prefect extends Fragment {
                 violatorData.put("prefect_referrer", reporter);
                 violatorData.put("referrer_id", reporterId); // Use the fetched reporter ID
                 violatorData.put("location", location);
-                violatorData.put("violation", violation);
-                violatorData.put("offense", offense); // Add the offense field
+                violatorData.put("violation", offense);
+                violatorData.put("offense", violation); // Add the offense field
                 violatorData.put("remarks", remarks);
                 violatorData.put("student_id", studId);  // Add the studentId
                 violatorData.put("student_name", name);  // Add the studentName

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import android.widget.ImageButton;
 
 
 import androidx.activity.EdgeToEdge;
@@ -75,6 +76,7 @@ public class form extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.form);
 
+
         // Initialize UI elements and Firestore
         initializeUIElements();
         firestore = FirebaseFirestore.getInstance();
@@ -99,6 +101,9 @@ public class form extends AppCompatActivity {
 
     }
 
+    // Declare the lists for storing student IDs and details
+    List<String> addedUserIds = new ArrayList<>();
+    List<Map<String, String>> addedUserDetails = new ArrayList<>();
 
     // Initialize UI elements
     private void initializeUIElements() {
@@ -375,25 +380,109 @@ public class form extends AppCompatActivity {
     }
 
     // Helper method to display student details in the table
+    // Define a class to hold student details
+    class StudentDetails {
+        String name;
+        String program;
+        String contact;
+
+        public StudentDetails(String name, String program, String contact) {
+            this.name = name;
+            this.program = program;
+            this.contact = contact;
+        }
+
+        // Getters (you can add setters if needed)
+        public String getName() {
+            return name;
+        }
+
+        public String getProgram() {
+            return program;
+        }
+
+        public String getContact() {
+            return contact;
+        }
+    }
+
+    // Initialize the HashMap to store students by their ID
+    private HashMap<String, StudentDetails> studentMap = new HashMap<>();
+
     private void displayStudentDetails(String name, String program, String studId, String contact) {
         TableRow row = new TableRow(this);
 
+        // Create TextViews for the student's details
         TextView nameCell = new TextView(this);
         TextView programCell = new TextView(this);
         TextView studIdCell = new TextView(this);
         TextView contactCell = new TextView(this);
 
+        // Set the text for the cells
         nameCell.setText(name);
         programCell.setText(program);
         studIdCell.setText(studId);
         contactCell.setText(contact);
 
+        // Add the text views to the row
         row.addView(nameCell);
         row.addView(programCell);
         row.addView(studIdCell);
         row.addView(contactCell);
 
+        // Create delete button
+        ImageButton deleteButton = new ImageButton(this);
+        deleteButton.setImageResource(R.drawable.baseline_delete_outline_24); // Set the delete icon
+        deleteButton.setBackgroundResource(android.R.color.transparent); // Remove default background
+        deleteButton.setLayoutParams(new TableRow.LayoutParams(
+                TableRow.LayoutParams.WRAP_CONTENT,
+                TableRow.LayoutParams.MATCH_PARENT
+        ));
+
+        // Set the delete button click listener
+        deleteButton.setOnClickListener(v -> {
+            // Remove the row from the TableLayout
+            detailsTable.removeView(row);
+
+            // Remove student from the studentMap using student ID
+            studentMap.remove(studId);  // This will not affect other students
+
+            // Show a toast message to inform the user
+            Toast.makeText(this, name + " removed", Toast.LENGTH_SHORT).show();
+
+            // Optionally disable submit button if necessary
+            toggleSubmitButton();
+        });
+
+        // Add the delete button to the row
+        row.addView(deleteButton);
+
+        // Finally, add the row to the TableLayout
         detailsTable.addView(row);
+
+        // Save the student in the map
+        studentMap.put(studId, new StudentDetails(name, program, contact));
+    }
+
+    // Method to enable or disable the submit button based on the presence of students
+    private void toggleSubmitButton() {
+        Button submitButton = findViewById(R.id.submit_button);
+        if (studentMap.isEmpty()) {
+            submitButton.setEnabled(false);  // Disable submit if no students are left
+        } else {
+            submitButton.setEnabled(true);  // Enable submit if there are students in the map
+        }
+    }
+
+    // Submit logic: Here we can get the remaining students in the map and save/submit them
+    private void submitStudentDetails() {
+        // For example, you could print out the remaining students:
+        for (String studId : studentMap.keySet()) {
+            StudentDetails student = studentMap.get(studId);
+            // Handle the submission logic (e.g., sending to server or saving locally)
+            // You can access student.name, student.program, student.contact
+        }
+        // Show confirmation or proceed with further submission process
     }
 
 

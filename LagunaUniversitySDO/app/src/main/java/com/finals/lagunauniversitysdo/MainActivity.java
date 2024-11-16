@@ -301,8 +301,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             selectedFragment = new MyRefferal_student();
         } else if (itemId == R.id.myViolation) {
             selectedFragment = new myViolations_student();
-        } else if (itemId == R.id.guidanceRefferal) {
-            selectedFragment = new guidanceRefferal_student();
         }
 
         if (selectedFragment != null) {
