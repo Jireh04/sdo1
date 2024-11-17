@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -73,6 +74,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        SharedPreferences sharedPreferences = getSharedPreferences("UserSession", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("isLoggedIn", true); // Save login state
+        editor.putString("userId", loggedInUserId); // Save the user ID (or any other user data)
+        editor.apply();
 
         // Retrieve loggedInUserId from the Intent
         Intent intent = getIntent();
@@ -286,8 +293,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 });
     }
 
+    @Override
+    public void onBackPressed() {
+        // Show a Toast message to inform the user
+        Toast.makeText(this, "Please log out first to exit", Toast.LENGTH_SHORT).show();
 
+        // Optionally, you can add a delay before taking any action or preventing the back press
+        new Handler().postDelayed(() -> {
+            // Prevent back action completely
+        }, 2000); // Delay for 2 seconds
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("MainActivity", "onPause called");
+        // Do not clear session here unless logging out
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("MainActivity", "onResume called");
+
+        SharedPreferences sharedPreferences = getSharedPreferences("UserSession", MODE_PRIVATE);
+        boolean isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false);
+
+        if (!isLoggedIn) {
+            // Redirect to login screen if user is not logged in
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
+    }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {

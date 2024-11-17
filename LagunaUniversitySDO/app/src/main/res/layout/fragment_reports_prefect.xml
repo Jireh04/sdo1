@@ -162,16 +162,55 @@
                     android:textColor="#333333"
                     android:textStyle="bold" />
 
-                <EditText
+                <!-- Filter Dates Section -->
+                <Button
+                    android:id="@+id/useDateRangeButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/dateRangeEditText"
-                    android:hint="Use Date Range"
-                    android:textSize="12dp"
                     android:backgroundTint="#4CAF50"
-                    android:drawableRight="@drawable/baseline_calendar_month_24" />
+                    android:text="Use Date Range"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold" />
             </LinearLayout>
+
+
         </GridLayout>
+
+        <!-- Start Date and End Date Fields -->
+        <LinearLayout
+            android:id="@+id/dateRangeLayout"
+            android:background="@color/white"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+
+            <EditText
+                android:id="@+id/startDateEditText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Start Date"
+                android:gravity="center"
+                android:focusable="false"
+                android:clickable="true"
+                android:drawableEnd="@drawable/baseline_calendar_month_24"
+                android:padding="8dp" />
+
+            <EditText
+                android:id="@+id/endDateEditText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="End Date"
+                android:gravity="center"
+                android:focusable="false"
+                android:clickable="true"
+                android:drawableEnd="@drawable/baseline_calendar_month_24"
+                android:padding="8dp"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
 
         <!-- Generate Buttons -->
         <LinearLayout
@@ -219,54 +258,81 @@
                 android:textSize="18sp" />
         </LinearLayout>
 
-        <!-- Student No Search -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:background="#FFFFFF"
-            android:padding="8dp"
-            android:layout_marginBottom="16dp">
+            android:padding="16dp">
 
-            <EditText
-                android:id="@+id/studentNoEditText"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Student No"
-                android:backgroundTint="#4CAF50" />
-
-            <ImageButton
-                android:id="@+id/searchButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/baseline_search_24"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Search"
-                app:tint="#25A18E"/>
-
-            <!-- PDF Button -->
-            <ImageButton
-                android:id="@+id/pdfButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/baseline_picture_as_pdf_24"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Generate PDF"
-                app:tint="#25A18E"
-                android:layout_marginStart="8dp" />
-
-            <TextView
-                android:id="@+id/studentNameTextView"
+            <!-- Student No Search -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Search Results will appear here"
-                android:textSize="16sp"
-                android:textColor="#000000"
-                android:padding="16dp"
-                android:visibility="gone"/>
+                android:orientation="horizontal"
+                android:padding="8dp"
+                android:layout_marginBottom="16dp">
 
+                <EditText
+                    android:id="@+id/studentNoEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Student No"
+                    android:backgroundTint="#4CAF50"
+                    android:padding="8dp"
+                    android:inputType="text" />
+
+                <ImageButton
+                    android:id="@+id/searchButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/baseline_search_24"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Search"
+                    app:tint="#25A18E"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+
+            <!-- Search Result and PDF Button -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone"
+                android:id="@+id/resultLayout">
+
+                <TextView
+                    android:id="@+id/studentNameTextView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="16sp"
+                    android:textColor="#000000"
+                    android:padding="8dp"
+                    android:background="#F5F5F5"
+                    android:layout_marginEnd="8dp"
+                    android:elevation="2dp"
+                    android:text="Search Results will appear here"
+                    android:gravity="center_vertical|start"
+                    android:drawablePadding="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:visibility="gone" />
+
+                <ImageButton
+                    android:id="@+id/pdfButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/baseline_picture_as_pdf_24"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Generate PDF"
+                    app:tint="#25A18E"
+                    android:visibility="gone" />
+            </LinearLayout>
         </LinearLayout>
+
 
         <TextView
             android:id="@+id/logsCountTextView"

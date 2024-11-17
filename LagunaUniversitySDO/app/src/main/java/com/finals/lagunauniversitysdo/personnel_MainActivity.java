@@ -44,7 +44,7 @@ import java.util.Map;
 public class personnel_MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawer_layout;
-    private ImageView userIcon;
+    private ImageView userIcon, notificationIcon;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String loggedInPersonnelId; // Changed from loggedInUserId
     private String userName;
@@ -126,7 +126,7 @@ public class personnel_MainActivity extends AppCompatActivity implements Navigat
                                             } else if (id == R.id.menu_logout) {
                                                 logUserActivity(loggedInPersonnelId, "Logout");
                                                 // Clear user session data
-                                                UserSession.clearSession();
+                                                PersonnelSession.clearSession();
 
                                                 Toast.makeText(personnel_MainActivity.this, "Logging out...", Toast.LENGTH_SHORT).show();
 
@@ -163,6 +163,19 @@ public class personnel_MainActivity extends AppCompatActivity implements Navigat
             }
         });
     }
+
+    @Override
+    public void onBackPressed() {
+        // Show a Toast message to inform the user
+        Toast.makeText(this, "Please log out first to exit", Toast.LENGTH_SHORT).show();
+
+        // Optionally, you can add a delay before taking any action or preventing the back press
+        new Handler().postDelayed(() -> {
+            // Prevent back action completely
+        }, 2000); // Delay for 2 seconds
+    }
+
+
 
     private void logUserActivity(String personnelID, String activityType) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();

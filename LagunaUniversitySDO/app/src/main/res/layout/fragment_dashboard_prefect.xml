@@ -149,37 +149,42 @@
     </HorizontalScrollView>
 
     <!-- Pagination Buttons (Next and Previous) -->
+    <!-- Pagination Controls -->
     <LinearLayout
         android:id="@+id/pagination_layout"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_marginTop="10dp"
+        android:padding="8dp"
         android:visibility="gone"
-    app:layout_constraintTop_toBottomOf="@id/search_results_scroll"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/search_results_scroll"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- Previous Button -->
-    <Button
-        android:id="@+id/previous_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Previous"
-        android:textColor="@android:color/white"
-        android:background="#25A18E"
-        android:layout_marginEnd="16dp" />
+        <Button
+            android:id="@+id/previous_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Previous" />
 
-    <!-- Next Button -->
-    <Button
-        android:id="@+id/next_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Next"
-        android:textColor="@android:color/white"
-        android:background="#25A18E" />
-</LinearLayout>
+        <!-- Container for Page Number TextViews -->
+        <LinearLayout
+            android:id="@+id/page_number_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical" />
+
+        <Button
+            android:id="@+id/next_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Next" />
+    </LinearLayout>
 
     <!-- Include the graphs layout -->
     <include

@@ -4,6 +4,10 @@
         android:title="User Name" />
 
     <item
+        android:id="@+id/menu_activity_log"
+        android:title="Activity Log" />
+
+    <item
         android:id="@+id/menu_settings"
         android:title="Settings" />
 

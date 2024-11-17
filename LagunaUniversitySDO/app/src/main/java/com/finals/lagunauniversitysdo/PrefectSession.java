@@ -67,13 +67,19 @@ public class PrefectSession {
     }
 
     // Method to store all prefect details at once
-    public static void setPrefectDetails(String name, String email, Long contactNum, String department, String username, String password) {
+    public static void setPrefectDetails(String name, String email, String prefectEmail, Long contactNum, String department, String username, String password) {
         setPrefectName(name);
         setPrefectEmail(email);
         setPrefectContactNum(contactNum);
         setPrefectDepartment(department);
         setPrefectUsername(username);
         setPrefectPassword(password);
+    }
+
+    // Method to check if a prefect is logged in
+    public static boolean isLoggedIn() {
+        // If the prefectId is not null, we assume that the prefect is logged in
+        return prefectId != null && !prefectId.isEmpty();
     }
 
     // Optionally, you can add a method to clear the session when needed

@@ -1,12 +1,18 @@
 package com.finals.lagunauniversitysdo;
 
+import static java.lang.String.format;
+
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.os.Handler;
 
@@ -25,9 +31,18 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.firestore.Query;
+
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Prefect_MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private DrawerLayout drawerLayout;
     private ImageView userIcon;
@@ -111,6 +126,7 @@ public class Prefect_MainActivity extends AppCompatActivity implements Navigatio
                                             if (id == R.id.menu_user_name) {
                                                 return true;
                                             } else if (id == R.id.menu_logout) {
+                                                logUserActivity(loggedInPrefectId, "Logout");
                                                 // Clear PrefectSession data
                                                 PrefectSession.clearSession();
 
@@ -140,10 +156,15 @@ public class Prefect_MainActivity extends AppCompatActivity implements Navigatio
                                                 fragmentTransaction.commit(); // Commit the transaction
 
                                                 return true;
+                                            } else if (id == R.id.menu_activity_log) {
+                                                    String prefectId = loggedInPrefectId; // Replace with actual student ID of the logged-in user
+                                                    showActivityLogDialog(prefectId);
                                             } else {
                                                 return false;
                                             }
+                                            return false;
                                         }
+
                                     });
 
                                 } else {
@@ -158,6 +179,119 @@ public class Prefect_MainActivity extends AppCompatActivity implements Navigatio
             }
         });
     }
+
+    @Override
+    public void onBackPressed() {
+        // Show a Toast message to inform the user
+        Toast.makeText(this, "Please log out first to exit", Toast.LENGTH_SHORT).show();
+
+        // Optionally, you can add a delay before taking any action or preventing the back press
+        new Handler().postDelayed(() -> {
+            // Prevent back action completely
+        }, 2000); // Delay for 2 seconds
+    }
+
+    private void logUserActivity(String prefectID, String activityType) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // Reference to the student's ActivityLog subcollection
+        CollectionReference activityLogRef = db.collection("prefect").document(prefectID).collection("ActivityLog");
+
+        // Query to get the existing count of documents for the specific activity type (e.g., "Login" or "Logout")
+        activityLogRef.whereEqualTo("type", activityType)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    // Count the number of existing logs of this type
+                    int count = querySnapshot.size() + 1; // Next sequence number
+                    String documentId = activityType + ": " + count; // Format the document ID
+
+                    // Create the log entry data
+                    Map<String, Object> logEntry = new HashMap<>();
+                    logEntry.put("type", activityType); // "Login" or "Logout"
+                    logEntry.put("timestamp", FieldValue.serverTimestamp()); // Auto-generated server timestamp
+
+                    // Add the log entry with the custom document ID
+                    activityLogRef.document(documentId)
+                            .set(logEntry)
+                            .addOnSuccessListener(aVoid -> Log.d("ActivityLog", "Log entry added with ID: " + documentId))
+                            .addOnFailureListener(e -> Log.w("ActivityLog", "Error adding log entry with ID: " + documentId, e));
+                })
+                .addOnFailureListener(e -> Log.w("ActivityLog", "Error fetching existing logs for student: " + prefectID, e));
+    }
+
+
+
+    private void showActivityLogDialog(String prefectID) {
+        // Create a dialog box
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Activity Log");
+
+        // Create a layout for displaying the logs
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(20, 20, 20, 20);
+
+        // Access the Firestore instance and fetch the logs
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("prefect").document(prefectID)
+                .collection("ActivityLog") // Subcollection for logs
+                .orderBy("timestamp", Query.Direction.DESCENDING) // Sort by date, newest first
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        boolean hasLogs = false;
+
+                        for (DocumentSnapshot document : task.getResult()) {
+                            // Get log details
+                            String type = document.getString("type"); // "Login" or "Logout"
+                            Timestamp timestamp = document.getTimestamp("timestamp");
+
+                            if (type != null && timestamp != null) {
+                                hasLogs = true;
+
+                                // Format the date and time
+                                String formattedDate = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", java.util.Locale.getDefault()).format(timestamp.toDate());
+                                String logText = format("%s: %s", type, formattedDate);
+
+                                // Create TextView for each log entry
+                                TextView logEntry = new TextView(this);
+                                logEntry.setText(logText);
+                                logEntry.setPadding(10, 10, 10, 10);
+                                logEntry.setTextColor(Color.BLACK);
+
+                                // Add separator line
+                                View separator = new View(this);
+                                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.MATCH_PARENT, 2);
+                                separator.setLayoutParams(params);
+                                separator.setBackgroundColor(Color.LTGRAY);
+
+                                layout.addView(logEntry); // Add log entry to layout
+                                layout.addView(separator); // Add separator
+                            }
+                        }
+
+                        if (!hasLogs) {
+                            TextView noLogsText = new TextView(this);
+                            noLogsText.setText("No logs available.");
+                            noLogsText.setPadding(10, 10, 10, 10);
+                            noLogsText.setTextColor(Color.GRAY);
+                            layout.addView(noLogsText);
+                        }
+
+                    } else {
+                        TextView errorText = new TextView(this);
+                        errorText.setText("Error fetching logs.");
+                        errorText.setPadding(10, 10, 10, 10);
+                        errorText.setTextColor(Color.RED);
+                        layout.addView(errorText);
+                    }
+
+                    builder.setView(layout);
+                    builder.setPositiveButton("Close", (dialog, which) -> dialog.dismiss());
+                    builder.create().show(); // Show the dialog
+                });
+    }
+
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {

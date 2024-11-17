@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
 
@@ -51,11 +53,12 @@ public class dashboard_prefect extends Fragment {
     private ImageButton pickQrCodeButton;  // QR code scanner button
 
     private graphs graphObj;
-    private int currentPage = 0; // To keep track of the current page
-    private static final int RESULTS_PER_PAGE = 5; // Changed to 3 results per page
+    private List<DocumentSnapshot> allDocuments;
+    private AtomicInteger currentPage; // To keep track of the current page
+    private static final int RESULTS_PER_PAGE = 3; // Changed to 3 results per page
     private Button previousButton;
     private Button nextButton;
-    private LinearLayout paginationLayout;
+    private LinearLayout paginationLayout, pageNumberContainer;
     private DocumentSnapshot lastVisible; // To track the last document for pagination
 
     public dashboard_prefect() {
@@ -78,6 +81,7 @@ public class dashboard_prefect extends Fragment {
         previousButton = rootView.findViewById(R.id.previous_button);
         nextButton = rootView.findViewById(R.id.next_button);
         paginationLayout = rootView.findViewById(R.id.pagination_layout);
+        pageNumberContainer = rootView.findViewById(R.id.page_number_container);
 
         // Initialize views
         searchBar = rootView.findViewById(R.id.search_bar);
@@ -89,6 +93,9 @@ public class dashboard_prefect extends Fragment {
         Button referToGuidanceButton = rootView.findViewById(R.id.referToGuidance);
         Button viewReporters = rootView.findViewById(R.id.ViewReporters);
 
+        currentPage = new AtomicInteger(0);
+        allDocuments = new ArrayList<>();
+
         // Set OnClickListener for the search button
         searchButton.setOnClickListener(v -> searchStudents());
 
@@ -97,15 +104,15 @@ public class dashboard_prefect extends Fragment {
 
         referToGuidanceButton.setOnClickListener(v -> openReferralDashboard());
         viewReporters.setOnClickListener(v -> openViewReporters());
+
         nextButton.setOnClickListener(v -> {
-            currentPage++;
+            currentPage.incrementAndGet();
             searchStudents();  // Re-run the search to fetch the next set of students
         });
         previousButton.setOnClickListener(v -> {
-            if (currentPage > 0) {
-                currentPage--;
+            currentPage.decrementAndGet();
                 searchStudents();  // Re-run the search to fetch the previous set of students
-            }
+
         });
 
         return rootView;
@@ -125,15 +132,15 @@ public class dashboard_prefect extends Fragment {
         searchResultsContainer.removeAllViews();
 
         if (!queryText.isEmpty()) {
-            // Reference to the Firestore "students" collection
             CollectionReference studentsRef = db.collection("students");
 
-            // Create the base query, ordering by 'name' (or any other field)
             Query query = studentsRef.orderBy("name").limit(RESULTS_PER_PAGE);
 
-            // Use startAfter for pagination when moving to the next page (if currentPage > 0)
-            if (currentPage > 0 && lastVisible != null) {
-                query = query.startAfter(lastVisible); // Fetch data starting after the last document
+            // Handle pagination for 'Next' and 'Previous'
+            if (currentPage.get() > 0 && lastVisible != null) {
+                query = query.startAfter(lastVisible);
+            } else if (currentPage.get() < 0) {
+                query = query.startAt(lastVisible); // For 'Previous'
             }
 
             query.get().addOnCompleteListener(task -> {
@@ -242,7 +249,7 @@ public class dashboard_prefect extends Fragment {
                         searchResultsContainer.addView(noResultsTextView);
 
                         // Disable the Next button if there are no results for this query
-                        nextButton.setEnabled(false);
+                        disablePaginationButtons();
                     }
                 } else {
                     // Handle the error if the query fails
@@ -252,8 +259,7 @@ public class dashboard_prefect extends Fragment {
                     searchResultsContainer.addView(errorTextView);
 
                     // Disable pagination buttons if there's an error
-                    nextButton.setEnabled(false);
-                    previousButton.setEnabled(false);
+                    disablePaginationButtons();
                 }
             });
         } else {
@@ -265,19 +271,35 @@ public class dashboard_prefect extends Fragment {
         }
     }
 
+
     // Updated method to always show pagination buttons (Next and Previous)
     private void updatePaginationButtons(int currentQuerySize) {
-        // Enable the previous button if we're not on the first page
-        previousButton.setEnabled(currentPage > 0);
+        if (previousButton != null && nextButton != null && pageNumberContainer != null) {
+            previousButton.setEnabled(currentPage.get() > 0);
+            nextButton.setEnabled(currentQuerySize == RESULTS_PER_PAGE);
 
-        // Enable the next button if we have more results to display
-        nextButton.setEnabled(currentQuerySize == RESULTS_PER_PAGE);
+            pageNumberContainer.removeAllViews();
+            int totalPages = (int) Math.ceil((double) allDocuments.size() / RESULTS_PER_PAGE);
+
+            for (int i = 0; i < totalPages; i++) {
+                TextView pageNumberTextView = new TextView(getActivity());
+                pageNumberTextView.setText(String.valueOf(i + 1));
+                pageNumberTextView.setPadding(8, 8, 8, 8);
+                pageNumberTextView.setTextSize(16); // Ensure text is visible
+                pageNumberTextView.setGravity(Gravity.CENTER);
+                pageNumberTextView.setTextColor(i == currentPage.get() ? Color.BLUE : Color.BLACK);
+                pageNumberContainer.addView(pageNumberTextView);
+                Log.d("PageNumbers", "Added page number: " + i);
+            }
+        }
+
+
     }
 
-
-
-
-
+    private void disablePaginationButtons() {
+        previousButton.setEnabled(false);
+        nextButton.setEnabled(false);
+    }
 
 
 

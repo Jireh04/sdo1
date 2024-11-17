@@ -16,8 +16,13 @@ import androidx.fragment.app.DialogFragment;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PrefectLoginDialogFragment extends DialogFragment {
 
@@ -99,10 +104,11 @@ public class PrefectLoginDialogFragment extends DialogFragment {
 
                                     // Store Prefect ID and details in PrefectSession, now with username and password
                                     PrefectSession.setPrefectId(prefectId);
-                                    PrefectSession.setPrefectDetails(prefectName, prefectEmail, prefectContactNum, prefectDepartment, username, password);
+                                    PrefectSession.setPrefectDetails(prefectId, prefectName, prefectEmail, prefectContactNum, prefectDepartment, username, password);
 
                                     Log.d("Auth", "Login successful for prefect: " + prefectName);
                                     Toast.makeText(getActivity(), "Prefect logged in", Toast.LENGTH_SHORT).show();
+                                    logUserActivity(prefectId, "Login");
 
                                     // Proceed to the prefect main activity
                                     Intent intent = new Intent(getActivity(), Prefect_MainActivity.class);
@@ -127,6 +133,33 @@ public class PrefectLoginDialogFragment extends DialogFragment {
                         }
                     }
                 });
+    }
+
+    private void logUserActivity(String prefectID, String activityType) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // Reference to the prefect's ActivityLog subcollection
+        CollectionReference activityLogRef = db.collection("prefect").document(prefectID).collection("ActivityLog");
+
+        // Query to get the existing count of documents for the specific activity type (e.g., "Login" or "Logout")
+        activityLogRef.whereEqualTo("type", activityType)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    // Count the number of existing logs of this type
+                    int count = querySnapshot.size() + 1; // Next sequence number
+                    String documentId = activityType + ": " + count; // Format the document ID
+
+                    // Create the log entry data
+                    Map<String, Object> logEntry = new HashMap<>();
+                    logEntry.put("type", activityType); // "Login" or "Logout"
+                    logEntry.put("timestamp", FieldValue.serverTimestamp()); // Auto-generated server timestamp
+
+                    // Add the log entry with the custom document ID
+                    activityLogRef.document(documentId)
+                            .set(logEntry)
+                            .addOnSuccessListener(aVoid -> Log.d("ActivityLog", "Log entry added with ID: " + documentId))
+                            .addOnFailureListener(e -> Log.w("ActivityLog", "Error adding log entry with ID: " + documentId, e));
+                })
+                .addOnFailureListener(e -> Log.w("ActivityLog", "Error fetching existing logs for prefect: " + prefectID, e));
     }
 
     // Example hashing function (replace with a real implementation)
