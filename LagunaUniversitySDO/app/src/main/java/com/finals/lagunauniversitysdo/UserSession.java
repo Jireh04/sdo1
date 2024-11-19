@@ -110,6 +110,13 @@ public class UserSession {
         return scannedBlock != null ? scannedBlock : sharedPreferences.getString("SCANNED_BLOCK", null);
     }
 
+    // Method to check if personnel is logged in
+    public static boolean isLoggedIn() {
+        // If the prefectId is not null, we assume that the prefect is logged in
+        return student_id != null && !student_id.isEmpty();
+    }
+
+
     // Clear session
     public static void clearSession() {
         student_id = null;

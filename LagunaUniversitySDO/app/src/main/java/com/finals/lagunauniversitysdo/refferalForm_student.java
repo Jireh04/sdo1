@@ -233,6 +233,8 @@ public class refferalForm_student extends Fragment {
         }
         return null;
     }
+
+
     private void performSearch(View rootView) {
         String searchTerm = searchBar.getText().toString().trim().toLowerCase();
 
@@ -341,6 +343,7 @@ public class refferalForm_student extends Fragment {
                 // Highlight the current page
                 pageNumberTextView.setTextColor(i == currentPage.get() ? Color.BLUE : Color.BLACK);
                 pageNumberContainer.addView(pageNumberTextView);
+                Log.d("PageNumbers", "Added page number: " + i);
             }
 
             // Disable buttons if no results are available

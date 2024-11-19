@@ -53,6 +53,7 @@
             android:padding="12dp"
             android:layout_marginBottom="16dp"/>
 
+
         <!-- Username EditText with rounded corners -->
         <EditText
             android:id="@+id/login_username"
@@ -68,19 +69,38 @@
             android:textColorHint="@color/light_grey"/>
 
         <!-- Password EditText with rounded corners -->
-        <EditText
-            android:id="@+id/login_password"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/rounded_edittext_background"
-            android:drawableLeft="@drawable/baseline_lock_24"
-            android:drawablePadding="10dp"
-            android:hint="Password"
-            android:inputType="textPassword"
-            android:padding="12dp"
-            android:textColor="@color/black"
-            android:textColorHint="@color/light_grey"/>
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <EditText
+                android:id="@+id/login_password"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/rounded_edittext_background"
+                android:drawableLeft="@drawable/baseline_lock_24"
+                android:drawablePadding="10dp"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:padding="12dp"
+                android:layout_marginRight="10dp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/light_grey"/>
+
+            <!-- Eye Icon Button for password visibility toggle -->
+            <ImageButton
+                android:id="@+id/eye_button"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center_vertical|end"
+                android:background="@android:color/transparent"
+                android:src="@drawable/baseline_remove_red_eye_24"
+
+                app:tint="@color/light_grey" />
+        </LinearLayout>
 
         <!-- Login Button with rounded corners -->
         <Button
@@ -94,6 +114,7 @@
             android:textColor="@color/white"
             android:textSize="18sp"
             app:cornerRadius="25dp"/>
+
     </LinearLayout>
 
         </androidx.cardview.widget.CardView>

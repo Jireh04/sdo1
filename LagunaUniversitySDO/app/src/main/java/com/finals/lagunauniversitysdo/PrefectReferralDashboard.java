@@ -113,7 +113,7 @@ public class PrefectReferralDashboard extends Fragment {
 
         // Prepare the intent to pass prefect data
         Intent intent = new Intent(getActivity(), PrefectForm.class);
-        intent.putExtra("PREFECT_ID", prefectId);
+
         intent.putExtra("PREFECT_NAME_KEY", prefectName);
         intent.putExtra("PREFECT_EMAIL_KEY", prefectEmail);
 

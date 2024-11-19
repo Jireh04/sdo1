@@ -321,16 +321,19 @@
                 android:minLines="4" />
 
             <!-- Scrollable Table Section -->
-            <HorizontalScrollView
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
+                android:layout_height="match_parent"
                 android:layout_marginTop="10dp"
                 android:fillViewport="true">
 
-                <ScrollView
+                <!-- HorizontalScrollView inside ScrollView -->
+                <HorizontalScrollView
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent">
+                    android:layout_height="wrap_content"
+                    android:fillViewport="true">
 
+                    <!-- TableLayout to hold the rows -->
                     <TableLayout
                         android:id="@+id/details_table"
                         android:layout_width="wrap_content"
@@ -386,8 +389,9 @@
 
                         <!-- Add more rows as needed -->
                     </TableLayout>
-                </ScrollView>
-            </HorizontalScrollView>
+                </HorizontalScrollView>
+
+            </ScrollView>
 
             <!-- Privacy Consent Checkbox -->
             <CheckBox

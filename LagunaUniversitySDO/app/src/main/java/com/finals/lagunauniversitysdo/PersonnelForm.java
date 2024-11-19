@@ -413,6 +413,7 @@ public class PersonnelForm extends AppCompatActivity {
         String date = dateField.getText().toString().trim();
         String studId = violatorsStudID.getText().toString().trim();
         String status = "pending"; // Default status
+        String violation_status = "Unsettled";
 
         // Retrieve remarks from remarks_field
         String remarks = ((EditText) findViewById(R.id.remarks_field)).getText().toString().trim();
@@ -504,6 +505,7 @@ public class PersonnelForm extends AppCompatActivity {
                         studentData.put("offense", violation); // Save the offense type
                         studentData.put("date", date);
                         studentData.put("status", status);
+                        studentData.put("violation_status", violation_status);
                         studentData.put("user_concern", userConcern); // Add user concern to the student data
                         studentData.put("remarks", remarks);
                         studentData.put("personnel_referrer", personnelReferrer); // Add personnel referrer
@@ -555,6 +557,7 @@ public class PersonnelForm extends AppCompatActivity {
                     studentData.put("offense", violation); // Save the offense type
                     studentData.put("date", date);
                     studentData.put("status", status);
+                    studentData.put("violation_status", violation_status);
                     studentData.put("user_concern", userConcern);
                     studentData.put("remarks", remarks); // Add remarks if needed
                     studentData.put("personnel_referrer", personnelReferrer); // Add personnel referrer
@@ -580,6 +583,47 @@ public class PersonnelForm extends AppCompatActivity {
                             });
                 }
             }
+            for (Map<String, String> scannedData : scannedStudentDataList) {
+                String scannedName = scannedData.get("student_name");
+                String scannedStudentNo = scannedData.get("student_no");
+                String scannedProgram = scannedData.get("student_program");
+
+                if (!addedStudentIdsSet.contains(scannedStudentNo)) {
+                    String scannedDateTimeId = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date()) + "_" + scannedStudentNo;
+
+                    Map<String, Object> scannedStudentData = new HashMap<>();
+                    scannedStudentData.put("student_name", scannedName);
+                    scannedStudentData.put("student_program", scannedProgram);
+                    scannedStudentData.put("student_id", scannedStudentNo);
+                    scannedStudentData.put("term", term);
+                    scannedStudentData.put("violation", offense);
+                    scannedStudentData.put("offense", violation); // Add offense
+                    scannedStudentData.put("date", date);
+                    scannedData.put("user_concern", userConcern);
+                    scannedStudentData.put("status", status);
+                    scannedData.put("violation_status", violation_status);
+                    scannedStudentData.put("remarks", remarks);
+                    scannedStudentData.put("personnel_referrer", personnelReferrer);
+                    scannedStudentData.put("personnel_id", personnelID);
+
+                    firestore.collection("personnel")
+                            .document(personnelID)
+                            .collection("personnel_refferal_history")
+                            .document(scannedDateTimeId)
+                            .set(scannedStudentData)
+                            .addOnSuccessListener(documentReference -> {
+                                Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_SHORT).show();
+                                finish();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, "Failed to submit data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                Log.e("Firestore", "Error adding document", e);
+                            });
+
+
+                }
+            }
+
         }
     }
 

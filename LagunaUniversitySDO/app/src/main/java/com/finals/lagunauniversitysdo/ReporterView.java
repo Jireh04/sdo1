@@ -11,17 +11,23 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.EditText;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+
+import java.util.Calendar;
 import java.util.List;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -119,6 +125,22 @@ public class ReporterView extends Fragment {
         exportPdfButton = view.findViewById(R.id.exportPdfButton);
         violationTable = view.findViewById(R.id.violationTable);
 
+        // Set OnClickListener for the Export PDF button
+        exportPdfButton.setOnClickListener(v -> showExportOptions());
+
+        addViolationButton.setOnClickListener(v -> {
+            // Extract raw text from TextViews
+            String rawStudentId = studentIdTextView.getText().toString().trim();
+            String rawStudentName = studentNameTextView.getText().toString().trim();
+
+            // Remove prefixes (like "ID: " and "Name: ") and trim whitespace
+            String studentId = rawStudentId.replace("ID: ", "").trim();
+            String studentName = rawStudentName.replace("Name: ", "").trim();
+
+            // Pass cleaned values to the dialog
+            showAddViolatorDialog(studentId, studentName);
+        });
+
         // Retrieve arguments passed to the fragment
         Bundle arguments = getArguments();
         if (arguments != null) {
@@ -167,6 +189,218 @@ public class ReporterView extends Fragment {
         return view;
     }
 
+    public void showAddViolatorDialog(String studId, String name) {
+        // Inflate the custom dialog layout
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        View dialogView = inflater.inflate(R.layout.add_violator, null);
+
+        // Find the UI elements in the dialog
+        EditText dateTimeEditText = dialogView.findViewById(R.id.dateTimeEditText);
+        EditText termEditText = dialogView.findViewById(R.id.termEditText); // New Term field
+        EditText reporterEditText = dialogView.findViewById(R.id.reporterEditText);
+        EditText locationEditText = dialogView.findViewById(R.id.locationEditText);
+        EditText reporterIdEditText = dialogView.findViewById(R.id.reporterIdEditText);
+        Spinner violationSpinner = dialogView.findViewById(R.id.violationSpinner);
+        EditText remarksEditText = dialogView.findViewById(R.id.remarksEditText);
+        Button submitButton = dialogView.findViewById(R.id.submitButton);
+        String status = "accepted";
+
+        // Set the current date and time automatically
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String currentDateAndTime = sdf.format(calendar.getTime());
+        dateTimeEditText.setText(currentDateAndTime);
+
+        // Set the current term automatically
+        String currentTerm = getCurrentTerm();
+        termEditText.setText(currentTerm);
+        termEditText.setEnabled(false); // Disable editing
+        termEditText.setFocusable(false); // Make it non-focusable
+        termEditText.setClickable(false); // Prevent clicking
+
+
+        // Fetch the prefect ID and set it
+        String reporterId = PrefectSession.getPrefectId();
+        reporterIdEditText.setText(reporterId);
+        reporterIdEditText.setEnabled(false);
+
+        // Fetch violation types from Firestore
+        fetchViolationTypes(violationSpinner);
+
+        // Build the AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setView(dialogView);
+        builder.setTitle("Add Violation");
+
+        AlertDialog dialog = builder.create();
+
+        submitButton.setOnClickListener(v -> {
+            // Get input values
+            String dateTime = dateTimeEditText.getText().toString().trim();
+            String term = termEditText.getText().toString().trim();
+            String reporter = reporterEditText.getText().toString().trim();
+            String location = locationEditText.getText().toString().trim();
+            String remarks = remarksEditText.getText().toString().trim();
+
+            // Validate input
+            if (!isValidInput(reporter) || !isValidInput(location) || !isValidInput(remarks)) {
+                Toast.makeText(getContext(), "Fields must contain meaningful text.", Toast.LENGTH_SHORT).show();
+            } else if (dateTime.isEmpty() || reporter.isEmpty() || reporterId.isEmpty() || location.isEmpty() || remarks.isEmpty()) {
+                Toast.makeText(getContext(), "Please fill in all required fields.", Toast.LENGTH_SHORT).show();
+            } else {
+                // Get violation and offense
+                CheckboxSpinnerAdapter violationAdapter = (CheckboxSpinnerAdapter) violationSpinner.getAdapter();
+                String violation = violationAdapter.getSelectedViolation();
+                String offense = violationAdapter.getSelectedType();
+
+                if (violation == null || violation.isEmpty() || offense == null || offense.isEmpty()) {
+                    Toast.makeText(getContext(), "Please select a valid violation.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Prepare data for Firestore
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                Map<String, Object> violatorData = new HashMap<>();
+                violatorData.put("date", dateTime);
+                violatorData.put("term", term); // Add term
+                violatorData.put("prefect_referrer", reporter);
+                violatorData.put("referrer_id", reporterId);
+                violatorData.put("location", location);
+                violatorData.put("violation", offense);
+                violatorData.put("offense", violation);
+                violatorData.put("remarks", remarks);
+                violatorData.put("student_id", studId);
+                violatorData.put("student_name", name);
+                violatorData.put("status", status);
+                violatorData.put("violation_status", "Unsettled");
+
+                String formattedDateTime = dateTime.replace(" ", "_");
+                String documentId = formattedDateTime + "_" + studId;
+
+                // Save to Firestore
+                db.collection("prefect")
+                        .document(reporterId)
+                        .collection("prefect_referral_history")
+                        .document(documentId)
+                        .set(violatorData)
+                        .addOnSuccessListener(documentReference -> {
+                            Toast.makeText(getContext(), "Violator Added!", Toast.LENGTH_SHORT).show();
+
+                            db.collection("students")
+                                    .document(studId)
+                                    .collection("accepted_status")
+                                    .document(documentId)
+                                    .set(violatorData)
+                                    .addOnSuccessListener(aVoid -> Log.d("Firestore", "Data saved to accepted_status."))
+                                    .addOnFailureListener(e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+
+                            dialog.dismiss();
+                        })
+                        .addOnFailureListener(e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+            }
+        });
+
+        builder.setNegativeButton("Cancel", (dialogInterface, which) -> dialog.dismiss());
+
+        dialog.show();
+    }
+
+    private String getCurrentTerm() {
+        // Get the current month
+        Calendar calendar = Calendar.getInstance();
+        int currentMonth = calendar.get(Calendar.MONTH); // January = 0, December = 11
+
+        // Set the term based on the current month
+        String currentTerm = "";
+
+        if (currentMonth >= Calendar.AUGUST && currentMonth <= Calendar.DECEMBER) {
+            currentTerm = "1st Semester"; // August - December
+        } else if (currentMonth >= Calendar.JANUARY && currentMonth <= Calendar.MAY) {
+            currentTerm = "2nd Semester"; // January - May
+        } else if (currentMonth >= Calendar.JUNE && currentMonth <= Calendar.JULY) {
+            currentTerm = "Summer"; // June - July
+        }
+
+        return currentTerm;
+    }
+
+
+    // Method to validate input fields for meaningful text and no special characters/whitespace only
+    private boolean isValidInput(String input) {
+        return input != null && input.matches(".*[a-zA-Z0-9].*");
+    }
+
+    private void fetchViolationTypes(Spinner violationSpinner) {
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        CollectionReference violationTypesRef = firestore.collection("violation_type");
+
+        violationTypesRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Map<String, List<String>> violationMap = new HashMap<>();
+                List<String> violationDisplayList = new ArrayList<>();
+                violationDisplayList.add("Select a Violation"); // Initial prompt
+
+                // Fetch violations and types from Firestore
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    String violationName = document.getString("violation");
+                    String type = document.getString("type");
+
+                    Log.d("FirestoreData", "Retrieved data: " + document.getId() + " => " + document.getData());
+
+                    if (violationName != null && type != null) {
+                        // Group types by violation name
+                        violationMap.computeIfAbsent(violationName, k -> new ArrayList<>()).add(type);
+                    }
+                }
+
+                // Populate the display list with violations and their types
+                for (Map.Entry<String, List<String>> entry : violationMap.entrySet()) {
+                    String violationName = entry.getKey();
+                    List<String> types = entry.getValue();
+
+                    // Add the violation name
+                    violationDisplayList.add(violationName);
+                    // Add each type below the violation name
+                    for (String type : types) {
+                        violationDisplayList.add(" " + type); // Indent types for better visibility
+                    }
+                }
+
+                Log.d("ViolationDisplayList", "Display List: " + violationDisplayList.toString());
+
+                // Create the adapter directly in this method
+                CheckboxSpinnerAdapter adapter = new CheckboxSpinnerAdapter(getContext(), violationDisplayList);
+                violationSpinner.setAdapter(adapter);
+
+                violationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        // Get the selected item text
+                        String selectedText = violationDisplayList.get(position);
+                        // Update the spinner prompt to show the selected item
+                        violationSpinner.setPrompt(selectedText);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                        // Handle case when no item is selected if needed
+                    }
+                });
+
+                // Show the dropdown when the spinner is clicked
+                violationSpinner.setOnTouchListener((v, event) -> {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        violationSpinner.performClick();
+                        return true;
+                    }
+                    return false;
+                });
+            } else {
+                Log.w("FormActivity", "Error getting violation types.", task.getException());
+                Toast.makeText(getContext(), "Failed to load violation types", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
 
 
@@ -344,7 +578,7 @@ public class ReporterView extends Fragment {
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
         // Get the URI for the file using FileProvider
-        Uri uri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".provider", file);
+        Uri uri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", file);
 
         // Set flags to allow read access to the file
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -359,7 +593,7 @@ public class ReporterView extends Fragment {
 
     private void viewPdf(File file) {
         // Create an intent to view the PDF
-        Uri uri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".provider", file);
+        Uri uri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", file);
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(uri, "application/pdf");

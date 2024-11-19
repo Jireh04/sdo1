@@ -23,6 +23,8 @@ import androidx.core.content.FileProvider;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import java.util.HashMap;
+import android.widget.EditText;
+import android.view.View;
 
 import android.widget.Toast;
 import android.widget.ImageView;
@@ -218,6 +220,8 @@ public class refferals_prefect extends Fragment {
                 for (DocumentSnapshot studentDocument : task.getResult().getDocuments()) {
                     db.collection("students").document(studentDocument.getId())
                             .collection("student_refferal_history")
+                            .orderBy("date", Query.Direction.DESCENDING) // Sort by date in descending order
+
                             .get()
                             .addOnCompleteListener(subTask -> {
                                 if (subTask.isSuccessful()) {
@@ -300,6 +304,9 @@ public class refferals_prefect extends Fragment {
                                                                             acceptedData.put("term", referralData.get("term")); // Example: "First Sem"
                                                                             acceptedData.put("user_concern", referralData.get("user_concern")); // Example: "Discipline Concerns"
                                                                             acceptedData.put("violation", referralData.get("violation")); // Example: "Major Offense"
+                                                                            acceptedData.put("offense", referralData.get("offense")); // Example: "Major Offense"
+                                                                            acceptedData.put("violation_status", "Unsettled"); // Add the new field "violation_status"
+
 
                                                                             // Save the accepted referral data in the `accepted_status` sub-collection
                                                                             db.collection("students").document(studentId)
@@ -318,15 +325,29 @@ public class refferals_prefect extends Fragment {
                                                                 break;
 
                                                             case "Reject":
+                                                                // Create a custom layout for rejection reason
+                                                                View rejectView = getLayoutInflater().inflate(R.layout.reject_reason, null);
+
+                                                                // Create the EditText where the user will input the reason
+                                                                EditText reasonEditText = rejectView.findViewById(R.id.editTextReason);
+
                                                                 new AlertDialog.Builder(getActivity())
-                                                                        .setTitle("Confirmation")
-                                                                        .setMessage("Are you sure you want to reject this referral?")
-                                                                        .setPositiveButton("Yes", (dialog, which) -> {
-                                                                            updateReferralStatusStudent(referrerId, referralDocument.getId(), "accepted");
+                                                                        .setTitle("Rejection Reason")
+                                                                        .setMessage("Please provide a reason for rejecting this referral:")
+                                                                        .setView(rejectView) // Attach the custom view to the dialog
+                                                                        .setPositiveButton("Reject", (dialog, which) -> {
+                                                                            String rejectionReason = reasonEditText.getText().toString().trim();
+                                                                            if (!rejectionReason.isEmpty()) {
+                                                                                // Proceed to update the Firestore document with the rejection reason
+                                                                                updateReferralStatusStudentWithReason(referrerId, referralDocument.getId(), "rejected", rejectionReason);
+                                                                            } else {
+                                                                                Toast.makeText(getActivity(), "Please enter a rejection reason.", Toast.LENGTH_SHORT).show();
+                                                                            }
                                                                         })
-                                                                        .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                                                                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                                                                         .show();
                                                                 break;
+
                                                         }
                                                         // Reset spinner to default after action
                                                         actionsSpinner.setSelection(0);
@@ -352,6 +373,8 @@ public class refferals_prefect extends Fragment {
             }
         });
 
+
+
         horizontalScrollView.addView(tableLayout);
         linearLayoutPending.addView(horizontalScrollView);
 
@@ -362,6 +385,8 @@ public class refferals_prefect extends Fragment {
                     // Get all referral history documents
                     db.collection("personnel").document(personnelDocument.getId())
                             .collection("personnel_refferal_history")
+                            .orderBy("date", Query.Direction.DESCENDING) // Sort by date in descending order
+
                             .get()
                             .addOnCompleteListener(subTask -> {
                                 if (subTask.isSuccessful()) {
@@ -456,6 +481,9 @@ public class refferals_prefect extends Fragment {
                                                                             acceptedData.put("term", referralData.get("term")); // Example: "First Sem"
                                                                             acceptedData.put("user_concern", referralData.get("user_concern")); // Example: "Discipline Concerns"
                                                                             acceptedData.put("violation", referralData.get("violation")); // Example: "Major Offense"
+                                                                            acceptedData.put("offense", referralData.get("offense")); // Example: "Major Offense"
+                                                                            acceptedData.put("violation_status", "Unsettled"); // Add the new field "violation_status"
+
 
                                                                             // Ensure that the student_id is a String when using it as a document ID
                                                                             String studentId = (String) referralData.get("student_id");  // Ensure the student_id is treated as a String
@@ -481,16 +509,33 @@ public class refferals_prefect extends Fragment {
 
 
                                                             case "Reject":
-                                                                // Confirmation dialog to reject
+                                                                // Create a custom layout for rejection reason
+                                                                View rejectView = getLayoutInflater().inflate(R.layout.reject_reason, null);
+
+                                                                // Create the EditText where personnel will input the rejection reason
+                                                                EditText reasonEditText = rejectView.findViewById(R.id.editTextReason);
+
+                                                                // Create the dialog to show the rejection options
                                                                 new AlertDialog.Builder(getActivity())
-                                                                        .setTitle("Confirmation")
-                                                                        .setMessage("Are you sure you want to reject this referral?")
-                                                                        .setPositiveButton("Yes", (dialog, which) -> {
-                                                                            updateReferralStatusPersonnel(referrerId, referralDocument.getId(), "rejected");
+                                                                        .setTitle("Rejection Reason")
+                                                                        .setMessage("Please provide a reason for rejecting this referral:")
+                                                                        .setView(rejectView) // Attach the custom view to the dialog
+                                                                        .setPositiveButton("Reject", (dialog, which) -> {
+                                                                            String rejectionReason = reasonEditText.getText().toString().trim();
+                                                                            if (!rejectionReason.isEmpty()) {
+                                                                                // Proceed to update the Firestore document with the rejection reason
+                                                                                updateReferralStatusPersonnel(referrerId, referralDocument.getId(), "rejected", rejectionReason);
+
+                                                                                // Optional: Show a Toast to indicate the referral was rejected successfully
+                                                                                Toast.makeText(getActivity(), "Referral has been rejected.", Toast.LENGTH_SHORT).show();
+                                                                            } else {
+                                                                                Toast.makeText(getActivity(), "Please enter a rejection reason.", Toast.LENGTH_SHORT).show();
+                                                                            }
                                                                         })
-                                                                        .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                                                                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()) // Dismiss the dialog if Cancel is clicked
                                                                         .show();
                                                                 break;
+
                                                         }
 
                                                         // Reset selection to "Select Action" after handling the action
@@ -517,6 +562,47 @@ public class refferals_prefect extends Fragment {
             }
         });
 
+    }
+
+    private void updateReferralStatusPersonnel(String referrerId, String referralDocId, String status, String rejectionReason) {
+        Map<String, Object> updatedReferralData = new HashMap<>();
+        updatedReferralData.put("status", status); // Update status to rejected
+        updatedReferralData.put("reason_rejecting", rejectionReason); // Store rejection reason
+
+        // Update the referral status in personnel collection
+        db.collection("personnel")
+                .document(referrerId)
+                .collection("personnel_refferal_history")
+                .document(referralDocId)
+                .update(updatedReferralData)
+                .addOnSuccessListener(aVoid -> {
+                    // Optionally, show a success message or handle UI refresh
+                    Toast.makeText(getActivity(), "Referral status updated to rejected.", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    // Show failure message if updating failed
+                    Toast.makeText(getActivity(), "Failed to reject referral.", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+
+    private void updateReferralStatusStudentWithReason(String referrerId, String referralDocId, String status, String rejectionReason) {
+        Map<String, Object> updatedReferralData = new HashMap<>();
+        updatedReferralData.put("status", status); // Update status to rejected
+        updatedReferralData.put("reason_rejecting", rejectionReason); // Store rejection reason
+
+        // Update the referral status in the student's collection
+        db.collection("students")
+                .document(referrerId)
+                .collection("student_refferal_history")
+                .document(referralDocId)
+                .update(updatedReferralData)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getActivity(), "Referral has been rejected.", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getActivity(), "Failed to reject referral.", Toast.LENGTH_SHORT).show();
+                });
     }
 
     // Define a request code for permission requests
@@ -679,7 +765,7 @@ public class refferals_prefect extends Fragment {
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
         // Get the URI for the file using FileProvider
-        Uri uri = FileProvider.getUriForFile(getActivity(), getActivity().getPackageName() + ".provider", file);
+        Uri uri = FileProvider.getUriForFile(getActivity(), getActivity().getPackageName() + ".fileprovider", file);
 
         // Set flags to allow read access to the file
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -862,7 +948,7 @@ public class refferals_prefect extends Fragment {
                     db.collection("personnel").document(personnelDocument.getId())
                             .collection("personnel_refferal_history")
                             .whereEqualTo("status", "accepted")
-                            .orderBy("date", Query.Direction.ASCENDING)  // Order from latest to oldest
+                            .orderBy("date", Query.Direction.DESCENDING)  // Order from latest to oldest
                             .get()
                             .addOnCompleteListener(subTask -> {
                                 if (subTask.isSuccessful()) {

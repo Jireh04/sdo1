@@ -9,6 +9,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -115,6 +116,15 @@ public class MyRefferal_student extends Fragment {
         statusTextView.setPadding(8, 8, 8, 8);
         statusTextView.setGravity(Gravity.CENTER);
 
+        // If the status is "rejected", make it clickable and show the rejection reason
+        if ("rejected".equals(status)) {
+            statusTextView.setClickable(true);
+            statusTextView.setTextColor(getResources().getColor(android.R.color.holo_red_dark));  // Set text color to red for "rejected"
+
+            // Set click listener to show rejection reason in an AlertDialog
+            statusTextView.setOnClickListener(v -> showRejectionReason(dateReported, studentNo));
+        }
+
         // Add the TextViews to the TableRow
         tableRow.addView(dateReportedTextView);
         tableRow.addView(studentNoTextView);
@@ -124,4 +134,41 @@ public class MyRefferal_student extends Fragment {
         // Add the TableRow to the TableLayout
         tableLayout.addView(tableRow);
     }
+    private void showRejectionReason(String dateReported, String studentNo) {
+        // Fetch the rejection reason from Firestore using the studentNo and dateReported (or any other identifier you have)
+        db.collection("students")
+                .document(userId)
+                .collection("student_refferal_history")
+                .whereEqualTo("student_id", studentNo)
+                .whereEqualTo("date", dateReported) // or any unique identifier for the referral
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        if (!task.getResult().isEmpty()) {
+                            DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                            // Get the rejection reason from the document
+                            String rejectionReason = document.getString("reason_rejecting");
+
+                            if (rejectionReason != null) {
+                                // Show the rejection reason in an AlertDialog
+                                new AlertDialog.Builder(getContext())
+                                        .setTitle("Rejection Reason")
+                                        .setMessage(rejectionReason)
+                                        .setPositiveButton("OK", null)
+                                        .show();
+                            } else {
+                                // Handle the case where there's no rejection reason
+                                Toast.makeText(getContext(), "No rejection reason available.", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            // Handle the case where the referral document is not found
+                            Toast.makeText(getContext(), "Referral not found.", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        // Handle errors fetching the data
+                        Toast.makeText(getContext(), "Error fetching rejection reason: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
 }

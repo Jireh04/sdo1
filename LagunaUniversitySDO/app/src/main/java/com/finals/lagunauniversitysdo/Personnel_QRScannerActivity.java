@@ -33,7 +33,7 @@ public class Personnel_QRScannerActivity extends AppCompatActivity {
     // Variables to hold personnel details
     private String personnelName;
     private String personnelEmail;
-    private Long personnelContact;
+    private String personnelContact;
     private String personnelProgram;
 
     @Override
@@ -58,7 +58,7 @@ public class Personnel_QRScannerActivity extends AppCompatActivity {
         Intent intent = getIntent();
         personnelName = intent.getStringExtra("PERSONNEL_NAME");
         personnelEmail = intent.getStringExtra("PERSONNEL_EMAIL");
-        personnelContact = intent.getLongExtra("PERSONNEL_CONTACT", 0);
+        personnelContact = intent.getStringExtra("PERSONNEL_CONTACT" );
         personnelProgram = intent.getStringExtra("PERSONNEL_PROGRAM");
 
         // Display welcome message

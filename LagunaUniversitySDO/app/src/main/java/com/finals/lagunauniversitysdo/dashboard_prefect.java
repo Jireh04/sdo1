@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
 
@@ -51,11 +53,12 @@ public class dashboard_prefect extends Fragment {
     private ImageButton pickQrCodeButton;  // QR code scanner button
 
     private graphs graphObj;
-    private int currentPage = 0; // To keep track of the current page
+    private List<DocumentSnapshot> allDocuments;
+    private AtomicInteger currentPage; // To keep track of the current page
     private static final int RESULTS_PER_PAGE = 5; // Changed to 3 results per page
     private Button previousButton;
     private Button nextButton;
-    private LinearLayout paginationLayout;
+    private LinearLayout paginationLayout, pageNumberContainer;
     private DocumentSnapshot lastVisible; // To track the last document for pagination
 
     public dashboard_prefect() {
@@ -78,6 +81,7 @@ public class dashboard_prefect extends Fragment {
         previousButton = rootView.findViewById(R.id.previous_button);
         nextButton = rootView.findViewById(R.id.next_button);
         paginationLayout = rootView.findViewById(R.id.pagination_layout);
+        pageNumberContainer = rootView.findViewById(R.id.page_number_container);
 
         // Initialize views
         searchBar = rootView.findViewById(R.id.search_bar);
@@ -89,6 +93,9 @@ public class dashboard_prefect extends Fragment {
         Button referToGuidanceButton = rootView.findViewById(R.id.referToGuidance);
         Button viewReporters = rootView.findViewById(R.id.ViewReporters);
 
+        currentPage = new AtomicInteger(0);
+        allDocuments = new ArrayList<>();
+
         // Set OnClickListener for the search button
         searchButton.setOnClickListener(v -> searchStudents());
 
@@ -97,15 +104,15 @@ public class dashboard_prefect extends Fragment {
 
         referToGuidanceButton.setOnClickListener(v -> openReferralDashboard());
         viewReporters.setOnClickListener(v -> openViewReporters());
+
         nextButton.setOnClickListener(v -> {
-            currentPage++;
+            currentPage.incrementAndGet();
             searchStudents();  // Re-run the search to fetch the next set of students
         });
         previousButton.setOnClickListener(v -> {
-            if (currentPage > 0) {
-                currentPage--;
+            currentPage.decrementAndGet();
                 searchStudents();  // Re-run the search to fetch the previous set of students
-            }
+
         });
 
         return rootView;
@@ -123,18 +130,13 @@ public class dashboard_prefect extends Fragment {
 
         // Clear previous results before starting a new search
         searchResultsContainer.removeAllViews();
+        allDocuments.clear(); // Clear all previous search results
 
         if (!queryText.isEmpty()) {
-            // Reference to the Firestore "students" collection
             CollectionReference studentsRef = db.collection("students");
 
-            // Create the base query, ordering by 'name' (or any other field)
-            Query query = studentsRef.orderBy("name").limit(RESULTS_PER_PAGE);
-
-            // Use startAfter for pagination when moving to the next page (if currentPage > 0)
-            if (currentPage > 0 && lastVisible != null) {
-                query = query.startAfter(lastVisible); // Fetch data starting after the last document
-            }
+            // Start a new query without using pagination
+            Query query = studentsRef.orderBy("name");
 
             query.get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
@@ -142,11 +144,12 @@ public class dashboard_prefect extends Fragment {
                     boolean foundResults = false;
 
                     if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                        // Save the last document for pagination
-                        lastVisible = querySnapshot.getDocuments().get(querySnapshot.size() - 1);
+                        // Add all the fetched documents to the allDocuments list
+                        allDocuments.addAll(querySnapshot.getDocuments());
 
-                        // Iterate through the documents
-                        for (QueryDocumentSnapshot document : querySnapshot) {
+                        // Iterate through the documents and display them
+                        for (int i = currentPage.get() * RESULTS_PER_PAGE; i < Math.min((currentPage.get() + 1) * RESULTS_PER_PAGE, allDocuments.size()); i++) {
+                            DocumentSnapshot document = allDocuments.get(i);
                             String name = document.getString("name");
                             String studentId = document.getString("student_id");
                             String program = document.getString("program");
@@ -232,7 +235,7 @@ public class dashboard_prefect extends Fragment {
                         paginationLayout.setVisibility(View.VISIBLE);
 
                         // Update pagination buttons visibility
-                        updatePaginationButtons(querySnapshot.size());
+                        updatePaginationButtons();
 
                     } else {
                         // If no students matched, show a "No students found" message
@@ -242,7 +245,7 @@ public class dashboard_prefect extends Fragment {
                         searchResultsContainer.addView(noResultsTextView);
 
                         // Disable the Next button if there are no results for this query
-                        nextButton.setEnabled(false);
+                        disablePaginationButtons();
                     }
                 } else {
                     // Handle the error if the query fails
@@ -252,8 +255,7 @@ public class dashboard_prefect extends Fragment {
                     searchResultsContainer.addView(errorTextView);
 
                     // Disable pagination buttons if there's an error
-                    nextButton.setEnabled(false);
-                    previousButton.setEnabled(false);
+                    disablePaginationButtons();
                 }
             });
         } else {
@@ -265,19 +267,34 @@ public class dashboard_prefect extends Fragment {
         }
     }
 
-    // Updated method to always show pagination buttons (Next and Previous)
-    private void updatePaginationButtons(int currentQuerySize) {
-        // Enable the previous button if we're not on the first page
-        previousButton.setEnabled(currentPage > 0);
 
-        // Enable the next button if we have more results to display
-        nextButton.setEnabled(currentQuerySize == RESULTS_PER_PAGE);
+
+    private void updatePaginationButtons() {
+        if (previousButton != null && nextButton != null && pageNumberContainer != null) {
+            previousButton.setEnabled(currentPage.get() > 0);
+            nextButton.setEnabled((currentPage.get() + 1) * RESULTS_PER_PAGE < allDocuments.size());
+
+            pageNumberContainer.removeAllViews();
+            int totalPages = (int) Math.ceil((double) allDocuments.size() / RESULTS_PER_PAGE);
+
+            for (int i = 0; i < totalPages; i++) {
+                TextView pageNumberTextView = new TextView(getActivity());
+                pageNumberTextView.setText(String.valueOf(i + 1));
+                pageNumberTextView.setPadding(8, 8, 8, 8);
+                pageNumberTextView.setTextSize(16); // Ensure text is visible
+                pageNumberTextView.setGravity(Gravity.CENTER);
+                pageNumberTextView.setTextColor(i == currentPage.get() ? Color.BLUE : Color.BLACK);
+                pageNumberContainer.addView(pageNumberTextView);
+                Log.d("PageNumbers", "Added page number: " + i);
+            }
+        }
     }
 
 
-
-
-
+    private void disablePaginationButtons() {
+        previousButton.setEnabled(false);
+        nextButton.setEnabled(false);
+    }
 
 
 
@@ -320,132 +337,140 @@ public class dashboard_prefect extends Fragment {
         startActivity(intent);
     }
     public void showAddViolatorDialog(String studId, String name) {
-        // Inflate the custom dialog layout using getContext() instead of this
+        // Inflate the custom dialog layout
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View dialogView = inflater.inflate(R.layout.add_violator, null);
 
         // Find the UI elements in the dialog
         EditText dateTimeEditText = dialogView.findViewById(R.id.dateTimeEditText);
+        EditText termEditText = dialogView.findViewById(R.id.termEditText); // New Term field
         EditText reporterEditText = dialogView.findViewById(R.id.reporterEditText);
         EditText locationEditText = dialogView.findViewById(R.id.locationEditText);
-        EditText reporterIdEditText = dialogView.findViewById(R.id.reporterIdEditText); // New field for Reporter ID
+        EditText reporterIdEditText = dialogView.findViewById(R.id.reporterIdEditText);
         Spinner violationSpinner = dialogView.findViewById(R.id.violationSpinner);
         EditText remarksEditText = dialogView.findViewById(R.id.remarksEditText);
         Button submitButton = dialogView.findViewById(R.id.submitButton);
         String status = "accepted";
 
-        // Set the current date and time automatically in the dateTimeEditText field
+        // Set the current date and time automatically
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // Customize the format as needed
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String currentDateAndTime = sdf.format(calendar.getTime());
         dateTimeEditText.setText(currentDateAndTime);
 
-        // Fetch the prefect ID and set it in the reporterIdEditText
-        String reporterId = PrefectSession.getPrefectId(); // Replace this with your method to get the prefect ID
-        reporterIdEditText.setText(reporterId); // Populate the EditText with the fetched ID
-        reporterIdEditText.setEnabled(false); // Optionally, disable editing for this field
+        // Set the current term automatically
+        String currentTerm = getCurrentTerm();
+        termEditText.setText(currentTerm);
+        termEditText.setEnabled(false); // Disable editing
+        termEditText.setFocusable(false); // Make it non-focusable
+        termEditText.setClickable(false); // Prevent clicking
 
-        // Fetch violation types from Firestore and set up the violation spinner
-        fetchViolationTypes(violationSpinner); // Pass the violationSpinner to the method
 
-        // Build the AlertDialog using getActivity() to get the context
+        // Fetch the prefect ID and set it
+        String reporterId = PrefectSession.getPrefectId();
+        reporterIdEditText.setText(reporterId);
+        reporterIdEditText.setEnabled(false);
+
+        // Fetch violation types from Firestore
+        fetchViolationTypes(violationSpinner);
+
+        // Build the AlertDialog
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(dialogView);
         builder.setTitle("Add Violation");
 
-        // Create the dialog
         AlertDialog dialog = builder.create();
 
-        // Set a listener for the submit button
         submitButton.setOnClickListener(v -> {
-            // Get the input values
+            // Get input values
             String dateTime = dateTimeEditText.getText().toString().trim();
+            String term = termEditText.getText().toString().trim();
             String reporter = reporterEditText.getText().toString().trim();
             String location = locationEditText.getText().toString().trim();
             String remarks = remarksEditText.getText().toString().trim();
 
-            // Validate input fields for special characters or excessive whitespace
+            // Validate input
             if (!isValidInput(reporter) || !isValidInput(location) || !isValidInput(remarks)) {
-                Toast.makeText(getContext(), "Fields must contain meaningful text and cannot be only special characters or whitespace.", Toast.LENGTH_SHORT).show();
-            } else if (dateTime.isEmpty() || reporter.isEmpty() || reporterId.isEmpty() || location.isEmpty()  || remarks.isEmpty()) {
+                Toast.makeText(getContext(), "Fields must contain meaningful text.", Toast.LENGTH_SHORT).show();
+            } else if (dateTime.isEmpty() || reporter.isEmpty() || reporterId.isEmpty() || location.isEmpty() || remarks.isEmpty()) {
                 Toast.makeText(getContext(), "Please fill in all required fields.", Toast.LENGTH_SHORT).show();
             } else {
-                // Get selected violation and offense from the spinner
+                // Get violation and offense
                 CheckboxSpinnerAdapter violationAdapter = (CheckboxSpinnerAdapter) violationSpinner.getAdapter();
                 String violation = violationAdapter.getSelectedViolation();
                 String offense = violationAdapter.getSelectedType();
 
-                // Validate violation and offense selection
-                if (violation == null || violation.isEmpty()) {
+                if (violation == null || violation.isEmpty() || offense == null || offense.isEmpty()) {
                     Toast.makeText(getContext(), "Please select a valid violation.", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if (offense == null || offense.isEmpty()) {
-                    Toast.makeText(getContext(), "Please select an offense.", Toast.LENGTH_SHORT).show();
-                    return;
-                }
 
-                // Prepare the data to be saved to Firestore
+                // Prepare data for Firestore
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-                // Create a new violator entry with the specified fields
                 Map<String, Object> violatorData = new HashMap<>();
                 violatorData.put("date", dateTime);
+                violatorData.put("term", term); // Add term
                 violatorData.put("prefect_referrer", reporter);
-                violatorData.put("referrer_id", reporterId); // Use the fetched reporter ID
+                violatorData.put("referrer_id", reporterId);
                 violatorData.put("location", location);
                 violatorData.put("violation", offense);
-                violatorData.put("offense", violation); // Add the offense field
+                violatorData.put("offense", violation);
                 violatorData.put("remarks", remarks);
-                violatorData.put("student_id", studId);  // Add the studentId
-                violatorData.put("student_name", name);  // Add the studentName
-                violatorData.put("status", status);  // Add the status
+                violatorData.put("student_id", studId);
+                violatorData.put("student_name", name);
+                violatorData.put("status", status);
+                violatorData.put("violation_status", "Unsettled");
 
-                // Format the document ID as yyyy-MM-dd_HH:mm:ss_studentId
-                String formattedDateTime = dateTime.replace(" ", "_"); // Replace space with underscore
-                String documentId = formattedDateTime + "_" + studId; // Construct the document ID using studentId
+                String formattedDateTime = dateTime.replace(" ", "_");
+                String documentId = formattedDateTime + "_" + studId;
 
-                // Save to the prefect_referral_history subcollection
+                // Save to Firestore
                 db.collection("prefect")
-                        .document(reporterId) // Use the reporterId for the main document
+                        .document(reporterId)
                         .collection("prefect_referral_history")
-                        .document(documentId) // Use the formatted document ID for history
-                        .set(violatorData) // Set the violator data
+                        .document(documentId)
+                        .set(violatorData)
                         .addOnSuccessListener(documentReference -> {
-                            // Show a success message
                             Toast.makeText(getContext(), "Violator Added!", Toast.LENGTH_SHORT).show();
 
-                            // Save the same data to the student's accepted_status sub-collection
                             db.collection("students")
-                                    .document(studId) // Use the studentId to get the student's document
+                                    .document(studId)
                                     .collection("accepted_status")
-                                    .document(documentId) // Use the same document ID as for the referral history
-                                    .set(violatorData) // Save the same violator data to the accepted_status
-                                    .addOnSuccessListener(aVoid -> {
-                                        // Successfully saved to accepted_status
-                                        Log.d("Firestore", "Data saved to accepted_status.");
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        // Handle failure to save to accepted_status
-                                        Toast.makeText(getContext(), "Error saving to accepted_status: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                    });
+                                    .document(documentId)
+                                    .set(violatorData)
+                                    .addOnSuccessListener(aVoid -> Log.d("Firestore", "Data saved to accepted_status."))
+                                    .addOnFailureListener(e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 
-                            // Close the dialog
                             dialog.dismiss();
                         })
-                        .addOnFailureListener(e -> {
-                            // Show an error message if the operation fails
-                            Toast.makeText(getContext(), "Error adding to referral history: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        });
+                        .addOnFailureListener(e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             }
         });
 
-        // Add a cancel button to close the dialog
         builder.setNegativeButton("Cancel", (dialogInterface, which) -> dialog.dismiss());
 
-        // Show the dialog
         dialog.show();
     }
+
+    private String getCurrentTerm() {
+        // Get the current month
+        Calendar calendar = Calendar.getInstance();
+        int currentMonth = calendar.get(Calendar.MONTH); // January = 0, December = 11
+
+        // Set the term based on the current month
+        String currentTerm = "";
+
+        if (currentMonth >= Calendar.AUGUST && currentMonth <= Calendar.DECEMBER) {
+            currentTerm = "1st Semester"; // August - December
+        } else if (currentMonth >= Calendar.JANUARY && currentMonth <= Calendar.MAY) {
+            currentTerm = "2nd Semester"; // January - May
+        } else if (currentMonth >= Calendar.JUNE && currentMonth <= Calendar.JULY) {
+            currentTerm = "Summer"; // June - July
+        }
+
+        return currentTerm;
+    }
+
 
 
     // Method to validate input fields for meaningful text and no special characters/whitespace only

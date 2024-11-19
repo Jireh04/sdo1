@@ -181,6 +181,13 @@ public class PersonnelSession {
         return studentDepartment;
     }
 
+    // Method to check if personnel is logged in
+    public static boolean isLoggedIn() {
+        // Checks if the personnelId or studentId is not null or empty
+        return personnelId != null && !personnelId.isEmpty();
+    }
+
+
     // Clear session
     public static void clearSession() {
         personnelId = null;

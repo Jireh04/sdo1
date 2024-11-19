@@ -1,11 +1,14 @@
 package com.finals.lagunauniversitysdo;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Spinner;
@@ -75,6 +78,9 @@ public class reports_prefect extends Fragment {
     private long logsCount;
     private List<String> offenses = new ArrayList<>();
     private List<String> violations = new ArrayList<>();
+    private List<String> date = new ArrayList<>();
+    private List<String> location = new ArrayList<>();
+    private List<String> referrer_id = new ArrayList<>();
 
     // Spinners for selection
     private Spinner programSpinner;
@@ -84,6 +90,10 @@ public class reports_prefect extends Fragment {
     private Spinner semesterSpinner;
     private Spinner offenseTypeSpinner;
     private Button groupNameButton;
+
+    private Button useDateRangeButton;
+    private EditText startDateEditText, endDateEditText;
+    private LinearLayout dateRangeLayout, resultLayout;
 
     public reports_prefect() {
         // Required empty public constructor
@@ -99,7 +109,6 @@ public class reports_prefect extends Fragment {
 
         // Initialize UI elements
         studentNoEditText = view.findViewById(R.id.studentNoEditText);
-        dateRangeEditText = view.findViewById(R.id.dateRangeEditText);  // Initialize Date Range EditText
         searchButton = view.findViewById(R.id.searchButton);
         studentNameTextView = view.findViewById(R.id.studentNameTextView);
         pdfButton = view.findViewById(R.id.pdfButton);
@@ -111,8 +120,9 @@ public class reports_prefect extends Fragment {
         semesterSpinner = view.findViewById(R.id.semesterSpinner);
         offenseTypeSpinner = view.findViewById(R.id.offenseTypeSpinner);
 
-        // Initialize the new Group by Date button
-        groupDateButton = view.findViewById(R.id.group_date);
+
+
+
 
         // Set up spinners
         setupSpinner(programSpinner, new String[]{"BSCS", "BSIT", "BEED"});
@@ -135,88 +145,127 @@ public class reports_prefect extends Fragment {
         groupNameButton.setOnClickListener(v -> fetchGroupByProgram());
 
         // Set up Group by Date button click listener
+        groupDateButton = view.findViewById(R.id.group_date);
         groupDateButton.setOnClickListener(v -> generateGroupByDate());
+
+        // Toggle visibility for date range fields
+        useDateRangeButton = view.findViewById(R.id.useDateRangeButton);
+        dateRangeLayout = view.findViewById(R.id.dateRangeLayout);
+
+        resultLayout = view.findViewById(R.id.resultLayout);
+
+        useDateRangeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (dateRangeLayout.getVisibility() == View.GONE) {
+                    dateRangeLayout.setVisibility(View.VISIBLE); // Show date range fields
+                } else {
+                    dateRangeLayout.setVisibility(View.GONE); // Hide date range fields
+                }
+            }
+        });
+
+        // Initialize date edit texts and set listeners
+        startDateEditText = view.findViewById(R.id.startDateEditText);
+        endDateEditText = view.findViewById(R.id.endDateEditText);
+
+        startDateEditText.setOnClickListener(v -> showDatePickerDialog(true)); // true for start date
+        endDateEditText.setOnClickListener(v -> showDatePickerDialog(false)); // false for end date
 
         return view;
     }
 
+    // Show DatePickerDialog for start or end date
+    private void showDatePickerDialog(boolean isStartDate) {
+        Calendar calendar = Calendar.getInstance();
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                getContext(),
+                (view, year, monthOfYear, dayOfMonth) -> {
+                    calendar.set(year, monthOfYear, dayOfMonth);
+                    String selectedDate = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+                            .format(calendar.getTime());
+                    if (isStartDate) {
+                        startDateEditText.setText(selectedDate);
+                    } else {
+                        endDateEditText.setText(selectedDate);
+                    }
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+        );
+        datePickerDialog.show();
+    }
+
+
+
+    // Generate grouped data based on selected date range and filters
     private void generateGroupByDate() {
-        String dateRange = dateRangeEditText.getText().toString().trim();
-        if (dateRange.isEmpty()) {
-            // Show an error message if the date range is not provided
-            dateRangeEditText.setError("Please select a date range.");
+        String startDateString = startDateEditText.getText().toString().trim();
+        String endDateString = endDateEditText.getText().toString().trim();
+
+        if (startDateString.isEmpty() || endDateString.isEmpty()) {
+            Toast.makeText(getContext(), "Please select both start and end dates.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Extract the start and end dates from the string (assuming the format is "MM-dd-yyyy to MM-dd-yyyy")
-        String[] dates = dateRange.split(" to ");
-        if (dates.length != 2) {
-            Toast.makeText(getContext(), "Invalid date range format.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String startDateString = dates[0].trim();
-        String endDateString = dates[1].trim();
-
-        // Log the dates for debugging
-        Log.d("DEBUG", "Start Date: " + startDateString + ", End Date: " + endDateString);
-
-        // Parse the start and end date strings to Date objects
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());  // Adjusted format
-        final Date startDate;
-        final Date endDate;
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
+        Date startDate, endDate;
 
         try {
-            startDate = sdf.parse(startDateString);  // Parse the start date
-            endDate = sdf.parse(endDateString);      // Parse the end date
+            startDate = sdf.parse(startDateString);
+            endDate = sdf.parse(endDateString);
         } catch (ParseException e) {
-            Log.e("ERROR", "Date parsing error", e);
-            return; // Handle error appropriately
+            Toast.makeText(getContext(), "Invalid date format. Use: MM/dd/yyyy", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        // Normalize start and end dates to include the full day
+        // Normalize start and end dates to full-day ranges
         Calendar calendar = Calendar.getInstance();
+
+        // Start Date
         calendar.setTime(startDate);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);   // Set start time to 00:00:00
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         Date normalizedStartDate = calendar.getTime();
 
+        // End Date
         calendar.setTime(endDate);
-        calendar.set(Calendar.HOUR_OF_DAY, 23);  // Set end time to 23:59:59
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
         calendar.set(Calendar.MILLISECOND, 999);
         Date normalizedEndDate = calendar.getTime();
 
-        // Get the selected program and status from the spinner
-        String selectedProgram = programSpinner.getSelectedItem().toString().trim();
-        String selectedStatus = statusSpinner.getSelectedItem().toString().trim();
+            // Get the selected program and status from the spinner
+            String selectedProgram = programSpinner.getSelectedItem().toString().trim();
+            String selectedStatus = statusSpinner.getSelectedItem().toString().trim();
 
-        // Get the selected semester and offense type (add these to the spinners)
-        String selectedSemester = semesterSpinner.getSelectedItem().toString().trim();
-        String selectedOffenseType = offenseTypeSpinner.getSelectedItem().toString().trim();
+            // Get the selected semester and offense type (add these to the spinners)
+            String selectedSemester = semesterSpinner.getSelectedItem().toString().trim();
+            String selectedOffenseType = offenseTypeSpinner.getSelectedItem().toString().trim();
 
-        List<String> allReferralDetails = new ArrayList<>();
-        final int[] processedCount = {0};
-        final int[] totalEntities = {0};
+            List<String> allReferralDetails = new ArrayList<>();
+            final int[] processedCount = {0};
+            final int[] totalEntities = {0};
 
-        if (selectedStatus.equals("Settled")) {
-            // When "Settled" is selected, fetch only from the students collection and filter by "accepted_status" sub-collection
-            fetchReferralDataForSettled("students", "accepted_status", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-        } else if (selectedStatus.equals("Unsettled")) {
-            // When "Unsettled" is selected, fetch from the students, personnel, and prefect collections with unsettled status
-            fetchReferralDataForUnsettled("students", "student_refferal_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-            fetchReferralDataForUnsettled("personnel", "personnel_refferal_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-            fetchReferralDataForUnsettled("prefect", "prefect_referral_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-        } else {
-            // Otherwise, fetch data from "students", "personnel", and "prefect collections" with proper filtering.
-            fetchReferralData("students", "student_refferal_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-            fetchReferralData("personnel", "personnel_refferal_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-            fetchReferralData("prefect", "prefect_referral_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
+            if (selectedStatus.equals("Settled")) {
+                // When "Settled" is selected, fetch only from the students collection and filter by "accepted_status" sub-collection
+                fetchReferralDataForSettled("students", "accepted_status", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
+            } else if (selectedStatus.equals("Unsettled")) {
+                // When "Unsettled" is selected, fetch from the students, personnel, and prefect collections with unsettled status
+                fetchReferralDataForUnsettled("students", "student_refferal_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
+                fetchReferralDataForUnsettled("personnel", "personnel_refferal_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
+                fetchReferralDataForUnsettled("prefect", "prefect_referral_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
+            } else {
+                // Otherwise, fetch data from "students", "personnel", and "prefect collections" with proper filtering.
+                fetchReferralData("students", "student_refferal_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
+                fetchReferralData("personnel", "personnel_refferal_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
+                fetchReferralData("prefect", "prefect_referral_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
+            }
         }
-    }
 
     private void fetchReferralDataForUnsettled(String collection, String referralHistoryCollection, Date startDate, Date endDate,
                                                String selectedProgram, String selectedStatus, String selectedSemester, String selectedOffenseType,
@@ -259,6 +308,7 @@ public class reports_prefect extends Fragment {
                                                         String referrer = referralDoc.getString(getReferrerField(collection));  // Get the appropriate referrer field
                                                         String referralStatus = referralDoc.getString("status");
                                                         String term = referralDoc.getString("term");
+
 
                                                         String referralDetails = buildReferralDetails(name, offense, violation, referrer, referralStatus, term);
                                                         allReferralDetails.add(getEntityTypeName(collection) + " Referral:\n" + referralDetails);
@@ -430,7 +480,7 @@ public class reports_prefect extends Fragment {
                                                                 String status = referralDoc.getString("status");
 
                                                                 StringBuilder referralDetails = new StringBuilder();
-                                                                referralDetails.append("Name: ").append(name != null ? name : "N/A")
+                                                                referralDetails.append("Name : ").append(name != null ? name : "N/A")
                                                                         .append("\nOffense: ").append(offense != null ? offense : "N/A")
                                                                         .append("\nViolation: ").append(violation != null ? violation : "N/A")
                                                                         .append("\nReferrer: ").append(referrer != null ? referrer : "N/A")
@@ -894,64 +944,78 @@ public class reports_prefect extends Fragment {
                     studentId = studentNo;
                     offenses.clear();
                     violations.clear();
+                    date.clear();
+                    location.clear();
+                    referrer_id.clear();
 
-                    // Iterate through all the documents in the accepted_status sub-collection
                     for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                        // Fetch the fields from the document
                         Long logs = document.getLong("logs");
 
-                        // Check if the logs field is present and equals 1
                         if (logs != null && logs == 1) {
-                            logsCount++;  // Increment the count if logs equals 1
+                            logsCount++;
 
-                            // Fetch offense and violation fields
                             String offenseField = document.getString("offense");
                             String violationField = document.getString("violation");
+                            String dateField = document.getString("date");
+                            String locationField = document.getString("location");
+                            String refferer_idField = document.getString("referrer_id");
 
                             if (offenseField != null) {
-                                offenses.add(offenseField);  // Add offense to the list
+                                offenses.add(offenseField);
                             }
                             if (violationField != null) {
-                                violations.add(violationField);  // Add violation to the list
+                                violations.add(violationField);
+                            }
+                            if (dateField != null) {
+                                date.add(dateField);
+                            }
+                            if (locationField != null) {
+                                location.add(locationField);
+                            }
+                            if (refferer_idField != null) {
+                                referrer_id.add(refferer_idField);
                             }
                         }
 
-                        // Fetch student name from the document if available
                         if (document.contains("student_name")) {
                             studentName = document.getString("student_name");
                         }
                     }
 
-                    // Display information based on logs presence and value
                     if (logsCount > 0) {
+                        resultLayout.setVisibility(View.VISIBLE); // Show result layout
                         studentNameTextView.setVisibility(View.VISIBLE);
-                        studentNameTextView.setText("Student Name: " + studentName + "\nStudent ID: " + studentId + "\nLogs with value 1: " + logsCount);
-
-                        // Enable the PDF button when data is found
+                        pdfButton.setVisibility(View.VISIBLE);
                         pdfButton.setEnabled(true);
-                    } else {
-                        Toast.makeText(getActivity(), "No logs with value 1 found for this student ID", Toast.LENGTH_SHORT).show();
 
-                        // Disable the PDF button if no valid logs are found
-                        pdfButton.setEnabled(false);
+                        // Update studentNameTextView with styled content
+                        String styledText = "Student Name: <b>" + studentName + "</b><br>" +
+                                "Student ID: <b>" + studentId + "</b><br>" +
+                                "Violation count: <b>" + logsCount + "</b>";
+                        studentNameTextView.setText(Html.fromHtml(styledText, Html.FROM_HTML_MODE_COMPACT));
+
+                    } else {
+                        resultLayout.setVisibility(View.GONE); // Hide result layout
+                        Toast.makeText(getActivity(), "No logs with value 1 found for this student ID", Toast.LENGTH_SHORT).show();
                     }
                 } else {
+                    resultLayout.setVisibility(View.GONE); // Hide result layout
                     Toast.makeText(getActivity(), "No data found for this student ID", Toast.LENGTH_SHORT).show();
-                    pdfButton.setEnabled(false);
                 }
             } else {
                 Exception e = task.getException();
                 if (e != null) {
                     e.printStackTrace();
                 }
+                resultLayout.setVisibility(View.GONE); // Hide result layout
                 Toast.makeText(getActivity(), "Error fetching student data", Toast.LENGTH_SHORT).show();
-                pdfButton.setEnabled(false);
             }
         });
     }
 
+
     private void openPDF() {
-        if (studentName.isEmpty() || studentId.isEmpty() || offenses.isEmpty() || violations.isEmpty()) {
+        if (studentName.isEmpty() || studentId.isEmpty() || offenses.isEmpty() || violations.isEmpty() || date.isEmpty() || location.isEmpty() || referrer_id.isEmpty()) {
             Toast.makeText(getActivity(), "Please search for a student first", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -961,32 +1025,92 @@ public class reports_prefect extends Fragment {
         PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(600, 800, 1).create();
         PdfDocument.Page page = pdfDocument.startPage(pageInfo);
 
-        // Create a canvas to draw text
+        // Create a canvas to draw text and shapes
         Canvas canvas = page.getCanvas();
         Paint paint = new Paint();
         paint.setColor(Color.BLACK);
-        paint.setTextSize(16);
+        paint.setTextSize(14);
 
-        // Add student details to the PDF
-        canvas.drawText("Student Name: " + studentName, 50, 50, paint);
-        canvas.drawText("Student ID: " + studentId, 50, 70, paint);
+        // Add Table Title
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextAlign(Paint.Align.CENTER);
+        canvas.drawText("STUDENT DISCIPLINARY CASES", pageInfo.getPageWidth() / 2, 30, paint);
 
-        // Add header for logs section
-        int yPosition = 100;  // Set initial y position for logs
-        canvas.drawText("Log Entries:", 50, yPosition, paint);
-        yPosition += 20;  // Add space after the header
+        // Add student details under the title
+        paint.setTextAlign(Paint.Align.LEFT);
+        canvas.drawText("Name: " + studentName, 30, 60, paint);
+        canvas.drawText("ID: " + studentId, 30, 80, paint);
 
-        // Loop through each log (offense and violation) and display it
-        for (int i = 0; i < offenses.size(); i++) {
-            String offenseText = "Offense " + (i + 1) + ": " + offenses.get(i);
-            String violationText = "Violation " + (i + 1) + ": " + violations.get(i);
+        // Set up table dimensions
+        int startX = 30;
+        int startY = 100;
 
-            // Draw offense and violation
-            canvas.drawText(offenseText, 50, yPosition, paint);
-            yPosition += 20;  // Move to the next line after the offense
+        // Column headers and table content
+        String[] headers = {"Offense", "Violation", "Date", "Location", "Referrer ID"};
+        List<String[]> dataColumns = Arrays.asList(
+                offenses.toArray(new String[0]),
+                violations.toArray(new String[0]),
+                date.toArray(new String[0]),
+                location.toArray(new String[0]),
+                referrer_id.toArray(new String[0])
+        );
 
-            canvas.drawText(violationText, 50, yPosition, paint);
-            yPosition += 30;  // Add extra space after each entry for readability
+        // Dynamically calculate column widths
+        int[] columnWidths = calculateColumnWidths(paint, headers, dataColumns);
+
+
+        // Draw the table header row
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.LTGRAY);
+        canvas.drawRect(startX, startY, startX + Arrays.stream(columnWidths).sum(), startY + 30, paint);
+
+        // Write header text centered in each column
+        paint.setColor(Color.BLACK);
+        paint.setStyle(Paint.Style.FILL);
+        int currentX = startX;
+        for (int i = 0; i < headers.length; i++) {
+            // Calculate text width
+            float textWidth = paint.measureText(headers[i]);
+            // Center text horizontally in the column
+            float textX = currentX + (columnWidths[i] - textWidth) / 2;
+            // Adjust the text Y position for vertical alignment
+            float textY = startY + 20; // Adjust as needed based on font size
+            canvas.drawText(headers[i], textX, textY, paint);
+            currentX += columnWidths[i];
+        }
+
+        // Draw table header grid lines
+        paint.setStyle(Paint.Style.STROKE);
+        currentX = startX;
+        for (int i = 0; i <= headers.length; i++) {
+            canvas.drawLine(currentX, startY, currentX, startY + 30, paint);
+            currentX += (i < headers.length) ? columnWidths[i] : 0;
+        }
+        canvas.drawLine(startX, startY + 30, startX + Arrays.stream(columnWidths).sum(), startY + 30, paint);
+
+        // Draw table content
+        int currentY = startY + 30;
+        paint.setStyle(Paint.Style.FILL);
+        for (int row = 0; row < offenses.size(); row++) {
+
+            currentX = startX;
+            for (int col = 0; col < headers.length; col++) {
+                String content = dataColumns.get(col)[row];
+                canvas.drawText(content, currentX + 10, currentY + 20, paint);
+                currentX += columnWidths[col];
+            }
+
+            // Draw horizontal grid line
+            canvas.drawLine(startX, currentY + 25, startX + Arrays.stream(columnWidths).sum(), currentY + 25, paint);
+
+            currentY += 25;
+        }
+
+        // Draw vertical grid lines
+        currentX = startX;
+        for (int i = 0; i <= headers.length; i++) {
+            canvas.drawLine(currentX, startY, currentX, currentY, paint);
+            currentX += (i < headers.length) ? columnWidths[i] : 0;
         }
 
         // Finish the page
@@ -1006,13 +1130,33 @@ public class reports_prefect extends Fragment {
             Intent pdfIntent = new Intent(Intent.ACTION_VIEW);
             pdfIntent.setDataAndType(path, "application/pdf");
             pdfIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            pdfIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);  // Grant URI permission
+            pdfIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(pdfIntent);
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(getActivity(), "Error generating PDF", Toast.LENGTH_SHORT).show();
         }
     }
+
+    // Dynamically calculate column widths
+    private int[] calculateColumnWidths(Paint paint, String[] headers, List<String[]> dataColumns) {
+        int[] colWidths = new int[headers.length];
+
+        // Calculate width for headers
+        for (int i = 0; i < headers.length; i++) {
+            colWidths[i] = Math.max(colWidths[i], (int) paint.measureText(headers[i]) + 20);
+        }
+
+        // Calculate width for data
+        for (int col = 0; col < dataColumns.size(); col++) {
+            for (String content : dataColumns.get(col)) {
+                colWidths[col] = Math.max(colWidths[col], (int) paint.measureText(content) + 20);
+            }
+        }
+
+        return colWidths;
+    }
+
 
     // Method to set up the spinner with a string array
     private void setupSpinner(Spinner spinner, String[] items) {
