@@ -32,13 +32,13 @@
             android:textSize="16sp" />
     </LinearLayout>
 
-    <!-- Scrollable Table Section -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="150dp"
         android:layout_marginTop="100dp"
         android:fillViewport="true">
 
+        <!-- Scrollable Content (Horizontal Scroll) -->
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -114,6 +114,7 @@
 
         </ScrollView>
     </HorizontalScrollView>
+
 
     <!-- Proceed Button -->
     <Button

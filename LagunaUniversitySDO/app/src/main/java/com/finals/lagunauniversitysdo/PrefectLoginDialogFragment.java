@@ -9,6 +9,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
+import android.text.TextUtils;
+import android.text.InputType;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,6 +32,10 @@ public class PrefectLoginDialogFragment extends DialogFragment {
     Button loginButton;
     ImageButton closeButton;
 
+    ImageButton  eyeButton; // Added eyeButton
+    boolean isPasswordVisible = false; // Track the password visibility
+
+
     private FirebaseFirestore db;
 
     @Nullable
@@ -41,6 +47,8 @@ public class PrefectLoginDialogFragment extends DialogFragment {
         loginPassword = view.findViewById(R.id.login_password);
         loginButton = view.findViewById(R.id.login_button);
         closeButton = view.findViewById(R.id.close_button);
+        eyeButton = view.findViewById(R.id.eye_button); // Initialize eye button
+
 
         // Initialize Firestore
         db = FirebaseFirestore.getInstance();
@@ -67,6 +75,14 @@ public class PrefectLoginDialogFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 dismiss();
+            }
+        });
+
+        // Set onClickListener for eye button to toggle password visibility
+        eyeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                togglePasswordVisibility();
             }
         });
 
@@ -160,6 +176,23 @@ public class PrefectLoginDialogFragment extends DialogFragment {
                             .addOnFailureListener(e -> Log.w("ActivityLog", "Error adding log entry with ID: " + documentId, e));
                 })
                 .addOnFailureListener(e -> Log.w("ActivityLog", "Error fetching existing logs for prefect: " + prefectID, e));
+    }
+    private void togglePasswordVisibility() {
+        if (isPasswordVisible) {
+            // Hide the password
+            loginPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            eyeButton.setImageResource(R.drawable.baseline_remove_red_eye_24); // Change to closed eye icon
+        } else {
+            // Show the password
+            loginPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            eyeButton.setImageResource(R.drawable.baseline_remove_red_eye_24); // Change to open eye icon
+        }
+
+        // Move cursor to the end after toggling visibility
+        loginPassword.setSelection(loginPassword.length());
+
+        // Toggle the visibility state
+        isPasswordVisible = !isPasswordVisible;
     }
 
     // Example hashing function (replace with a real implementation)

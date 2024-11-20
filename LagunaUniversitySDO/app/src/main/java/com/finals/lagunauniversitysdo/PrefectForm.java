@@ -112,6 +112,7 @@ public class PrefectForm extends AppCompatActivity {
 
         // Retrieve prefect data from the intent
         String prefectName = intent.getStringExtra("PREFECT_NAME_KEY");
+        // In populateFieldsFromIntent()
         String prefectEmail = intent.getStringExtra("PREFECT_EMAIL_KEY");
         Long prefectContact = intent.getLongExtra("PREFECT_CONTACT_NUM_KEY", 0L);
         String prefectDepartment = intent.getStringExtra("PREFECT_DEPARTMENT_KEY");
@@ -123,7 +124,7 @@ public class PrefectForm extends AppCompatActivity {
         programField.setText(prefectDepartment != null ? prefectDepartment : "");
 
         // Display prefect details on the UI
-        displayPrefectDetails(prefectName, prefectEmail, String.valueOf(prefectContact), prefectDepartment);
+        displayPrefectDetails(prefectName, prefectEmail,String.valueOf(prefectContact), prefectDepartment);
 
         // Retrieve student data from the intent
         ArrayList<String> userNames = intent.getStringArrayListExtra("ADDED_STUDENT_NAMES");
@@ -429,6 +430,8 @@ public class PrefectForm extends AppCompatActivity {
         String date = dateField.getText().toString().trim();
         String studId = violatorsStudID.getText().toString().trim();
         String status = "accepted"; // Default status
+        String violation_status = "Unsettled"; // Default violation
+
 
         // Get selected violation and offense from the spinner
         CheckboxSpinnerAdapter violationAdapter = (CheckboxSpinnerAdapter) violationSpinner.getAdapter();
@@ -510,6 +513,7 @@ public class PrefectForm extends AppCompatActivity {
                         studentData.put("offense", violation); // Add offense
                         studentData.put("date", date);
                         studentData.put("status", status);
+                        studentData.put("violation_status", violation_status);
                         studentData.put("user_concern", userConcern);
                         studentData.put("remarks", remarks);
                         studentData.put("prefect_referrer", prefectReferrer); // Add prefect referrer
@@ -572,6 +576,7 @@ public class PrefectForm extends AppCompatActivity {
                     studentData.put("offense", violation); // Add offense
                     studentData.put("date", date);
                     studentData.put("status", status);
+                    studentData.put("violation_status", violation_status);
                     studentData.put("remarks", remarks);
                     studentData.put("user_concern", userConcern);
                     studentData.put("referrer_id", prefectID);
@@ -626,6 +631,7 @@ public class PrefectForm extends AppCompatActivity {
                 scannedStudentData.put("date", date);
                 scannedData.put("user_concern", userConcern);
                 scannedStudentData.put("status", status);
+                scannedData.put("violation_status", violation_status);
                 scannedStudentData.put("remarks", remarks);
                 scannedStudentData.put("prefect_referrer", prefectReferrer);
                 scannedStudentData.put("prefect_id", prefectID);

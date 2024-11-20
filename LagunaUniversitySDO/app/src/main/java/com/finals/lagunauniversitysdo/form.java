@@ -505,7 +505,7 @@ public class form extends AppCompatActivity {
         String date = dateField.getText().toString().trim();
         String studId = studentId; // Assuming this is the student's ID being referred
         String status = "pending"; // Default status
-
+        String violation_status = "Unsettled"; // Default violation
         // Retrieve remarks from remarks_field
         String remarks = ((EditText) findViewById(R.id.remarks_field)).getText().toString().trim();
 
@@ -574,6 +574,7 @@ public class form extends AppCompatActivity {
                 studentData.put("violation", selectedType);  // Save selected type in "violation" field
                 studentData.put("date", date);
                 studentData.put("status", status);
+                studentData.put("violation_status", violation_status);
                 studentData.put("user_concern", userConcern); // Add user concern to the student data
                 studentData.put("remarks", remarks); // Add remarks to the student data
                 studentData.put("student_referrer", studentReferrer); // Add student_referrer to Firestore data
@@ -615,6 +616,7 @@ public class form extends AppCompatActivity {
             scannedStudentData.put("violation", selectedType);  // Save selected type in "violation" field
             scannedStudentData.put("date", date);
             scannedStudentData.put("status", status);
+            scannedData.put("violation_status", violation_status);
             scannedStudentData.put("user_concern", userConcern); // Add user concern to scanned student data
             scannedStudentData.put("remarks", remarks); // Add remarks to scanned student data
             scannedStudentData.put("student_referrer", studentReferrer); // Add student_referrer to Firestore data
