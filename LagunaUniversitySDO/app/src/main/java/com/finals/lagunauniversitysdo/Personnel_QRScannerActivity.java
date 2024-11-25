@@ -42,23 +42,17 @@ public class Personnel_QRScannerActivity extends AppCompatActivity {
         setContentView(R.layout.qr_scanner_overlay); // Ensure the correct layout is set
 
         EdgeToEdge.enable(this);
-        View scannerFrame = findViewById(R.id.scanner_frame);
-
-        if (scannerFrame != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(scannerFrame, (v, insets) -> {
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-                return insets;
-            });
-        } else {
-            Toast.makeText(this, "Scanner frame view not found", Toast.LENGTH_SHORT).show();
-        }
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.scanner_frame), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
 
         // Retrieve personnel details from intent
         Intent intent = getIntent();
         personnelName = intent.getStringExtra("PERSONNEL_NAME");
         personnelEmail = intent.getStringExtra("PERSONNEL_EMAIL");
-        personnelContact = intent.getStringExtra("PERSONNEL_CONTACT" );
+        personnelContact = intent.getStringExtra("PERSONNEL_CONTACT");
         personnelProgram = intent.getStringExtra("PERSONNEL_PROGRAM");
 
         // Display welcome message
@@ -86,7 +80,7 @@ public class Personnel_QRScannerActivity extends AppCompatActivity {
 
     private void askForNumberOfScans() {
         final EditText input = new EditText(this);
-        input.setFilters(new InputFilter[]{
+        input.setFilters(new InputFilter[] {
                 (source, start, end, dest, dstart, dend) -> {
                     String inputText = dest.toString() + source.toString();
                     if (!inputText.matches("\\d*")) return ""; // Reject non-numeric input
@@ -108,7 +102,7 @@ public class Personnel_QRScannerActivity extends AppCompatActivity {
                         if (numberOfScans > 0) {
                             remainingScans = numberOfScans; // Set remaining scans
                             scannedDataList.clear(); // Clear previous scans
-                            checkCameraPermissionAndStartScanner(); // Check permission and start scanning
+                            checkCameraPermissionAndStartScanner(); // Start scanning
                         } else {
                             Toast.makeText(Personnel_QRScannerActivity.this, "Please enter a valid number.", Toast.LENGTH_SHORT).show();
                         }
@@ -116,7 +110,7 @@ public class Personnel_QRScannerActivity extends AppCompatActivity {
                         Toast.makeText(Personnel_QRScannerActivity.this, "Invalid input. Please enter a number.", Toast.LENGTH_SHORT).show();
                     }
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton("Cancel", (dialog, which) -> finish())
                 .show();
     }
 
@@ -154,8 +148,8 @@ public class Personnel_QRScannerActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
 
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (result != null) {
             if (result.getContents() == null) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
@@ -178,14 +172,39 @@ public class Personnel_QRScannerActivity extends AppCompatActivity {
         } else {
             // If in multiple scan mode
             if (remainingScans > 0) {
-                Toast.makeText(this, "Scan another QR code", Toast.LENGTH_SHORT).show();
-                startQRCodeScanner(); // Start scanning again
+                // Show dialog after each scan
+                showContinueOrGoToFormDialog(scannedText);
             } else {
                 // When all scans are done, send data to the form activity
                 startPersonnelFormActivity(scannedDataList); // Pass all scanned data to the form activity
             }
         }
     }
+
+    private void showContinueOrGoToFormDialog(String scannedText) {
+        new AlertDialog.Builder(this)
+                .setTitle("Scan Successful")
+                .setMessage("Scanned Student: " + scannedText + "\nDo you want to continue scanning, delete this scan, or go to the form?")
+                .setPositiveButton("Continue Scanning", (dialog, which) -> {
+                    startQRCodeScanner(); // Start scanning again
+                })
+                .setNegativeButton("Go to Form", (dialog, which) -> {
+                    startPersonnelFormActivity(scannedDataList); // Pass all scanned data to the form activity
+                })
+                .setNeutralButton("Delete Scan", (dialog, which) -> {
+                    // Remove the last scanned entry from the list if it's wrong
+                    if (!scannedDataList.isEmpty()) {
+                        scannedDataList.remove(scannedDataList.size() - 1); // Remove the last scan
+                        remainingScans++; // Increase the remaining scans as the user deleted a scan
+                    }
+                    Toast.makeText(this, "Last scan deleted. Continue scanning.", Toast.LENGTH_SHORT).show();
+                    startQRCodeScanner(); // Continue scanning
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+
 
     private void startPersonnelFormActivity(String scannedData) {
         Intent formIntent = new Intent(this, PersonnelForm.class);

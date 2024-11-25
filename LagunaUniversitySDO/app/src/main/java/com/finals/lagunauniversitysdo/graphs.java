@@ -5,6 +5,7 @@ import android.graphics.Paint;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import android.util.Log;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
@@ -36,11 +37,22 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+
+
+
+
 public class graphs {
 
     private BarChart barChart;
     private LineChart lineChart;
     private FirebaseFirestore db;
+    // Example color list (you can customize these colors)
+    private int[] programColors = {
+            Color.parseColor("#6AAB9C"), // Program 1
+            Color.parseColor("#5874DC"), // Program 2
+            Color.parseColor("#E06C78"), // Program 3
+            Color.parseColor("#25A18E"), // Program 4
+    };
 
     // Maps to hold combined data
     private Map<String, Integer> totalStudentCountMap = new HashMap<>();
@@ -58,62 +70,44 @@ public class graphs {
     }
 
     public void fetchDataFromFirestore() {
-        // Fetch data from nested collections in "students" and "personnel"
-        fetchNestedCollectionData("students", "student_refferal_history");
-        fetchNestedCollectionData("personnel", "personnel_refferal_history");
-
-        // Fetch data from standalone collection "prefect_refferal_history"
-        fetchCollectionData("prefect_refferal_history");
+        // Fetch data from the "students" collection's "accepted_status" sub-collection
+        fetchAcceptedStatusData();
     }
 
-    private void fetchNestedCollectionData(String mainCollectionName, String subCollectionName) {
-        db.collection(mainCollectionName)
-                .get()
+    private void fetchAcceptedStatusData() {
+        // Fetch all students from the "students" collection
+        db.collection("students")
+                .get()  // Retrieve all documents from the "students" collection
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                // Access the nested subcollection for each document
-                                db.collection(mainCollectionName)
-                                        .document(document.getId())
-                                        .collection(subCollectionName)
-                                        .get()
+                                // For each student, access the "accepted_status" sub-collection
+                                db.collection("students")
+                                        .document(document.getId())  // Specify student by their document ID
+                                        .collection("accepted_status")  // Access the "accepted_status" sub-collection
+                                        .get()  // Fetch all documents in "accepted_status" sub-collection
                                         .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                             @Override
                                             public void onComplete(@NonNull Task<QuerySnapshot> subTask) {
                                                 if (subTask.isSuccessful()) {
-                                                    // Process the data for this subcollection
-                                                    processFirestoreData(subTask.getResult());
+                                                    // Successfully retrieved data from "accepted_status"
+                                                    processFirestoreData(subTask.getResult());  // Process the retrieved data
                                                 } else {
-                                                    // Handle error for subcollection fetch
+                                                    // Handle failure when fetching "accepted_status" data
+                                                    Log.e("Firestore", "Error fetching accepted_status data", subTask.getException());
                                                 }
                                             }
                                         });
                             }
                         } else {
-                            // Handle error for main collection fetch
+                            // Handle failure when fetching student data
+                            Log.e("Firestore", "Error fetching student data", task.getException());
                         }
                     }
                 });
     }
-
-    private void fetchCollectionData(String collectionName) {
-        db.collection(collectionName)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            // Process the data for this collection
-                            processFirestoreData(task.getResult());
-                        } else {
-                            // Handle error
-                        }
-                    }
-                });
-    }
-
 
     public void processFirestoreData(QuerySnapshot querySnapshot) {
         // For counting unique students per program (BarChart)
@@ -170,14 +164,15 @@ public class graphs {
         barChart.animateY(1000);   // Animates Y-axis over 1.5 seconds
     }
 
+    // The rest of the setup methods (setupBarChart, setupLineChart) remain unchanged.
+    // Add them as needed based on the original code.
 
-    // Example color list (you can customize these colors)
-    private int[] programColors = {
-            Color.parseColor("#6AAB9C"), // Program 1
-            Color.parseColor("#5874DC"), // Program 2
-            Color.parseColor("#E06C78"), // Program 3
-            Color.parseColor("#25A18E"), // Program 4
-    };
+    public class IntegerValueFormatter extends ValueFormatter {
+        @Override
+        public String getFormattedValue(float value) {
+            return String.valueOf((int) value);
+        }
+    }
 
     public void setupBarChart() {
         List<BarEntry> programEntries = new ArrayList<>();
@@ -344,12 +339,6 @@ public class graphs {
 
 
 
-    public class IntegerValueFormatter extends ValueFormatter {
-        @Override
-        public String getFormattedValue(float value) {
-            return String.valueOf((int) value);
-        }
-    }
 
 
 }

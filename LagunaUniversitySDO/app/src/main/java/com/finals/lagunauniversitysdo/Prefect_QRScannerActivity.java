@@ -54,6 +54,70 @@ public class Prefect_QRScannerActivity extends AppCompatActivity {
         showScanModeDialog(); // Show dialog for selecting scan mode
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (result != null) {
+            if (result.getContents() == null) {
+                // Handle when the user cancels the scan
+                Toast.makeText(this, "Scan cancelled", Toast.LENGTH_LONG).show();
+                // End the activity or navigate back as intended
+                finish();
+            } else {
+                // Handle a successful scan result
+                handleScanResult(result.getContents());
+            }
+        } else {
+            // Ensure the parent method doesn't override cancellation handling
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private void handleScanResult(String scannedText) {
+        scannedDataList.add(scannedText); // Add scanned text to the list
+        remainingScans--; // Decrease the count of remaining scans
+
+        if (!isMultipleScan) {
+            // If in single scan mode
+            startPrefectFormActivity(scannedText); // Start the personnel form with the scanned data
+        } else {
+            // If in multiple scan mode
+            if (remainingScans > 0) {
+                // Show dialog after each scan
+                showContinueOrGoToFormDialog(scannedText);
+            } else {
+                // When all scans are done, send data to the form activity
+                startPrefectFormActivity(scannedDataList); // Pass all scanned data to the form activity
+            }
+        }
+    }
+
+    private void showContinueOrGoToFormDialog(String scannedText) {
+        new AlertDialog.Builder(this)
+                .setTitle("Scan Successful")
+                .setMessage("Scanned Student: " + scannedText + "\nDo you want to continue scanning, delete this scan, or go to the form?")
+                .setPositiveButton("Continue Scanning", (dialog, which) -> {
+                    startQRCodeScanner(); // Start scanning again
+                })
+                .setNegativeButton("Go to Form", (dialog, which) -> {
+                    startPrefectFormActivity(scannedDataList); // Pass all scanned data to the form activity
+                })
+                .setNeutralButton("Delete Scan", (dialog, which) -> {
+                    // Remove the last scanned entry from the list if it's wrong
+                    if (!scannedDataList.isEmpty()) {
+                        scannedDataList.remove(scannedDataList.size() - 1); // Remove the last scan
+                        remainingScans++; // Increase the remaining scans as the user deleted a scan
+                    }
+                    Toast.makeText(this, "Last scan deleted. Continue scanning.", Toast.LENGTH_SHORT).show();
+                    startQRCodeScanner(); // Continue scanning
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+
     private void showScanModeDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("Select Scan Mode")
@@ -66,7 +130,7 @@ public class Prefect_QRScannerActivity extends AppCompatActivity {
                     isMultipleScan = true;
                     askForNumberOfScans(); // Ask user how many scans they want to perform
                 })
-                .setCancelable(false)
+                .setCancelable(false) // Prevent accidental dismissal
                 .show();
     }
 
@@ -83,6 +147,7 @@ public class Prefect_QRScannerActivity extends AppCompatActivity {
                 }
         });
 
+
         new AlertDialog.Builder(this)
                 .setTitle("Number of Scans")
                 .setMessage("How many QR codes do you want to scan? (Max: 50)")
@@ -94,7 +159,7 @@ public class Prefect_QRScannerActivity extends AppCompatActivity {
                         if (numberOfScans > 0) {
                             remainingScans = numberOfScans; // Set remaining scans
                             scannedDataList.clear(); // Clear previous scans
-                            checkCameraPermissionAndStartScanner(); // Check permission and start scanning
+                            checkCameraPermissionAndStartScanner(); // Start scanning
                         } else {
                             Toast.makeText(Prefect_QRScannerActivity.this, "Please enter a valid number.", Toast.LENGTH_SHORT).show();
                         }
@@ -102,7 +167,10 @@ public class Prefect_QRScannerActivity extends AppCompatActivity {
                         Toast.makeText(Prefect_QRScannerActivity.this, "Invalid input. Please enter a number.", Toast.LENGTH_SHORT).show();
                     }
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    // End the activity if "Cancel" is pressed
+                    finish();
+                })
                 .show();
     }
 
@@ -127,67 +195,22 @@ public class Prefect_QRScannerActivity extends AppCompatActivity {
         integrator.initiateScan();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startQRCodeScanner();
-            } else {
-                Toast.makeText(this, "Camera permission is required to scan QR codes", Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
-            if (result.getContents() == null) {
-                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
-                finish();
-            } else {
-                handleScanResult(result.getContents());
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
-
-    private void handleScanResult(String scannedText) {
-        scannedDataList.add(scannedText); // Add scanned text to the list
-        remainingScans--; // Decrease the count of remaining scans
-
-        if (!isMultipleScan) {
-            startPrefectFormActivity(scannedText); // Start the form with single scanned data
-        } else {
-            if (remainingScans > 0) {
-                Toast.makeText(this, "Scan another QR code", Toast.LENGTH_SHORT).show();
-                startQRCodeScanner(); // Start scanning again
-            } else {
-                // Start the form with all scanned data
-                startPrefectFormActivity(scannedDataList);
-            }
-        }
-    }
-
     private void startPrefectFormActivity(String scannedData) {
         Intent formIntent = new Intent(this, PrefectForm.class);
         formIntent.putExtra("scannedData", scannedData);
         putPrefectData(formIntent);
         startActivity(formIntent);
-        finish();
+        finish(); // Ensure the current activity finishes
     }
 
     private void startPrefectFormActivity(ArrayList<String> scannedDataList) {
         Intent formIntent = new Intent(this, PrefectForm.class);
-        formIntent.putStringArrayListExtra("SCANNED_DATA_LIST_KEY", scannedDataList); // Ensure key is consistent
+        formIntent.putStringArrayListExtra("SCANNED_DATA_LIST_KEY", scannedDataList);
         putPrefectData(formIntent);
         startActivity(formIntent);
-        finish();
+        finish(); // Ensure the current activity finishes
     }
+
 
     private void putPrefectData(Intent formIntent) {
         formIntent.putExtra("PREFECT_NAME_KEY", PrefectSession.getPrefectName());

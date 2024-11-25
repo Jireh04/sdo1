@@ -11,10 +11,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 public class LoginActivity extends AppCompatActivity {
 
     Button studentLoginButton, PersonnelLoginButton, DODLoginButton;
+    private StudentLoginDialogFragment studentDialog;
+    private PersonnelLoginDialogFragment personnelDialog;
+    private PrefectLoginDialogFragment prefectDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,24 +59,33 @@ public class LoginActivity extends AppCompatActivity {
         studentLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                StudentLoginDialogFragment studentDialog = new StudentLoginDialogFragment();
-                studentDialog.show(getSupportFragmentManager(), "student_login_dialog");
+                // Check if the student dialog is already showing
+                if (studentDialog == null || !studentDialog.isAdded()) {
+                    studentDialog = new StudentLoginDialogFragment();
+                    studentDialog.show(getSupportFragmentManager(), "student_login_dialog");
+                }
             }
         });
 
         PersonnelLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PersonnelLoginDialogFragment personnelDialog = new PersonnelLoginDialogFragment();
-                personnelDialog.show(getSupportFragmentManager(), "personnel_login_dialog");
+                // Check if the personnel dialog is already showing
+                if (personnelDialog == null || !personnelDialog.isAdded()) {
+                    personnelDialog = new PersonnelLoginDialogFragment();
+                    personnelDialog.show(getSupportFragmentManager(), "personnel_login_dialog");
+                }
             }
         });
 
         DODLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PrefectLoginDialogFragment PrefectDialog = new PrefectLoginDialogFragment();
-                PrefectDialog.show(getSupportFragmentManager(), "prefect_login_dialog");
+                // Check if the prefect dialog is already showing
+                if (prefectDialog == null || !prefectDialog.isAdded()) {
+                    prefectDialog = new PrefectLoginDialogFragment();
+                    prefectDialog.show(getSupportFragmentManager(), "prefect_login_dialog");
+                }
             }
         });
     }

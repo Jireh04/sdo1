@@ -86,7 +86,7 @@ public class PrefectSession {
     }
 
     // Method to store all prefect details at once
-    public static void setPrefectDetails(String name, String email, String prefectEmail, Long contactNum, String department, String username, String password) {
+    public static void setPrefectDetails(String name, String email, Long contactNum, String department, String username, String password) {
         setPrefectName(name);
         setPrefectEmail(email);
         setPrefectContactNum(contactNum);

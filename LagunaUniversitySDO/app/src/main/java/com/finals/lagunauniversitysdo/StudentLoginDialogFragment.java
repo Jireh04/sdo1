@@ -24,20 +24,26 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import android.widget.CheckBox;
 
 import java.util.HashMap;
 import java.util.Map;
+
+
+import android.content.SharedPreferences;
+
 
 public class StudentLoginDialogFragment extends DialogFragment {
 
     EditText loginUsername, loginPassword;
     Button loginButton;
     ImageButton closeButton;
-
-    ImageButton  eyeButton; // Added eyeButton
+    ImageButton eyeButton; // Added eyeButton
     boolean isPasswordVisible = false; // Track the password visibility
+    CheckBox rememberMeCheckbox; // Added Remember Me checkbox
 
     private FirebaseFirestore db;
+    private SharedPreferences sharedPreferences;
 
     @Nullable
     @Override
@@ -48,7 +54,21 @@ public class StudentLoginDialogFragment extends DialogFragment {
         loginPassword = view.findViewById(R.id.login_password);
         loginButton = view.findViewById(R.id.login_button);
         closeButton = view.findViewById(R.id.close_button);
-        eyeButton = view.findViewById(R.id.eye_button); // Initialize eye button
+        eyeButton = view.findViewById(R.id.eye_button);
+        rememberMeCheckbox = view.findViewById(R.id.remember_me_checkbox); // Initialize remember me checkbox
+
+        // Initialize SharedPreferences
+        sharedPreferences = getActivity().getSharedPreferences("StudentLogin", getActivity().MODE_PRIVATE);
+
+        // Check if credentials are saved
+        if (sharedPreferences.contains("username") && sharedPreferences.contains("password")) {
+            String savedUsername = sharedPreferences.getString("username", "");
+            String savedPassword = sharedPreferences.getString("password", "");
+            loginUsername.setText(savedUsername);
+            loginPassword.setText(savedPassword);
+            rememberMeCheckbox.setChecked(true); // Pre-check the remember me checkbox
+        }
+
         // Initialize Firestore
         db = FirebaseFirestore.getInstance();
 
@@ -84,6 +104,7 @@ public class StudentLoginDialogFragment extends DialogFragment {
                 togglePasswordVisibility();
             }
         });
+
         return view;
     }
 
@@ -130,6 +151,20 @@ public class StudentLoginDialogFragment extends DialogFragment {
                                 // After successful login
                                 Toast.makeText(getActivity(), "Student logged in", Toast.LENGTH_SHORT).show();
                                 logUserActivity(studId, "Login");
+
+                                // If "Remember Me" is checked, save credentials
+                                if (rememberMeCheckbox.isChecked()) {
+                                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                                    editor.putString("username", username);
+                                    editor.putString("password", password);
+                                    editor.apply();
+                                } else {
+                                    // Clear saved credentials if "Remember Me" is unchecked
+                                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                                    editor.remove("username");
+                                    editor.remove("password");
+                                    editor.apply();
+                                }
 
                                 // Proceed to the main activity
                                 Intent intent = new Intent(getActivity(), MainActivity.class);
@@ -195,8 +230,6 @@ public class StudentLoginDialogFragment extends DialogFragment {
         // Toggle the visibility state
         isPasswordVisible = !isPasswordVisible;
     }
-
-
 }
 
 
