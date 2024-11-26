@@ -6,15 +6,14 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layout_constraintHeight_percent="0.32"
     tools:context=".LoginActivity">
 
     <!-- Background overlay for a frosted glass effect -->
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/bg_lu"
-        android:alpha="0.5" />
+        android:background="@drawable/login_bg"
+        android:alpha="0.8" />
 
     <!-- University logo image -->
     <ImageView
@@ -40,7 +39,7 @@
         android:text="LAGUNA UNIVERSITY SDOMS"
         android:textSize="26sp"
         android:textStyle="bold"
-        android:textColor="#34B646"
+        android:textColor="#4DDB1F"
         android:alpha="0.9"
         app:layout_constraintTop_toBottomOf="@id/logo_image"
         app:layout_constraintStart_toStartOf="parent"
@@ -55,7 +54,6 @@
         android:gravity="center"
         android:text="Student Discipline Office Management System"
         android:textSize="18sp"
-        android:textStyle="bold"
         android:textColor="@android:color/white"
         android:alpha="0.8"
         app:layout_constraintTop_toBottomOf="@id/title_text"
@@ -85,7 +83,7 @@
             android:layout_height="wrap_content"
             android:text="Are you a..."
             android:textAlignment="center"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp"

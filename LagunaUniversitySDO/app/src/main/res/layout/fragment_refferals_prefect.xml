@@ -43,35 +43,45 @@
         android:padding="10dp">
 
         <!-- Pending referrals content -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view_pending"
+        <ScrollView
+            android:id="@+id/scroll_view_pending"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="8dp"
-            android:clipToPadding="false"
-            android:scrollbars="vertical"
-            android:visibility="gone"/>
+            android:layout_height="wrap_content"
+            android:visibility="visible">
 
+            <LinearLayout
+                android:id="@+id/linear_layout_pending"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </ScrollView>
 
         <!-- Accepted referrals content -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_view_accepted_referrals"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="8dp"
-                android:clipToPadding="false"
-                android:scrollbars="vertical"
-                android:visibility="gone"/>
+        <ScrollView
+            android:id="@+id/scroll_view_accepted"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
 
+            <LinearLayout
+                android:id="@+id/linear_layout_accepted"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </ScrollView>
 
         <!-- Rejected referrals content -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view_rejected_referrals"
+        <ScrollView
+            android:id="@+id/scroll_view_rejected"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="8dp"
-            android:clipToPadding="false"
-            android:scrollbars="vertical"
-            android:visibility="gone"/>
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:id="@+id/linear_layout_rejected"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </ScrollView>
     </FrameLayout>
 </LinearLayout>
