@@ -63,7 +63,7 @@
                 android:layout_weight="1"
                 android:text="Accept"
                 android:textColor="@android:color/white"
-                android:background="@android:color/holo_green_light" />
+                android:background="@color/green3" />
 
             <Button
                 android:id="@+id/rejectButton"
