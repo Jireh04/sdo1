@@ -29,6 +29,14 @@ import android.app.AlertDialog;
 import android.widget.Spinner;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import android.widget.Button;
+import androidx.annotation.NonNull;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -52,12 +60,13 @@ public class dashboard_prefect extends Fragment {
     private LinearLayout referralSection;  // Referral buttons container
     private ImageButton pickQrCodeButton;  // QR code scanner button
 
+    private Button prevButton;
+    private Button nextButton;
     private graphs graphObj;
     private List<DocumentSnapshot> allDocuments;
     private AtomicInteger currentPage; // To keep track of the current page
     private static final int RESULTS_PER_PAGE = 5; // Changed to 3 results per page
-    private Button previousButton;
-    private Button nextButton;
+
     private LinearLayout paginationLayout, pageNumberContainer;
     private DocumentSnapshot lastVisible; // To track the last document for pagination
 
@@ -78,8 +87,8 @@ public class dashboard_prefect extends Fragment {
         db = FirebaseFirestore.getInstance();
 
         // Initialize the buttons and layout
-        previousButton = rootView.findViewById(R.id.previous_button);
-        nextButton = rootView.findViewById(R.id.next_button);
+        prevButton = rootView.findViewById(R.id.previous_button); // Make sure the ID matches the layout XML
+        nextButton = rootView.findViewById(R.id.next_button); // Make sure the ID matches the layout XML
         paginationLayout = rootView.findViewById(R.id.pagination_layout);
         pageNumberContainer = rootView.findViewById(R.id.page_number_container);
 
@@ -105,51 +114,45 @@ public class dashboard_prefect extends Fragment {
         referToGuidanceButton.setOnClickListener(v -> openReferralDashboard());
         viewReporters.setOnClickListener(v -> openViewReporters());
 
-        nextButton.setOnClickListener(v -> {
-            currentPage.incrementAndGet();
-            searchStudents();  // Re-run the search to fetch the next set of students
-        });
-        previousButton.setOnClickListener(v -> {
-            currentPage.decrementAndGet();
-                searchStudents();  // Re-run the search to fetch the previous set of students
-
-        });
+        // Set onClick listeners for pagination buttons
+        prevButton.setOnClickListener(v -> showPreviousPage()); // Using prevButton here
+        nextButton.setOnClickListener(v -> showNextPage()); // Using nextButton here
 
         return rootView;
     }
 
+
     private void searchStudents() {
-        // Get the search query
         String queryText = searchBar.getText().toString().trim().toLowerCase();
 
-        // Find the graph layout and hide it
-        View graphLayout = getView().findViewById(R.id.graph_include);
-        if (graphLayout != null) {
-            graphLayout.setVisibility(View.GONE);  // Hide the graph layout
+        if (queryText.isEmpty()) {
+            Toast.makeText(getActivity(), "Please enter a search term", Toast.LENGTH_SHORT).show();
+            paginationLayout.setVisibility(View.GONE);
+
+            // Show graph again if no search term is entered
+            showGraph();
+
+            return;
         }
 
-        // Clear previous results before starting a new search
+        LinearLayout searchResultsContainer = getView().findViewById(R.id.search_results_container);
         searchResultsContainer.removeAllViews();
-        allDocuments.clear(); // Clear all previous search results
+        allDocuments.clear(); // Clear previous search results
 
-        if (!queryText.isEmpty()) {
-            CollectionReference studentsRef = db.collection("students");
+        // Hide the graph when search is active
+        hideGraph();
 
-            // Start a new query without using pagination
-            Query query = studentsRef.orderBy("name");
-
-            query.get().addOnCompleteListener(task -> {
+        // Query Firestore for the students collection
+        db.collection("students").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
                     QuerySnapshot querySnapshot = task.getResult();
-                    boolean foundResults = false;
-
                     if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                        // Add all the fetched documents to the allDocuments list
-                        allDocuments.addAll(querySnapshot.getDocuments());
+                        allDocuments.clear(); // Clear the list of previous results
 
-                        // Iterate through the documents and display them
-                        for (int i = currentPage.get() * RESULTS_PER_PAGE; i < Math.min((currentPage.get() + 1) * RESULTS_PER_PAGE, allDocuments.size()); i++) {
-                            DocumentSnapshot document = allDocuments.get(i);
+                        // Loop through each document in the result set
+                        for (DocumentSnapshot document : querySnapshot.getDocuments()) {
                             String name = document.getString("name");
                             String studentId = document.getString("student_id");
                             String program = document.getString("program");
@@ -158,142 +161,171 @@ public class dashboard_prefect extends Fragment {
                             String remarks = document.getString("remarks");
                             String contact = document.getString("student_contact");
 
-                            // Check if the name or student ID contains the search query (case-insensitive)
+                            // Ensure the name or studentId contains the search term (case insensitive)
                             if ((name != null && name.toLowerCase().contains(queryText)) ||
                                     (studentId != null && studentId.toLowerCase().contains(queryText))) {
-                                foundResults = true;
 
-                                RelativeLayout userLayout = new RelativeLayout(getActivity());
-                                userLayout.setPadding(10, 10, 10, 10);
-
-                                // Create the TextView for displaying student info
-                                TextView studentTextView = new TextView(getActivity());
-                                studentTextView.setPadding(30, 0, 0, 0);
-                                studentTextView.setText(studentId + " | " + name + " | " + program);
-                                studentTextView.setTextSize(name.length() > 18 ? 14 : 16); // Adjust text size if the name is long
-                                studentTextView.setEllipsize(TextUtils.TruncateAt.END); // Truncate with "..." if text is too long
-                                studentTextView.setSingleLine(true); // Keep text on a single line
-                                studentTextView.setId(View.generateViewId());
-
-                                RelativeLayout.LayoutParams userInfoParams = new RelativeLayout.LayoutParams(
-                                        RelativeLayout.LayoutParams.WRAP_CONTENT,
-                                        RelativeLayout.LayoutParams.WRAP_CONTENT
-                                );
-                                userInfoParams.addRule(RelativeLayout.ALIGN_PARENT_START);
-                                userInfoParams.addRule(RelativeLayout.CENTER_VERTICAL);
-                                studentTextView.setLayoutParams(userInfoParams);
-
-                                // Create the Button for action
-                                Button addButton = new Button(getActivity());
-                                addButton.setText("+");
-                                addButton.setBackgroundResource(R.drawable.round_button);
-                                addButton.setTextColor(Color.WHITE);
-                                addButton.setAllCaps(false);
-                                addButton.setTextSize(24);
-                                addButton.setPadding(20, 13, 20, 13);
-                                addButton.setId(View.generateViewId());
-
-                                RelativeLayout.LayoutParams buttonLayoutParams = new RelativeLayout.LayoutParams(
-                                        130,
-                                        130
-                                );
-                                buttonLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_END);
-                                buttonLayoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
-                                buttonLayoutParams.setMargins(0, 0, 25, 0); // Add right margin for spacing
-                                addButton.setLayoutParams(buttonLayoutParams);
-
-                                // Make the TextView clickable
-                                studentTextView.setOnClickListener(v -> {
-                                    // Fetch violations for the selected student
-                                    navigateToPrefectView(studentId, name, program, year, block, remarks, contact); // Use studentId here
-                                });
-
-                                // Set the onClickListener for the button
-                                addButton.setOnClickListener(v -> {
-                                    // Show the Add Violator dialog when the button is clicked
-                                    showAddViolatorDialog(studentId, name);
-                                });
-
-                                // Add the TextView and Button to the RelativeLayout
-                                userLayout.addView(studentTextView);
-                                userLayout.addView(addButton);
-
-                                // Add the studentLayout to the searchResultsContainer
-                                searchResultsContainer.addView(userLayout);
+                                // Add the document to the allDocuments list
+                                allDocuments.add(document);
                             }
                         }
 
-                        // If no results are found, show a message
-                        if (!foundResults) {
-                            TextView noResultsTextView = new TextView(getContext());
-                            noResultsTextView.setText("No students found matching '" + queryText + "'");
-                            noResultsTextView.setPadding(0, 180, 0, 0); // Add top padding
-                            searchResultsContainer.addView(noResultsTextView);
+                        if (allDocuments.isEmpty()) {
+                            Toast.makeText(getActivity(), "No matching results", Toast.LENGTH_SHORT).show();
+                            paginationLayout.setVisibility(View.GONE);
+                        } else {
+                            currentPage.set(0); // Reset to first page
+                            showPage(getView()); // Show first page of results
+                            updatePaginationControls(); // Update pagination controls
+                            paginationLayout.setVisibility(View.VISIBLE);
                         }
-
-                        // Always show pagination buttons (Next and Previous)
-                        paginationLayout.setVisibility(View.VISIBLE);
-
-                        // Update pagination buttons visibility
-                        updatePaginationButtons();
-
                     } else {
-                        // If no students matched, show a "No students found" message
-                        TextView noResultsTextView = new TextView(getContext());
-                        noResultsTextView.setText("No students found matching '" + queryText + "'");
-                        noResultsTextView.setPadding(0, 180, 0, 0); // Add top padding
-                        searchResultsContainer.addView(noResultsTextView);
-
-                        // Disable the Next button if there are no results for this query
-                        disablePaginationButtons();
+                        Toast.makeText(getActivity(), "No data available", Toast.LENGTH_SHORT).show();
+                        paginationLayout.setVisibility(View.GONE);
                     }
                 } else {
-                    // Handle the error if the query fails
-                    TextView errorTextView = new TextView(getContext());
-                    errorTextView.setText("Error: " + task.getException().getMessage());
-                    errorTextView.setPadding(0, 180, 0, 0); // Add top padding
-                    searchResultsContainer.addView(errorTextView);
-
-                    // Disable pagination buttons if there's an error
-                    disablePaginationButtons();
+                    Toast.makeText(getActivity(), "Error fetching data", Toast.LENGTH_SHORT).show();
+                    Log.e("FirestoreError", "Error getting documents: ", task.getException());
                 }
-            });
-        } else {
-            // If the search query is empty, show a message and clear previous results
-            TextView emptySearchTextView = new TextView(getContext());
-            emptySearchTextView.setText("Please enter a search query.");
-            emptySearchTextView.setPadding(0, 180, 0, 0); // Add top padding
-            searchResultsContainer.addView(emptySearchTextView);
-        }
+            }
+        });
     }
 
+    private void showPage(View rootView) {
+        LinearLayout searchResultsContainer = rootView.findViewById(R.id.search_results_container);
+        searchResultsContainer.removeAllViews();
 
+        int startIndex = currentPage.get() * RESULTS_PER_PAGE;
+        int endIndex = Math.min(startIndex + RESULTS_PER_PAGE, allDocuments.size());
 
-    private void updatePaginationButtons() {
-        if (previousButton != null && nextButton != null && pageNumberContainer != null) {
-            previousButton.setEnabled(currentPage.get() > 0);
+        // Loop through the documents for the current page
+        for (int i = startIndex; i < endIndex; i++) {
+            DocumentSnapshot document = allDocuments.get(i);
+            String name = document.getString("name");
+            String studentId = document.getString("student_id");
+            String program = document.getString("program");
+            String year = document.getString("year");
+            String block = document.getString("block");
+            String remarks = document.getString("remarks");
+            String contact = document.getString("student_contact");
+
+            // Create and add each student result to the layout
+            addSearchResultToLayout(name, studentId, program, year, block, remarks, contact, searchResultsContainer);
+        }
+
+        // Update pagination controls after showing the page
+        updatePaginationControls();
+    }
+
+    private void addSearchResultToLayout(String name, String studentId, String program, String year, String block, String remarks, String contact, LinearLayout container) {
+        RelativeLayout userLayout = new RelativeLayout(getActivity());
+        userLayout.setPadding(10, 10, 10, 10);
+
+        // Create TextView for displaying student info
+        TextView studentTextView = new TextView(getActivity());
+        studentTextView.setPadding(30, 0, 0, 0);
+        studentTextView.setText(studentId + " | " + name + " | " + program);
+        studentTextView.setTextSize(name.length() > 18 ? 14 : 16);
+        studentTextView.setEllipsize(TextUtils.TruncateAt.END);
+        studentTextView.setSingleLine(true);
+        studentTextView.setId(View.generateViewId());
+
+        RelativeLayout.LayoutParams userInfoParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+        );
+        userInfoParams.addRule(RelativeLayout.ALIGN_PARENT_START);
+        userInfoParams.addRule(RelativeLayout.CENTER_VERTICAL);
+        studentTextView.setLayoutParams(userInfoParams);
+
+        // Create the "+" Button
+        Button addButton = new Button(getActivity());
+        addButton.setText("+");
+        addButton.setBackgroundResource(R.drawable.round_button);
+        addButton.setTextColor(Color.WHITE);
+        addButton.setAllCaps(false);
+        addButton.setTextSize(24);
+        addButton.setPadding(20, 13, 20, 13);
+        addButton.setId(View.generateViewId());
+
+        RelativeLayout.LayoutParams buttonLayoutParams = new RelativeLayout.LayoutParams(
+                130,
+                130
+        );
+        buttonLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_END);
+        buttonLayoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
+        buttonLayoutParams.setMargins(0, 0, 25, 0); // Add right margin for spacing
+        addButton.setLayoutParams(buttonLayoutParams);
+
+        // Set the onClickListener for the TextView (navigate to a detailed view)
+        studentTextView.setOnClickListener(v -> {
+            // Fetch violations for the selected student and navigate to detailed view
+            navigateToPrefectView(studentId, name, program, year, block, remarks, contact); // Use studentId here
+        });
+
+        // Set the onClickListener for the Button (Show the Add Violator dialog)
+        addButton.setOnClickListener(v -> {
+            // Show the Add Violator dialog when the button is clicked
+            showAddViolatorDialog(studentId, name);
+        });
+
+        // Add the TextView and Button to the RelativeLayout
+        userLayout.addView(studentTextView);
+        userLayout.addView(addButton);
+
+        // Add the userLayout to the searchResultsContainer
+        container.addView(userLayout);
+    }
+
+    private void updatePaginationControls() {
+        if (prevButton != null && nextButton != null && pageNumberContainer != null) {
+            // Enable/disable buttons based on the current page
+            prevButton.setEnabled(currentPage.get() > 0);
             nextButton.setEnabled((currentPage.get() + 1) * RESULTS_PER_PAGE < allDocuments.size());
 
+            // Clear previous page number indicators
             pageNumberContainer.removeAllViews();
             int totalPages = (int) Math.ceil((double) allDocuments.size() / RESULTS_PER_PAGE);
 
+            // Show page numbers
             for (int i = 0; i < totalPages; i++) {
                 TextView pageNumberTextView = new TextView(getActivity());
                 pageNumberTextView.setText(String.valueOf(i + 1));
                 pageNumberTextView.setPadding(8, 8, 8, 8);
-                pageNumberTextView.setTextSize(16); // Ensure text is visible
-                pageNumberTextView.setGravity(Gravity.CENTER);
                 pageNumberTextView.setTextColor(i == currentPage.get() ? Color.BLUE : Color.BLACK);
                 pageNumberContainer.addView(pageNumberTextView);
-                Log.d("PageNumbers", "Added page number: " + i);
             }
         }
     }
 
+    private void showPreviousPage() {
+        if (currentPage.get() > 0) {
+            currentPage.decrementAndGet();
+            showPage(getView());
+        }
+    }
 
-    private void disablePaginationButtons() {
-        previousButton.setEnabled(false);
-        nextButton.setEnabled(false);
+    private void showNextPage() {
+        if ((currentPage.get() + 1) * RESULTS_PER_PAGE < allDocuments.size()) {
+            currentPage.incrementAndGet();
+            showPage(getView());
+        }
+    }
+
+    // Method to hide the graph dynamically
+    private void hideGraph() {
+        View graphContainer = getView().findViewById(R.id.graph_include); // Replace with the actual ID of your graph container
+        if (graphContainer != null) {
+            graphContainer.setVisibility(View.GONE);
+        }
+    }
+
+    // Method to show the graph dynamically
+    private void showGraph() {
+        View graphContainer = getView().findViewById(R.id.graph_include); // Replace with the actual ID of your graph container
+        if (graphContainer != null) {
+            graphContainer.setVisibility(View.VISIBLE);
+        }
     }
 
 

@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.os.Handler;
@@ -224,7 +225,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void showActivityLogDialog(String studentId) {
         // Create a dialog box
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Activity Log");
+        builder.setTitle("Logs");
+
+        // Create a ScrollView to make the logs scrollable
+        ScrollView scrollView = new ScrollView(this);
 
         // Create a layout for displaying the logs
         LinearLayout layout = new LinearLayout(this);
@@ -287,11 +291,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         layout.addView(errorText);
                     }
 
-                    builder.setView(layout);
+                    // Add the layout to the ScrollView
+                    scrollView.addView(layout);
+
+                    // Set the ScrollView as the view for the dialog
+                    builder.setView(scrollView);
+
+                    // Add a "Close" button
                     builder.setPositiveButton("Close", (dialog, which) -> dialog.dismiss());
-                    builder.create().show(); // Show the dialog
+
+                    // Show the dialog
+                    builder.create().show();
                 });
     }
+
 
     @Override
     public void onBackPressed() {

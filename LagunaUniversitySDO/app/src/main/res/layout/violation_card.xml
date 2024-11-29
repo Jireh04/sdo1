@@ -1,0 +1,53 @@
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp"
+    tools:context=".myViolations_student">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="8dp"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/violationTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Violation"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#000000" />
+
+        <TextView
+            android:id="@+id/typeOfOffenseTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Type of Offense"
+            android:textSize="14sp"
+            android:textColor="#7F7F7F" />
+
+        <TextView
+            android:id="@+id/statusTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status"
+            android:textSize="14sp"
+            android:textColor="#7F7F7F" />
+
+        <TextView
+            android:id="@+id/dateTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date of Incident"
+            android:textSize="14sp"
+            android:textColor="#7F7F7F" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

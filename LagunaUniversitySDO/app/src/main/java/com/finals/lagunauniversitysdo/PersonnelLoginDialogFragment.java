@@ -180,7 +180,7 @@ public class PersonnelLoginDialogFragment extends DialogFragment {
             eyeButton.setImageResource(R.drawable.baseline_remove_red_eye_24);
         } else {
             loginPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-            eyeButton.setImageResource(R.drawable.baseline_remove_red_eye_24);
+            eyeButton.setImageResource(R.drawable.baseline_eye);
         }
 
         loginPassword.setSelection(loginPassword.length());

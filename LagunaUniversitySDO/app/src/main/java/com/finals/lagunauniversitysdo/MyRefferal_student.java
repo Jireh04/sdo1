@@ -1,30 +1,28 @@
 package com.finals.lagunauniversitysdo;
 
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TableLayout;
-import android.widget.TableRow;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.app.AlertDialog;
-
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 public class MyRefferal_student extends Fragment {
 
     private FirebaseFirestore db; // Firestore instance
-    private TableLayout tableLayout; // TableLayout to display data
+    private LinearLayout cardContainer; // Layout to hold dynamically added CardViews
     private String userId; // User ID of the logged-in student
-    private String studentName; // Full name of the logged-in student
+    private String studentName; // Name of the logged-in student
 
     public MyRefferal_student() {
         // Required empty public constructor
@@ -34,141 +32,130 @@ public class MyRefferal_student extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = FirebaseFirestore.getInstance(); // Initialize Firestore
-        userId = UserSession.getStudentId(); // Get the currently logged-in user's ID
-        studentName = UserSession.getStudentName(); // Use existing method to get the student's name
+        userId = UserSession.getStudentId(); // Get the logged-in user's ID
+        studentName = UserSession.getStudentName(); // Get the logged-in student's name
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_my_refferal_student, container, false);
 
-        // Reference to TableLayout in the XML layout
-        tableLayout = view.findViewById(R.id.tableLayout);
+        // Initialize card container
+        cardContainer = view.findViewById(R.id.cardContainer);
 
-        // Fetch and display referral data specific to the logged-in user
-        fetchRefferalData();
+        // Fetch and display referral data for the logged-in user
+        fetchReferralData();
 
         return view;
     }
 
-    private void fetchRefferalData() {
-        // Remove all rows except the first one (header)
-        if (tableLayout.getChildCount() > 1) {
-            tableLayout.removeViews(1, tableLayout.getChildCount() - 1); // Keep the first row (header)
-        }
+    private void fetchReferralData() {
+        // Clear previous views
+        cardContainer.removeAllViews();
 
-        // Fetch data from Firestore 'student_refferal_history' collection for the logged-in user
+        // Fetch referral data from Firestore
         db.collection("students")
                 .document(userId)
                 .collection("student_refferal_history")
+                .orderBy("date" , Query.Direction.DESCENDING)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<com.google.firebase.firestore.QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<com.google.firebase.firestore.QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            com.google.firebase.firestore.QuerySnapshot queryDocumentSnapshots = task.getResult();
-                            if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
-                                // Iterate through the Firestore documents
-                                for (DocumentSnapshot document : queryDocumentSnapshots) {
-                                    // Extract the data for each document
-                                    String dateReported = document.getString("date");
-                                    String studentNo = document.getString("student_id"); // Ensure this key matches what's in Firestore
-                                    String name = document.getString("student_name"); // Ensure this key matches what's in Firestore
-                                    String status = document.getString("status");
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            // Extract data for each referral
+                            String dateReported = document.getString("date");
+                            String studentNo = document.getString("student_id");
+                            String name = document.getString("student_name");
+                            String status = document.getString("status");
 
-                                    // Add data as a new row in the table
-                                    addTableRow(dateReported, studentNo, name, status);
-                                }
-                            } else {
-                                Toast.makeText(getContext(), "No data found.", Toast.LENGTH_SHORT).show();
-                            }
-                        } else {
-                            // Handle any errors that occur while fetching data
-                            Toast.makeText(getContext(), "Error fetching data: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            // Add data as a new CardView
+                            addCardView(dateReported, studentNo, name, status);
                         }
+                    } else {
+                        Toast.makeText(getContext(), "No referrals found.", Toast.LENGTH_SHORT).show();
                     }
-                });
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Error fetching data: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-    // Function to add a row dynamically to the table
-    private void addTableRow(String dateReported, String studentNo, String name, String status) {
-        // Create a new TableRow
-        TableRow tableRow = new TableRow(getContext());
+    private void addCardView(String dateReported, String studentNo, String name, String status) {
+        // Create a CardView
+        CardView cardView = new CardView(getContext());
+        cardView.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+        cardView.setRadius(16f);
+        cardView.setCardElevation(8f);
+        cardView.setUseCompatPadding(true);
+        cardView.setPadding(16, 16, 16, 16);
 
-        // Create TextViews for each column
-        TextView dateReportedTextView = new TextView(getContext());
-        dateReportedTextView.setText(dateReported);
-        dateReportedTextView.setPadding(8, 8, 8, 8);
 
-        TextView studentNoTextView = new TextView(getContext());
-        studentNoTextView.setText(studentNo);
-        studentNoTextView.setPadding(8, 8, 8, 8);
-        studentNoTextView.setGravity(Gravity.CENTER);
+        // Create a LinearLayout for the card content
+        LinearLayout linearLayout = new LinearLayout(getContext());
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        linearLayout.setPadding(8, 8, 8, 8);
+        linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
 
-        TextView nameTextView = new TextView(getContext());
-        nameTextView.setText(name);
-        nameTextView.setPadding(8, 8, 8, 8);
+        // Add TextViews for referral details
+        linearLayout.addView(createTextView("Date Reported: " + dateReported));
+        linearLayout.addView(createTextView("Student No.: " + studentNo));
+        linearLayout.addView(createTextView("Name: " + name));
 
-        TextView statusTextView = new TextView(getContext());
-        statusTextView.setText(status);
-        statusTextView.setPadding(8, 8, 8, 8);
-        statusTextView.setGravity(Gravity.CENTER);
-
-        // If the status is "rejected", make it clickable and show the rejection reason
-        if ("rejected".equals(status)) {
-            statusTextView.setClickable(true);
-            statusTextView.setTextColor(getResources().getColor(android.R.color.holo_red_dark));  // Set text color to red for "rejected"
-
-            // Set click listener to show rejection reason in an AlertDialog
+        // Add status with special handling for "rejected"
+        TextView statusTextView = createTextView("Status: " + status);
+        statusTextView.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+        if ("rejected".equalsIgnoreCase(status)) {
+            statusTextView.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
             statusTextView.setOnClickListener(v -> showRejectionReason(dateReported, studentNo));
         }
+        linearLayout.addView(statusTextView);
 
-        // Add the TextViews to the TableRow
-        tableRow.addView(dateReportedTextView);
-        tableRow.addView(studentNoTextView);
-        tableRow.addView(nameTextView);
-        tableRow.addView(statusTextView);
+        // Add the LinearLayout to the CardView
+        cardView.addView(linearLayout);
 
-        // Add the TableRow to the TableLayout
-        tableLayout.addView(tableRow);
+        // Add the CardView to the container
+        cardContainer.addView(cardView);
     }
+
+    private TextView createTextView(String text) {
+        TextView textView = new TextView(getContext());
+        textView.setText(text);
+        textView.setTextSize(16f);
+        textView.setPadding(8, 8, 8, 8);
+        return textView;
+    }
+
     private void showRejectionReason(String dateReported, String studentNo) {
-        // Fetch the rejection reason from Firestore using the studentNo and dateReported (or any other identifier you have)
         db.collection("students")
                 .document(userId)
                 .collection("student_refferal_history")
                 .whereEqualTo("student_id", studentNo)
-                .whereEqualTo("date", dateReported) // or any unique identifier for the referral
+                .whereEqualTo("date", dateReported)
                 .get()
                 .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        if (!task.getResult().isEmpty()) {
-                            DocumentSnapshot document = task.getResult().getDocuments().get(0);
-                            // Get the rejection reason from the document
-                            String rejectionReason = document.getString("reason_rejecting");
-
-                            if (rejectionReason != null) {
-                                // Show the rejection reason in an AlertDialog
-                                new AlertDialog.Builder(getContext())
-                                        .setTitle("Rejection Reason")
-                                        .setMessage(rejectionReason)
-                                        .setPositiveButton("OK", null)
-                                        .show();
-                            } else {
-                                // Handle the case where there's no rejection reason
-                                Toast.makeText(getContext(), "No rejection reason available.", Toast.LENGTH_SHORT).show();
-                            }
+                    if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
+                        DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                        String rejectionReason = document.getString("reason_rejecting");
+                        if (rejectionReason != null) {
+                            new AlertDialog.Builder(getContext())
+                                    .setTitle("Rejection Reason")
+                                    .setMessage(rejectionReason)
+                                    .setPositiveButton("OK", null)
+                                    .show();
                         } else {
-                            // Handle the case where the referral document is not found
-                            Toast.makeText(getContext(), "Referral not found.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "No rejection reason available.", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        // Handle errors fetching the data
-                        Toast.makeText(getContext(), "Error fetching rejection reason: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Referral not found.", Toast.LENGTH_SHORT).show();
                     }
-                });
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Error fetching rejection reason: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
-
 }

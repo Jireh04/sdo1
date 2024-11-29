@@ -5,23 +5,24 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TableLayout;
-import android.widget.TableRow;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 public class personnel_myRefferalForm extends Fragment {
 
     private FirebaseFirestore db; // Firestore instance
-    private TableLayout tableLayout; // TableLayout to display data
+    private LinearLayout linearLayout; // LinearLayout to display CardViews
     private String personnelId; // ID of the logged-in personnel
     private String personnelName; // Full name of the logged-in personnel
 
@@ -45,8 +46,8 @@ public class personnel_myRefferalForm extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_personnel_my_refferal_form, container, false);
 
-        // Reference to TableLayout in the XML layout
-        tableLayout = view.findViewById(R.id.tableLayout);
+        // Reference to LinearLayout in the XML layout
+        linearLayout = view.findViewById(R.id.linearLayout);
 
         // Fetch and display referral data specific to the logged-in personnel
         fetchReferralData();
@@ -55,10 +56,8 @@ public class personnel_myRefferalForm extends Fragment {
     }
 
     private void fetchReferralData() {
-        // Remove all rows except the first one (header)
-        if (tableLayout.getChildCount() > 1) {
-            tableLayout.removeViews(1, tableLayout.getChildCount() - 1); // Keep the first row (header)
-        }
+        // Clear existing views
+        linearLayout.removeAllViews();
 
         // Ensure personnelName is not null
         if (personnelName == null || personnelName.isEmpty()) {
@@ -70,6 +69,7 @@ public class personnel_myRefferalForm extends Fragment {
         db.collection("personnel")
                 .document(personnelId)
                 .collection("personnel_refferal_history")
+                .orderBy("date", Query.Direction.DESCENDING)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<com.google.firebase.firestore.QuerySnapshot>() {
                     @Override
@@ -85,8 +85,8 @@ public class personnel_myRefferalForm extends Fragment {
                                     String name = document.getString("student_name"); // Ensure this key matches what's in Firestore
                                     String status = document.getString("status");
 
-                                    // Add data as a new row in the table
-                                    addTableRow(dateReported, personnelNo, name, status);
+                                    // Add data as a new CardView
+                                    addCardView(dateReported, personnelNo, name, status);
                                 }
                             } else {
                                 Toast.makeText(getContext(), "No referral data found for " + personnelName, Toast.LENGTH_SHORT).show();
@@ -99,29 +99,55 @@ public class personnel_myRefferalForm extends Fragment {
                 });
     }
 
-    // Function to add a row dynamically to the table
-    private void addTableRow(String dateReported, String personnelNo, String name, String status) {
-        // Create a new TableRow
-        TableRow tableRow = new TableRow(getContext());
+    // Function to add a CardView dynamically
+    private void addCardView(String dateReported, String personnelNo, String name, String status) {
+        // Create a new CardView
+        CardView cardView = new CardView(getContext());
+        cardView.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+        cardView.setRadius(16f);
+        cardView.setCardElevation(8f);
+        cardView.setUseCompatPadding(true);
+        cardView.setPadding(16, 16, 16, 16);
+
+
+        // Create a LinearLayout inside the CardView to hold TextViews vertically
+        LinearLayout cardContentLayout = new LinearLayout(getContext());
+        cardContentLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+        cardContentLayout.setOrientation(LinearLayout.VERTICAL); // Set vertical orientation
+        cardContentLayout.setPadding(16, 16, 16, 16); // Padding for the whole content layout
 
         // Create TextViews for each column
         TextView dateReportedTextView = new TextView(getContext());
-        dateReportedTextView.setText(dateReported);
+        dateReportedTextView.setText("Date: " + dateReported);
         dateReportedTextView.setPadding(8, 8, 8, 8);
+        dateReportedTextView.setTextSize(16); // Adjust text size if necessary
 
         TextView personnelNoTextView = new TextView(getContext());
-        personnelNoTextView.setText(personnelNo);
+        personnelNoTextView.setText("Student No.: " + personnelNo);
         personnelNoTextView.setPadding(8, 8, 8, 8);
-        personnelNoTextView.setGravity(Gravity.CENTER);
+        personnelNoTextView.setTextSize(16);
 
         TextView nameTextView = new TextView(getContext());
-        nameTextView.setText(name);
+        nameTextView.setText("Name: " + name);
         nameTextView.setPadding(8, 8, 8, 8);
+        nameTextView.setTextSize(16);
 
         TextView statusTextView = new TextView(getContext());
-        statusTextView.setText(status);
+        statusTextView.setText("Status: " + status);
         statusTextView.setPadding(8, 8, 8, 8);
-        statusTextView.setGravity(Gravity.CENTER);
+        statusTextView.setTextSize(16);
+
+        // Add the TextViews to the LinearLayout (which is inside the CardView)
+        cardContentLayout.addView(dateReportedTextView);
+        cardContentLayout.addView(personnelNoTextView);
+        cardContentLayout.addView(nameTextView);
+        cardContentLayout.addView(statusTextView);
 
         // If the status is "rejected", make it clickable and show the rejection reason
         if ("rejected".equals(status)) {
@@ -132,14 +158,13 @@ public class personnel_myRefferalForm extends Fragment {
             statusTextView.setOnClickListener(v -> showRejectionReason(dateReported, personnelNo));
         }
 
-        // Add the TextViews to the TableRow
-        tableRow.addView(dateReportedTextView);
-        tableRow.addView(personnelNoTextView);
-        tableRow.addView(nameTextView);
-        tableRow.addView(statusTextView);
 
-        // Add the TableRow to the TableLayout
-        tableLayout.addView(tableRow);
+        // Add the LinearLayout with the TextViews to the CardView
+        cardView.addView(cardContentLayout);
+
+        // Add the CardView to the main LinearLayout (for displaying the cards)
+        linearLayout.addView(cardView);
+
     }
 
     private void showRejectionReason(String dateReported, String personnelNo) {

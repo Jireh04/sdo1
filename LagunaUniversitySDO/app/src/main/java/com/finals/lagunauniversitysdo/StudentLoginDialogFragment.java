@@ -221,7 +221,7 @@ public class StudentLoginDialogFragment extends DialogFragment {
         } else {
             // Show the password
             loginPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-            eyeButton.setImageResource(R.drawable.baseline_remove_red_eye_24); // Change to open eye icon
+            eyeButton.setImageResource(R.drawable.baseline_eye); // Change to open eye icon
         }
 
         // Move cursor to the end after toggling visibility

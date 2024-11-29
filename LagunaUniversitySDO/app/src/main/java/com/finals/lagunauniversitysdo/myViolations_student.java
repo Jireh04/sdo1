@@ -5,17 +5,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import androidx.cardview.widget.CardView;
 import android.widget.LinearLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -57,9 +56,9 @@ public class myViolations_student extends Fragment {
     private void fetchViolations(View view) {
         LinearLayout violationsLayout = view.findViewById(R.id.violations);
 
-        // Clear all rows except the first row (header row)
-        if (violationsLayout.getChildCount() > 1) {
-            violationsLayout.removeViews(1, violationsLayout.getChildCount() - 1);
+        // Clear all views except the header (if any)
+        if (violationsLayout.getChildCount() > 0) {
+            violationsLayout.removeAllViews();
         }
 
         // Fetch violations with status "accepted" from each specific user's subcollections
@@ -88,10 +87,11 @@ public class myViolations_student extends Fragment {
                             for (QueryDocumentSnapshot document : result) {
                                 Log.d("FirestoreData", document.getId() + " => " + document.getData());
 
+                                String dateOfIncident = document.getString("date");
                                 String violation = document.getString("remarks");
                                 String typeOfOffense = document.getString("violation");
                                 String status = document.getString("status");
-                                String dateOfIncident = document.getString("date");
+
 
                                 addViolationToLayout(violationsLayout, violation, typeOfOffense, status, dateOfIncident);
                             }
@@ -105,20 +105,22 @@ public class myViolations_student extends Fragment {
     }
 
     private void addViolationToLayout(LinearLayout layout, String violation, String typeOfOffense, String status, String dateOfIncident) {
-        TableRow violationRow = (TableRow) LayoutInflater.from(getContext()).inflate(R.layout.violation_row, layout, false);
+        // Inflate the card view layout
+        View violationCard = LayoutInflater.from(getContext()).inflate(R.layout.violation_card, layout, false);
 
-        TextView violationIndex = (TextView) violationRow.getChildAt(0);
-        TextView violationTextView = (TextView) violationRow.getChildAt(1);
-        TextView offenseTypeTextView = (TextView) violationRow.getChildAt(2);
-        TextView statusTextView = (TextView) violationRow.getChildAt(3);
-        TextView dateTextView = (TextView) violationRow.getChildAt(4);
+        // Set the data for the violation card
+        TextView violationTextView = violationCard.findViewById(R.id.violationTextView);
+        TextView offenseTypeTextView = violationCard.findViewById(R.id.typeOfOffenseTextView);
+        TextView statusTextView = violationCard.findViewById(R.id.statusTextView);
+        TextView dateTextView = violationCard.findViewById(R.id.dateTextView);
 
-        violationIndex.setText(String.valueOf(layout.getChildCount())); // Set index
-        violationTextView.setText(violation != null ? violation : "N/A");
-        offenseTypeTextView.setText(typeOfOffense != null ? typeOfOffense : "N/A");
-        statusTextView.setText(status != null ? status : "N/A");
-        dateTextView.setText(dateOfIncident != null ? dateOfIncident : "N/A");
+        violationTextView.setText(violation != null ? "Violation: " +  violation : "N/A");
+        offenseTypeTextView.setText(typeOfOffense != null ? "Offense: " + typeOfOffense : "N/A");
+        statusTextView.setText(status != null ? "Status: " + status : "N/A");
+        dateTextView.setText(dateOfIncident != null ? "Date: " +  dateOfIncident : "N/A");
 
-        layout.addView(violationRow);
+        // Add the card view to the layout
+        layout.addView(violationCard);
     }
+
 }

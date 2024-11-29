@@ -199,7 +199,7 @@ public class PrefectLoginDialogFragment extends DialogFragment {
             eyeButton.setImageResource(R.drawable.baseline_remove_red_eye_24); // Change to closed eye icon
         } else {
             loginPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-            eyeButton.setImageResource(R.drawable.baseline_remove_red_eye_24); // Change to open eye icon
+            eyeButton.setImageResource(R.drawable.baseline_eye); // Change to open eye icon
         }
 
         loginPassword.setSelection(loginPassword.length());

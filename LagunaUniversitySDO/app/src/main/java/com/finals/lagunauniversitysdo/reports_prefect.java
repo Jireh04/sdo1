@@ -199,7 +199,6 @@ public class reports_prefect extends Fragment {
 
 
 
-    // Generate grouped data based on selected date range and filters
     private void generateGroupByDate() {
         String startDateString = startDateEditText.getText().toString().trim();
         String endDateString = endDateEditText.getText().toString().trim();
@@ -239,37 +238,38 @@ public class reports_prefect extends Fragment {
         calendar.set(Calendar.MILLISECOND, 999);
         Date normalizedEndDate = calendar.getTime();
 
-            // Get the selected program and status from the spinner
-            String selectedProgram = programSpinner.getSelectedItem().toString().trim();
-            String selectedStatus = statusSpinner.getSelectedItem().toString().trim();
+        // Get the selected program and status from the spinner
+        String selectedProgram = programSpinner.getSelectedItem().toString().trim();
+        String selectedStatus = statusSpinner.getSelectedItem().toString().trim();
 
-            // Get the selected semester and offense type (add these to the spinners)
-            String selectedSemester = semesterSpinner.getSelectedItem().toString().trim();
-            String selectedOffenseType = offenseTypeSpinner.getSelectedItem().toString().trim();
+        // Get the selected semester and offense type (add these to the spinners)
+        String selectedSemester = semesterSpinner.getSelectedItem().toString().trim();
+        String selectedOffenseType = offenseTypeSpinner.getSelectedItem().toString().trim();
 
-            List<String> allReferralDetails = new ArrayList<>();
-            final int[] processedCount = {0};
-            final int[] totalEntities = {0};
+        List<String> allReferralDetails = new ArrayList<>();
+        final int[] processedCount = {0};
+        final int[] totalEntities = {0};
 
-            if (selectedStatus.equals("Settled")) {
-                // When "Settled" is selected, fetch only from the students collection and filter by "accepted_status" sub-collection
-                fetchReferralDataForSettled("students", "accepted_status", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-            } else if (selectedStatus.equals("Unsettled")) {
-                // When "Unsettled" is selected, fetch from the students, personnel, and prefect collections with unsettled status
-                fetchReferralDataForUnsettled("students", "student_refferal_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-                fetchReferralDataForUnsettled("personnel", "personnel_refferal_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-                fetchReferralDataForUnsettled("prefect", "prefect_referral_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-            } else {
-                // Otherwise, fetch data from "students", "personnel", and "prefect collections" with proper filtering.
-                fetchReferralData("students", "student_refferal_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-                fetchReferralData("personnel", "personnel_refferal_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-                fetchReferralData("prefect", "prefect_referral_history", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-            }
+        // Fetch referral data from "students" collection and "accepted_status" sub-collection
+        if (selectedStatus.equals("Settled")) {
+            // Fetch "Settled" referrals from the accepted_status sub-collection
+            fetchReferralData("students", "accepted_status", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
+        } else if (selectedStatus.equals("Unsettled")) {
+            // Fetch "Unsettled" referrals from the accepted_status sub-collection
+            fetchReferralData("students", "accepted_status", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
+        } else {
+            // Otherwise, fetch both "Settled" and "Unsettled" referrals from the accepted_status sub-collection
+            fetchReferralData("students", "accepted_status", normalizedStartDate, normalizedEndDate, selectedProgram, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
         }
+    }
 
-    private void fetchReferralDataForUnsettled(String collection, String referralHistoryCollection, Date startDate, Date endDate,
-                                               String selectedProgram, String selectedStatus, String selectedSemester, String selectedOffenseType,
-                                               List<String> allReferralDetails, final int[] processedCount, final int[] totalEntities) {
+
+
+
+    private void fetchReferralData(String collection, String referralHistoryCollection, Date startDate, Date endDate,
+                                   String selectedProgram, String selectedStatus, String selectedSemester,
+                                   String selectedOffenseType, List<String> allReferralDetails,
+                                   final int[] processedCount, final int[] totalEntities) {
 
         db.collection(collection)
                 .get()
@@ -281,21 +281,22 @@ public class reports_prefect extends Fragment {
                             totalEntities[0] += totalEntitiesCount;
 
                             for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                                // Query referral history for "unsettled_status"
+                                // Query the sub-collection based on filters
                                 Query referralQuery = db.collection(collection)
                                         .document(doc.getId())
-                                        .collection(referralHistoryCollection)
-                                        .whereEqualTo("status", "accepted")  // Fetch unsettled referrals
-                                        .whereEqualTo("student_program", selectedProgram)
-                                        .whereEqualTo("term", selectedSemester)
-                                        .whereGreaterThanOrEqualTo("date", startDate)
-                                        .whereLessThanOrEqualTo("date", endDate);
+                                        .collection(referralHistoryCollection);
 
-                                // Apply offense filter
+                                // Apply program and semester filters
+                                referralQuery = referralQuery.whereEqualTo("student_program", selectedProgram)
+                                        .whereEqualTo("term", selectedSemester);
+
+                                // Apply status filter (Settled, Unsettled, or All)
+                                referralQuery = applyStatusFilter(referralQuery, selectedStatus);
+
+                                // Apply offense type filter
                                 referralQuery = applyOffenseTypeFilter(referralQuery, selectedOffenseType);
 
-                                referralQuery = applyStatusFilter(referralQuery, "Unsettled");
-                                // Fetch the filtered data based on the status and offense type
+                                // Fetch data with the applied filters
                                 referralQuery.get()
                                         .addOnCompleteListener(referralTask -> {
                                             if (referralTask.isSuccessful()) {
@@ -305,16 +306,18 @@ public class reports_prefect extends Fragment {
                                                         String name = referralDoc.getString("student_name");
                                                         String offense = referralDoc.getString("offense");
                                                         String violation = referralDoc.getString("violation");
-                                                        String referrer = referralDoc.getString(getReferrerField(collection));  // Get the appropriate referrer field
+                                                        String referrer = referralDoc.getString("student_referrer");
                                                         String referralStatus = referralDoc.getString("status");
                                                         String term = referralDoc.getString("term");
 
-
+                                                        // Build referral details
                                                         String referralDetails = buildReferralDetails(name, offense, violation, referrer, referralStatus, term);
-                                                        allReferralDetails.add(getEntityTypeName(collection) + " Referral:\n" + referralDetails);
+                                                        allReferralDetails.add("Referral:\n" + referralDetails);
                                                     }
                                                 }
                                             }
+
+                                            // Increment the processed count and generate PDF if all entities are processed
                                             processedCount[0]++;
                                             if (processedCount[0] == totalEntities[0]) {
                                                 generatePDFFromReferralDetails(allReferralDetails);
@@ -326,186 +329,6 @@ public class reports_prefect extends Fragment {
                 });
     }
 
-
-    private void fetchReferralDataForSettled(String collection, String subCollection, Date startDate, Date endDate, String selectedProgram,
-                                             String selectedStatus, String selectedSemester, String selectedOffenseType,
-                                             List<String> allReferralDetails, final int[] processedCount, final int[] totalEntities) {
-
-        db.collection(collection)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        QuerySnapshot querySnapshot = task.getResult();
-                        if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                            final int totalEntitiesInCollection = querySnapshot.size();
-                            totalEntities[0] += totalEntitiesInCollection;
-
-                            for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                                // Query settled referrals with "accepted" status from the sub-collection
-                                Query referralQuery = db.collection(collection)
-                                        .document(doc.getId())
-                                        .collection(subCollection)
-                                        .whereEqualTo("status", "accepted"); // Fixed status as "accepted"
-
-                                // Fetch data based on the filters
-                                referralQuery.get()
-                                        .addOnCompleteListener(referralTask -> {
-                                            if (referralTask.isSuccessful()) {
-                                                QuerySnapshot referralQuerySnapshot = referralTask.getResult();
-                                                if (referralQuerySnapshot != null && !referralQuerySnapshot.isEmpty()) {
-                                                    for (DocumentSnapshot referralDoc : referralQuerySnapshot.getDocuments()) {
-                                                        String referralId = referralDoc.getId();
-
-                                                        // Extract and parse the referral date from referralId
-                                                        String dateString = referralId.split("_")[0] + " " + referralId.split("_")[1];
-                                                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-                                                        Date referralDate;
-                                                        try {
-                                                            referralDate = dateFormat.parse(dateString);
-                                                        } catch (ParseException e) {
-                                                            referralDate = null; // Skip invalid date format
-                                                        }
-
-                                                        // Check if the date is within range
-                                                        if (referralDate != null && referralDate.after(startDate) && referralDate.before(endDate)) {
-                                                            // Apply additional filters
-                                                            String program = referralDoc.getString("student_program");
-                                                            String term = referralDoc.getString("term");
-                                                            String offense = referralDoc.getString("offense");
-
-                                                            boolean programMatches = program != null && program.equals(selectedProgram);
-                                                            boolean termMatches = selectedSemester.equals("All") || (term != null && term.equals(selectedSemester));
-                                                            boolean offenseMatches = selectedOffenseType.equals("All") || (offense != null && offense.equals(selectedOffenseType));
-
-                                                            // If all filters match, collect the details
-                                                            if (programMatches && termMatches && offenseMatches) {
-                                                                String name = referralDoc.getString("student_name");
-                                                                String violation = referralDoc.getString("violation");
-                                                                String referrer = referralDoc.getString("student_referrer");
-                                                                String status = referralDoc.getString("status");
-
-                                                                StringBuilder referralDetails = new StringBuilder();
-                                                                referralDetails.append("Name: ").append(name != null ? name : "N/A")
-                                                                        .append("\nOffense: ").append(offense != null ? offense : "N/A")
-                                                                        .append("\nViolation: ").append(violation != null ? violation : "N/A")
-                                                                        .append("\nReferrer: ").append(referrer != null ? referrer : "N/A")
-                                                                        .append("\nStatus: ").append(status != null ? status : "N/A")
-                                                                        .append("\nTerm: ").append(term != null ? term : "N/A")
-                                                                        .append("\nProgram: ").append(program != null ? program : "N/A")
-                                                                        .append("\n");
-
-                                                                // Add details to the list
-                                                                allReferralDetails.add(collection.substring(0, 1).toUpperCase() + collection.substring(1) + " Settled Referral:\n" + referralDetails.toString());
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            processedCount[0]++;
-                                            if (processedCount[0] == totalEntities[0]) {
-                                                generatePDFFromReferralDetails(allReferralDetails);
-                                            }
-                                        });
-                            }
-                        }
-                    }
-                });
-    }
-
-
-
-    private void fetchReferralData(String collection, String subCollection, Date startDate, Date endDate, String selectedProgram,
-                                   String selectedStatus, String selectedSemester, String selectedOffenseType,
-                                   List<String> allReferralDetails, final int[] processedCount, final int[] totalEntities) {
-
-        db.collection(collection)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        QuerySnapshot querySnapshot = task.getResult();
-                        if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                            final int totalEntitiesInCollection = querySnapshot.size();
-                            totalEntities[0] += totalEntitiesInCollection;
-
-                            for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                                // Query referral history within the given date range and program from the respective sub-collection
-                                Query referralQuery = db.collection(collection)
-                                        .document(doc.getId())
-                                        .collection(subCollection);
-
-                                // Apply status filter using the applyStatusFilter method
-                                applyStatusFilter(referralQuery, selectedStatus);
-
-                                // Apply offense type filtering (same as previous logic)
-                                applyOffenseTypeFilter(referralQuery, selectedOffenseType);
-
-                                // Fetch the filtered data based on the status and offense type
-                                referralQuery.get()
-                                        .addOnCompleteListener(referralTask -> {
-                                            if (referralTask.isSuccessful()) {
-                                                QuerySnapshot referralQuerySnapshot = referralTask.getResult();
-                                                if (referralQuerySnapshot != null && !referralQuerySnapshot.isEmpty()) {
-                                                    for (DocumentSnapshot referralDoc : referralQuerySnapshot.getDocuments()) {
-                                                        String referralId = referralDoc.getId();  // Referral ID (includes date)
-
-                                                        // Extract date from referralId (e.g., "2024-11-14_18:03:53_221-0896")
-                                                        String dateString = referralId.split("_")[0] + " " + referralId.split("_")[1];  // Extract date from the referral_id
-
-                                                        // Parse the extracted date string
-                                                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-                                                        Date referralDate;
-                                                        try {
-                                                            referralDate = dateFormat.parse(dateString);  // Parse the referral date
-                                                        } catch (ParseException e) {
-                                                            referralDate = null; // Invalid date format, skip this referral
-                                                        }
-
-                                                        // Check if referral date is within the date range
-                                                        if (referralDate != null && referralDate.after(startDate) && referralDate.before(endDate)) {
-                                                            // Match the program with the selected program
-                                                            String referralProgram = referralDoc.getString("student_program");
-                                                            String term = referralDoc.getString("term");
-                                                            String offense = referralDoc.getString("offense");
-
-                                                            // Apply program, term, and offense filters
-                                                            boolean programMatches = referralProgram != null && referralProgram.equals(selectedProgram);
-                                                            boolean termMatches = selectedSemester.equals("All") || term != null && term.equals(selectedSemester);
-                                                            boolean offenseMatches = selectedOffenseType.equals("All") || offense != null && offense.equals(selectedOffenseType);
-
-                                                            // If all filters match, add details
-                                                            if (programMatches && termMatches && offenseMatches) {
-                                                                String name = referralDoc.getString("student_name");
-                                                                String violation = referralDoc.getString("violation");
-                                                                String referrer = referralDoc.getString("student_referrer");
-                                                                String status = referralDoc.getString("status");
-
-                                                                StringBuilder referralDetails = new StringBuilder();
-                                                                referralDetails.append("Name : ").append(name != null ? name : "N/A")
-                                                                        .append("\nOffense: ").append(offense != null ? offense : "N/A")
-                                                                        .append("\nViolation: ").append(violation != null ? violation : "N/A")
-                                                                        .append("\nReferrer: ").append(referrer != null ? referrer : "N/A")
-                                                                        .append("\nStatus: ").append(status != null ? status : "N/A")
-                                                                        .append("\nTerm: ").append(term != null ? term : "N/A")
-                                                                        .append("\nProgram: ").append(referralProgram != null ? referralProgram : "N/A")
-                                                                        .append("\n");
-
-                                                                // Add the referral details to the list
-                                                                allReferralDetails.add(collection.substring(0, 1).toUpperCase() + collection.substring(1) + " Referral:\n" + referralDetails.toString());
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            processedCount[0]++;
-                                            if (processedCount[0] == totalEntities[0]) {
-                                                generatePDFFromReferralDetails(allReferralDetails);
-                                            }
-                                        });
-                            }
-                        }
-                    }
-                });
-    }
 
 
 
@@ -523,47 +346,45 @@ public class reports_prefect extends Fragment {
         final int[] processedCount = {0};  // Track total processed entities
         final int[] totalEntities = {0};   // Total entities to wait for
 
-        // Handle settled/unsettled cases
+        // Fetch referral history from the students collection based on the selected status
         if (selectedStatus.equals("Settled")) {
-            // Fetch referral history for students with accepted status
-            fetchReferralHistoryForSettledStudents("students", "accepted_status", programWithoutSuffix, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
+            // Fetch "Settled" referrals for students
+            fetchReferralHistoryForStudents("Settled", selectedProgram, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
         } else if (selectedStatus.equals("Unsettled")) {
-            // Fetch "accepted" referrals from students, personnel, and prefect collections
-            fetchReferralHistoryForUnsettled("students", "student_refferal_history", programWithoutSuffix, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-            fetchReferralHistoryForUnsettled("personnel", "personnel_refferal_history", programWithoutSuffix, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-            fetchReferralHistoryForUnsettled("prefect", "prefect_referral_history", programWithoutSuffix, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
+            // Fetch "Unsettled" referrals for students
+            fetchReferralHistoryForStudents("Unsettled", selectedProgram, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
         } else {
-            // Otherwise, fetch referral history for each group: students, personnel, and prefects
-            fetchReferralHistory("students", "student_refferal_history", programWithoutSuffix, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-            fetchReferralHistory("personnel", "personnel_refferal_history", programWithoutSuffix, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-            fetchReferralHistory("prefect", "prefect_referral_history", programWithoutSuffix, selectedStatus, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
+            // Fetch both "Settled" and "Unsettled" referrals for students
+            fetchReferralHistoryForStudents("All", selectedProgram, selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
         }
     }
 
+    private void fetchReferralHistoryForStudents(String selectedStatus, String programWithoutSuffix, String selectedSemester,
+                                                 String selectedOffenseType, List<String> allReferralDetails, final int[] processedCount, final int[] totalEntities) {
 
-    private void fetchReferralHistoryForAllStatus(String collection, String referralHistoryCollection, String acceptedStatusCollection,
-                                                  String programWithoutSuffix, String selectedSemester, String selectedOffenseType,
-                                                  List<String> allReferralDetails, final int[] processedCount, final int[] totalEntities) {
-
-        // Query from the regular referral history
-        fetchReferralHistory(collection, referralHistoryCollection, programWithoutSuffix, "All", selectedSemester, selectedOffenseType, allReferralDetails, processedCount, totalEntities);
-
-        // Query from the accepted_status sub-collection for "accepted" referrals
-        db.collection(collection)
+        db.collection("students")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         QuerySnapshot querySnapshot = task.getResult();
                         if (querySnapshot != null && !querySnapshot.isEmpty()) {
+                            final int totalEntitiesCount = querySnapshot.size();
+                            totalEntities[0] += totalEntitiesCount;
+
                             for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                                Query referralQuery = db.collection(collection)
+                                // Query the "accepted_status" sub-collection based on the filters
+                                Query referralQuery = db.collection("students")
                                         .document(doc.getId())
-                                        .collection(acceptedStatusCollection)  // Query the accepted_status sub-collection
-                                        .whereEqualTo("status", "accepted")
-                                        .whereEqualTo("student_program", programWithoutSuffix)
+                                        .collection("accepted_status");
+
+                                // Apply program and semester filters
+                                referralQuery = referralQuery.whereEqualTo("student_program", programWithoutSuffix)
                                         .whereEqualTo("term", selectedSemester);
 
-                                // Apply offense filter
+                                // Apply status filter (Settled, Unsettled, or All)
+                                referralQuery = applyStatusFilter(referralQuery, selectedStatus);
+
+                                // Apply offense type filter
                                 referralQuery = applyOffenseTypeFilter(referralQuery, selectedOffenseType);
 
                                 // Fetch the filtered data
@@ -576,130 +397,18 @@ public class reports_prefect extends Fragment {
                                                         String name = referralDoc.getString("student_name");
                                                         String offense = referralDoc.getString("offense");
                                                         String violation = referralDoc.getString("violation");
-                                                        String referrer = referralDoc.getString(getReferrerField(collection));  // Get the appropriate referrer field
+                                                        String referrer = referralDoc.getString("student_referrer");
                                                         String referralStatus = referralDoc.getString("status");
                                                         String term = referralDoc.getString("term");
 
-                                                        String referralDetails = buildReferralDetails(name, offense, violation, referrer, referralStatus, term);
-                                                        allReferralDetails.add(getEntityTypeName(collection) + " Referral (from accepted_status):\n" + referralDetails);
-                                                    }
-                                                }
-                                            }
-                                            processedCount[0]++;
-                                            if (processedCount[0] == totalEntities[0]) {
-                                                generatePDFFromReferralDetails(allReferralDetails);
-                                            }
-                                        });
-                            }
-                        }
-                    }
-                });
-    }
-
-    private void fetchReferralHistoryForUnsettled(String collection, String referralHistoryCollection, String programWithoutSuffix,
-                                                  String selectedSemester, String selectedOffenseType,
-                                                  List<String> allReferralDetails, final int[] processedCount, final int[] totalEntities) {
-
-        db.collection(collection)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        QuerySnapshot querySnapshot = task.getResult();
-                        if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                            final int totalEntitiesCount = querySnapshot.size();
-                            totalEntities[0] += totalEntitiesCount;
-
-                            for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                                // Query referral history for "pending" status in the given sub-collection
-                                Query referralQuery = db.collection(collection)
-                                        .document(doc.getId())
-                                        .collection(referralHistoryCollection)
-                                        .whereEqualTo("student_program", programWithoutSuffix)
-                                        .whereEqualTo("term", selectedSemester);
-
-                                // Apply offense filter
-                                referralQuery = applyOffenseTypeFilter(referralQuery, selectedOffenseType);
-
-                                // Apply status filter (this will handle only "pending" referrals for Unsettled)
-                                referralQuery = applyStatusFilter(referralQuery, "Unsettled");
-
-                                // Fetch the filtered data
-                                referralQuery.get()
-                                        .addOnCompleteListener(referralTask -> {
-                                            if (referralTask.isSuccessful()) {
-                                                QuerySnapshot referralQuerySnapshot = referralTask.getResult();
-                                                if (referralQuerySnapshot != null && !referralQuerySnapshot.isEmpty()) {
-                                                    for (DocumentSnapshot referralDoc : referralQuerySnapshot.getDocuments()) {
-                                                        String name = referralDoc.getString("student_name");
-                                                        String offense = referralDoc.getString("offense");
-                                                        String violation = referralDoc.getString("violation");
-                                                        String referrer = referralDoc.getString(getReferrerField(collection));  // Get the appropriate referrer field
-                                                        String referralStatus = referralDoc.getString("status");
-                                                        String term = referralDoc.getString("term");
-
-                                                        String referralDetails = buildReferralDetails(name, offense, violation, referrer, referralStatus, term);
-                                                        allReferralDetails.add(getEntityTypeName(collection) + " Referral:\n" + referralDetails);
-                                                    }
-                                                }
-                                            }
-                                            processedCount[0]++;
-                                            if (processedCount[0] == totalEntities[0]) {
-                                                generatePDFFromReferralDetails(allReferralDetails);
-                                            }
-                                        });
-                            }
-                        }
-                    }
-                });
-    }
-
-
-
-    private void fetchReferralHistoryForSettledStudents(String collection, String referralHistoryCollection, String programWithoutSuffix,
-                                                        String selectedSemester, String selectedOffenseType,
-                                                        List<String> allReferralDetails, final int[] processedCount, final int[] totalEntities) {
-
-        db.collection(collection)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        QuerySnapshot querySnapshot = task.getResult();
-                        if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                            final int totalEntitiesCount = querySnapshot.size();
-                            totalEntities[0] += totalEntitiesCount;
-
-                            for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                                // Query the accepted_status sub-collection for students only
-                                Query referralQuery = db.collection(collection)
-                                        .document(doc.getId())
-                                        .collection(referralHistoryCollection)  // This should point to the accepted_status sub-collection
-                                        .whereEqualTo("status", "accepted")  // Filter for accepted status
-                                        .whereEqualTo("student_program", programWithoutSuffix)  // Match program (without suffix)
-                                        .whereEqualTo("term", selectedSemester);  // Match term
-
-                                // Apply offense filter
-                                referralQuery = applyOffenseTypeFilter(referralQuery, selectedOffenseType);
-
-
-                                // Fetch the filtered data based on the status and offense type
-                                referralQuery.get()
-                                        .addOnCompleteListener(referralTask -> {
-                                            if (referralTask.isSuccessful()) {
-                                                QuerySnapshot referralQuerySnapshot = referralTask.getResult();
-                                                if (referralQuerySnapshot != null && !referralQuerySnapshot.isEmpty()) {
-                                                    for (DocumentSnapshot referralDoc : referralQuerySnapshot.getDocuments()) {
-                                                        String name = referralDoc.getString("student_name");
-                                                        String offense = referralDoc.getString("offense");
-                                                        String violation = referralDoc.getString("violation");
-                                                        String referrer = referralDoc.getString("student_referrer"); // Assuming the referrer field for students
-                                                        String referralStatus = referralDoc.getString("status");
-                                                        String term = referralDoc.getString("term");
-
+                                                        // Create a referral details string
                                                         String referralDetails = buildReferralDetails(name, offense, violation, referrer, referralStatus, term);
                                                         allReferralDetails.add("Student Referral:\n" + referralDetails);
                                                     }
                                                 }
                                             }
+
+                                            // Increment the processed count and generate PDF if all entities are processed
                                             processedCount[0]++;
                                             if (processedCount[0] == totalEntities[0]) {
                                                 generatePDFFromReferralDetails(allReferralDetails);
@@ -712,61 +421,26 @@ public class reports_prefect extends Fragment {
     }
 
 
-    private void fetchReferralHistory(String collection, String referralHistoryCollection, String programWithoutSuffix,
-                                      String selectedStatus, String selectedSemester, String selectedOffenseType,
-                                      List<String> allReferralDetails, final int[] processedCount, final int[] totalEntities) {
-
-        db.collection(collection)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        QuerySnapshot querySnapshot = task.getResult();
-                        if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                            final int totalEntitiesCount = querySnapshot.size();
-                            totalEntities[0] += totalEntitiesCount;
-
-                            for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                                // Query referral history from the given collection and sub-collection
-                                Query referralQuery = db.collection(collection)
-                                        .document(doc.getId())
-                                        .collection(referralHistoryCollection)
-                                        .whereEqualTo("student_program", programWithoutSuffix)
-                                        .whereEqualTo("term", selectedSemester);
-
-                                // Apply status and offense filters
-                                applyStatusFilter(referralQuery, selectedStatus);
-                                referralQuery = applyOffenseTypeFilter(referralQuery, selectedOffenseType);
-
-
-                                // Fetch the filtered data based on the status and offense type
-                                referralQuery.get()
-                                        .addOnCompleteListener(referralTask -> {
-                                            if (referralTask.isSuccessful()) {
-                                                QuerySnapshot referralQuerySnapshot = referralTask.getResult();
-                                                if (referralQuerySnapshot != null && !referralQuerySnapshot.isEmpty()) {
-                                                    for (DocumentSnapshot referralDoc : referralQuerySnapshot.getDocuments()) {
-                                                        String name = referralDoc.getString("student_name");
-                                                        String offense = referralDoc.getString("offense");
-                                                        String violation = referralDoc.getString("violation");
-                                                        String referrer = referralDoc.getString(getReferrerField(collection));  // Get the appropriate referrer field
-                                                        String referralStatus = referralDoc.getString("status");
-                                                        String term = referralDoc.getString("term");
-
-                                                        String referralDetails = buildReferralDetails(name, offense, violation, referrer, referralStatus, term);
-                                                        allReferralDetails.add(getEntityTypeName(collection) + " Referral:\n" + referralDetails);
-                                                    }
-                                                }
-                                            }
-                                            processedCount[0]++;
-                                            if (processedCount[0] == totalEntities[0]) {
-                                                generatePDFFromReferralDetails(allReferralDetails);
-                                            }
-                                        });
-                            }
-                        }
-                    }
-                });
+    private Query applyStatusFilter(Query query, String selectedStatus) {
+        if (selectedStatus.equals("Settled")) {
+            // If "Settled", filter for only "Settled" violations
+            return query.whereEqualTo("violation_status", "Settled")
+                    .whereEqualTo("status", "accepted");
+        } else if (selectedStatus.equals("Unsettled")) {
+            // If "Unsettled", filter for only "Unsettled" violations
+            return query.whereEqualTo("violation_status", "Unsettled")
+                    .whereEqualTo("status", "accepted");
+        } else if (selectedStatus.equals("All")) {
+            // For "All", include both "Settled" and "Unsettled" violations
+            return query.whereIn("violation_status", Arrays.asList("Settled", "Unsettled"))
+                    .whereEqualTo("status", "accepted");
+        }
+        return query;  // Default return the original query if no matching status
     }
+
+
+
+
 
 
     private Query applyOffenseTypeFilter(Query query, String selectedOffenseType) {
@@ -784,19 +458,6 @@ public class reports_prefect extends Fragment {
 
 
 
-
-    private Query applyStatusFilter(Query query, String selectedStatus) {
-        if (selectedStatus.equals("Settled")) {
-            return query.whereEqualTo("status", "accepted");
-        } else if (selectedStatus.equals("Unsettled")) {
-            // If "Unsettled", fetch only "pending" status
-            return query.whereEqualTo("status", "pending");
-        } else if (selectedStatus.equals("All")) {
-            // For "All", fetch both "accepted" and "pending" statuses
-            return query.whereIn("status", Arrays.asList("accepted", "pending"));
-        }
-        return query;  // Default return the original query if no matching status
-    }
 
 
 
@@ -919,8 +580,6 @@ public class reports_prefect extends Fragment {
 
 
 
-
-    // Method to search student based on Student ID
     private void searchStudent() {
         String studentNo = studentNoEditText.getText().toString().trim();
 
@@ -932,8 +591,10 @@ public class reports_prefect extends Fragment {
         // Reference to the Firestore collection
         CollectionReference studentsRef = db.collection("students");
 
-        // Query to fetch the student document with the given student ID from the accepted_status sub-collection
-        Query query = studentsRef.document(studentNo).collection("accepted_status");
+        // Query to fetch documents with logs = 1
+        Query query = studentsRef.document(studentNo)
+                .collection("accepted_status")
+                .whereEqualTo("logs", 1);
 
         query.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -949,33 +610,19 @@ public class reports_prefect extends Fragment {
                     referrer_id.clear();
 
                     for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                        Long logs = document.getLong("logs");
+                        logsCount++;
 
-                        if (logs != null && logs == 1) {
-                            logsCount++;
+                        String offenseField = document.getString("offense");
+                        String violationField = document.getString("violation");
+                        String dateField = document.getString("date");
+                        String locationField = document.getString("location");
+                        String refferer_idField = document.getString("referrer_id");
 
-                            String offenseField = document.getString("offense");
-                            String violationField = document.getString("violation");
-                            String dateField = document.getString("date");
-                            String locationField = document.getString("location");
-                            String refferer_idField = document.getString("referrer_id");
-
-                            if (offenseField != null) {
-                                offenses.add(offenseField);
-                            }
-                            if (violationField != null) {
-                                violations.add(violationField);
-                            }
-                            if (dateField != null) {
-                                date.add(dateField);
-                            }
-                            if (locationField != null) {
-                                location.add(locationField);
-                            }
-                            if (refferer_idField != null) {
-                                referrer_id.add(refferer_idField);
-                            }
-                        }
+                        if (offenseField != null) offenses.add(offenseField);
+                        if (violationField != null) violations.add(violationField);
+                        if (dateField != null) date.add(dateField);
+                        if (locationField != null) location.add(locationField);
+                        if (refferer_idField != null) referrer_id.add(refferer_idField);
 
                         if (document.contains("student_name")) {
                             studentName = document.getString("student_name");
@@ -983,23 +630,21 @@ public class reports_prefect extends Fragment {
                     }
 
                     if (logsCount > 0) {
-                        resultLayout.setVisibility(View.VISIBLE); // Show result layout
+                        resultLayout.setVisibility(View.VISIBLE);
                         studentNameTextView.setVisibility(View.VISIBLE);
                         pdfButton.setVisibility(View.VISIBLE);
                         pdfButton.setEnabled(true);
 
-                        // Update studentNameTextView with styled content
                         String styledText = "Student Name: <b>" + studentName + "</b><br>" +
                                 "Student ID: <b>" + studentId + "</b><br>" +
                                 "Violation count: <b>" + logsCount + "</b>";
                         studentNameTextView.setText(Html.fromHtml(styledText, Html.FROM_HTML_MODE_COMPACT));
-
                     } else {
-                        resultLayout.setVisibility(View.GONE); // Hide result layout
+                        resultLayout.setVisibility(View.GONE);
                         Toast.makeText(getActivity(), "No logs with value 1 found for this student ID", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    resultLayout.setVisibility(View.GONE); // Hide result layout
+                    resultLayout.setVisibility(View.GONE);
                     Toast.makeText(getActivity(), "No data found for this student ID", Toast.LENGTH_SHORT).show();
                 }
             } else {
@@ -1007,7 +652,7 @@ public class reports_prefect extends Fragment {
                 if (e != null) {
                     e.printStackTrace();
                 }
-                resultLayout.setVisibility(View.GONE); // Hide result layout
+                resultLayout.setVisibility(View.GONE);
                 Toast.makeText(getActivity(), "Error fetching student data", Toast.LENGTH_SHORT).show();
             }
         });
@@ -1015,8 +660,14 @@ public class reports_prefect extends Fragment {
 
 
     private void openPDF() {
-        if (studentName.isEmpty() || studentId.isEmpty() || offenses.isEmpty() || violations.isEmpty() || date.isEmpty() || location.isEmpty() || referrer_id.isEmpty()) {
-            Toast.makeText(getActivity(), "Please search for a student first", Toast.LENGTH_SHORT).show();
+        // Validate data before proceeding
+        if (studentName == null || studentName.isEmpty()) {
+            Toast.makeText(getActivity(), "Student name is missing. Please search for a student first.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (studentId == null || studentId.isEmpty()) {
+            Toast.makeText(getActivity(), "Student ID is missing. Please search for a student first.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -1038,8 +689,8 @@ public class reports_prefect extends Fragment {
 
         // Add student details under the title
         paint.setTextAlign(Paint.Align.LEFT);
-        canvas.drawText("Name: " + studentName, 30, 60, paint);
-        canvas.drawText("ID: " + studentId, 30, 80, paint);
+        canvas.drawText("Name: " + (studentName.isEmpty() ? "N/A" : studentName), 30, 60, paint);
+        canvas.drawText("ID: " + (studentId.isEmpty() ? "N/A" : studentId), 30, 80, paint);
 
         // Set up table dimensions
         int startX = 30;
@@ -1048,16 +699,15 @@ public class reports_prefect extends Fragment {
         // Column headers and table content
         String[] headers = {"Offense", "Violation", "Date", "Location", "Referrer ID"};
         List<String[]> dataColumns = Arrays.asList(
-                offenses.toArray(new String[0]),
-                violations.toArray(new String[0]),
-                date.toArray(new String[0]),
-                location.toArray(new String[0]),
-                referrer_id.toArray(new String[0])
+                offenses.isEmpty() ? new String[] {"N/A"} : offenses.toArray(new String[0]),
+                violations.isEmpty() ? new String[] {"N/A"} : violations.toArray(new String[0]),
+                date.isEmpty() ? new String[] {"N/A"} : date.toArray(new String[0]),
+                location.isEmpty() ? new String[] {"N/A"} : location.toArray(new String[0]),
+                referrer_id.isEmpty() ? new String[] {"N/A"} : referrer_id.toArray(new String[0])
         );
 
         // Dynamically calculate column widths
         int[] columnWidths = calculateColumnWidths(paint, headers, dataColumns);
-
 
         // Draw the table header row
         paint.setStyle(Paint.Style.FILL);
@@ -1137,6 +787,7 @@ public class reports_prefect extends Fragment {
             Toast.makeText(getActivity(), "Error generating PDF", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     // Dynamically calculate column widths
     private int[] calculateColumnWidths(Paint paint, String[] headers, List<String[]> dataColumns) {

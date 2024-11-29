@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.os.Handler;
@@ -209,7 +210,10 @@ public class personnel_MainActivity extends AppCompatActivity implements Navigat
     private void showActivityLogDialog(String personnelID) {
         // Create a dialog box
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Activity Log");
+        builder.setTitle("Logs");
+
+        // Create a ScrollView to make the logs scrollable
+        ScrollView scrollView = new ScrollView(this);
 
         // Create a layout for displaying the logs
         LinearLayout layout = new LinearLayout(this);
@@ -236,7 +240,7 @@ public class personnel_MainActivity extends AppCompatActivity implements Navigat
 
                                 // Format the date and time
                                 String formattedDate = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", java.util.Locale.getDefault()).format(timestamp.toDate());
-                                String logText = format("%s: %s", type, formattedDate);
+                                String logText = String.format("%s: %s", type, formattedDate);
 
                                 // Create TextView for each log entry
                                 TextView logEntry = new TextView(this);
@@ -272,11 +276,20 @@ public class personnel_MainActivity extends AppCompatActivity implements Navigat
                         layout.addView(errorText);
                     }
 
-                    builder.setView(layout);
+                    // Add the layout to the ScrollView
+                    scrollView.addView(layout);
+
+                    // Set the ScrollView as the view for the dialog
+                    builder.setView(scrollView);
+
+                    // Add a "Close" button
                     builder.setPositiveButton("Close", (dialog, which) -> dialog.dismiss());
-                    builder.create().show(); // Show the dialog
+
+                    // Show the dialog
+                    builder.create().show();
                 });
     }
+
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
